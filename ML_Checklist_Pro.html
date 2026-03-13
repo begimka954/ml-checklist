@@ -1,0 +1,1972 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ML Checklist Pro — Dataset & Algorithm Best Practices</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;1,9..144,300&family=Space+Grotesk:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+  :root {
+    --ink: #0d0d0d;
+    --paper: #f5f0e8;
+    --accent: #c84b31;
+    --accent2: #2a6b5e;
+    --accent3: #d4a843;
+    --muted: #6b6560;
+    --border: #d4cfc8;
+    --card: #faf7f2;
+    --highlight: #fff9e6;
+    --check-done: #2a6b5e;
+    --check-warn: #d4a843;
+    --check-critical: #c84b31;
+    --mono: 'DM Mono', monospace;
+    --serif: 'Fraunces', serif;
+    --sans: 'Space Grotesk', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+
+  /* HEADER */
+  header {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 0;
+    position: relative;
+    overflow: hidden;
+  }
+  .header-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 48px 32px 40px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 24px;
+    align-items: end;
+  }
+  .header-badge {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent3);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .header-badge::before {
+    content: '';
+    width: 24px;
+    height: 1px;
+    background: var(--accent3);
+    display: inline-block;
+  }
+  h1 {
+    font-family: var(--serif);
+    font-weight: 700;
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    line-height: 1.1;
+    color: var(--paper);
+  }
+  h1 span { color: var(--accent3); font-style: italic; }
+  .header-sub {
+    font-size: 15px;
+    color: #a09890;
+    margin-top: 12px;
+    max-width: 520px;
+  }
+  .header-decor {
+    font-family: var(--mono);
+    font-size: 80px;
+    color: #1a1a1a;
+    line-height: 1;
+    user-select: none;
+  }
+  .nav-tabs {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 32px;
+    display: flex;
+    gap: 0;
+    border-top: 1px solid #1e1e1e;
+  }
+  .nav-tab {
+    padding: 14px 24px;
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #6b6560;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    user-select: none;
+    background: none;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+  }
+  .nav-tab:hover { color: var(--paper); }
+  .nav-tab.active { color: var(--accent3); border-bottom-color: var(--accent3); }
+
+  /* MAIN LAYOUT */
+  main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 40px 32px;
+  }
+
+  .view { display: none; }
+  .view.active { display: block; }
+
+  /* ============ WIZARD VIEW ============ */
+  .wizard-container {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 32px;
+    align-items: start;
+  }
+  .wizard-sidebar {
+    position: sticky;
+    top: 24px;
+  }
+  .wizard-step-list {
+    background: var(--ink);
+    border-radius: 12px;
+    padding: 24px;
+    list-style: none;
+  }
+  .wizard-step-list li {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: #4a4540;
+    padding: 10px 0;
+    border-bottom: 1px solid #1e1e1e;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: color 0.2s;
+  }
+  .wizard-step-list li:last-child { border-bottom: none; }
+  .wizard-step-list li.done { color: var(--accent2); }
+  .wizard-step-list li.active { color: var(--accent3); }
+  .step-num {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 1px solid currentColor;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    flex-shrink: 0;
+  }
+  .step-num.done-check::after { content: '✓'; }
+  .sidebar-summary {
+    margin-top: 16px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+  }
+  .sidebar-summary h4 {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+  .summary-tag {
+    display: inline-flex;
+    align-items: center;
+    background: var(--ink);
+    color: var(--paper);
+    font-family: var(--mono);
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    margin: 2px;
+  }
+  .summary-tag.algo { background: var(--accent); }
+  .summary-tag.scale { background: var(--accent2); }
+  .summary-tag.goal { background: var(--accent3); color: var(--ink); }
+
+  /* WIZARD FORM */
+  .wizard-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 36px;
+    animation: slideIn 0.3s ease;
+  }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .wizard-card h2 {
+    font-family: var(--serif);
+    font-size: 1.7rem;
+    font-weight: 300;
+    margin-bottom: 6px;
+  }
+  .wizard-card h2 em { font-style: italic; color: var(--accent); }
+  .wizard-card .q-desc {
+    font-size: 14px;
+    color: var(--muted);
+    margin-bottom: 28px;
+  }
+  .option-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+  .option-grid.two-col { grid-template-columns: 1fr 1fr; }
+  .option-btn {
+    background: var(--paper);
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: left;
+    font-family: var(--sans);
+    position: relative;
+    overflow: hidden;
+  }
+  .option-btn:hover { border-color: var(--accent3); transform: translateY(-2px); }
+  .option-btn.selected {
+    border-color: var(--accent);
+    background: #fff5f3;
+  }
+  .option-btn .ob-icon { font-size: 28px; margin-bottom: 8px; display: block; }
+  .option-btn .ob-label {
+    font-weight: 600;
+    font-size: 14px;
+    display: block;
+    margin-bottom: 3px;
+  }
+  .option-btn .ob-desc { font-size: 12px; color: var(--muted); }
+  .option-btn.selected::after {
+    content: '✓';
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 20px;
+    height: 20px;
+    background: var(--accent);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    line-height: 20px;
+    text-align: center;
+  }
+  .slider-group { margin-bottom: 24px; }
+  .slider-label {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 14px;
+  }
+  .slider-label span:last-child {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--accent);
+  }
+  input[type=range] {
+    width: 100%;
+    accent-color: var(--accent);
+    height: 4px;
+  }
+  .checkbox-group { display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
+  .checkbox-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    cursor: pointer;
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    transition: background 0.15s;
+  }
+  .checkbox-item:hover { background: var(--highlight); }
+  .checkbox-item input[type=checkbox] { margin-top: 2px; accent-color: var(--accent); }
+  .checkbox-item .ci-label { font-weight: 500; font-size: 14px; }
+  .checkbox-item .ci-desc { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .wizard-nav {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+  }
+  .btn {
+    padding: 12px 28px;
+    border-radius: 8px;
+    font-family: var(--sans);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    transition: all 0.15s;
+  }
+  .btn-ghost {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+  }
+  .btn-ghost:hover { border-color: var(--ink); color: var(--ink); }
+  .btn-primary {
+    background: var(--accent);
+    color: white;
+  }
+  .btn-primary:hover { background: #b03a22; transform: translateY(-1px); }
+  .btn-green {
+    background: var(--accent2);
+    color: white;
+  }
+  .btn-green:hover { background: #1e5247; }
+
+  /* ============ CHECKLIST VIEW ============ */
+  .checklist-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 32px;
+    gap: 24px;
+  }
+  .checklist-title h2 {
+    font-family: var(--serif);
+    font-size: 2rem;
+    font-weight: 300;
+  }
+  .checklist-title h2 em { font-style: italic; color: var(--accent); }
+  .checklist-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 10px;
+  }
+  .meta-tag {
+    font-family: var(--mono);
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    color: var(--muted);
+  }
+  .checklist-actions { display: flex; gap: 10px; flex-shrink: 0; }
+  .progress-bar-container {
+    margin-bottom: 32px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+  }
+  .progress-info {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    font-size: 14px;
+  }
+  .progress-info .pct {
+    font-family: var(--mono);
+    font-size: 20px;
+    font-weight: 500;
+    color: var(--accent2);
+  }
+  .progress-track {
+    height: 8px;
+    background: var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent2), var(--accent3));
+    border-radius: 4px;
+    transition: width 0.4s ease;
+    width: 0%;
+  }
+  .section-block {
+    margin-bottom: 28px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+  .section-header {
+    padding: 18px 24px;
+    background: var(--ink);
+    color: var(--paper);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.15s;
+  }
+  .section-header:hover { background: #1a1a1a; }
+  .section-icon { font-size: 20px; }
+  .section-title-wrap { flex: 1; }
+  .section-num {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: #6b6560;
+    text-transform: uppercase;
+  }
+  .section-name {
+    font-weight: 600;
+    font-size: 16px;
+  }
+  .section-count {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--accent3);
+    background: rgba(212,168,67,0.1);
+    padding: 3px 10px;
+    border-radius: 20px;
+  }
+  .section-arrow { color: #4a4540; transition: transform 0.2s; font-size: 12px; }
+  .section-arrow.open { transform: rotate(180deg); }
+  .section-body { padding: 0; }
+  .section-body.collapsed { display: none; }
+  .checklist-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 14px 24px;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+    cursor: pointer;
+  }
+  .checklist-item:last-child { border-bottom: none; }
+  .checklist-item:hover { background: var(--highlight); }
+  .checklist-item.checked { background: #f0faf7; }
+  .checklist-item.checked .item-text { text-decoration: line-through; color: var(--muted); }
+  .item-check {
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--border);
+    border-radius: 4px;
+    flex-shrink: 0;
+    margin-top: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    transition: all 0.15s;
+  }
+  .checklist-item.checked .item-check {
+    background: var(--check-done);
+    border-color: var(--check-done);
+    color: white;
+  }
+  .item-body { flex: 1; }
+  .item-text { font-size: 14px; font-weight: 400; line-height: 1.5; }
+  .item-detail { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  .item-tag {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 10px;
+    padding: 1px 6px;
+    border-radius: 3px;
+    margin-left: 6px;
+    vertical-align: middle;
+  }
+  .tag-critical { background: #ffe8e4; color: var(--accent); }
+  .tag-important { background: #fff4d6; color: #a07800; }
+  .tag-optional { background: #e8f5f2; color: var(--accent2); }
+  .subsection-label {
+    padding: 10px 24px;
+    background: #f0ede8;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* ============ REFERENCE VIEW ============ */
+  .ref-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 20px;
+  }
+  .ref-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .ref-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+  }
+  .ref-card-head {
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .ref-card-icon { font-size: 24px; }
+  .ref-card-title { font-weight: 600; font-size: 15px; }
+  .ref-card-subtitle { font-size: 12px; color: var(--muted); }
+  .ref-card-body { padding: 4px 0 16px; }
+  .ref-item {
+    padding: 8px 20px;
+    font-size: 13px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    border-top: 1px solid var(--border);
+  }
+  .ref-item::before {
+    content: '→';
+    color: var(--accent);
+    font-size: 12px;
+    margin-top: 1px;
+    flex-shrink: 0;
+  }
+
+  /* MISC */
+  .empty-state {
+    text-align: center;
+    padding: 80px 40px;
+    color: var(--muted);
+  }
+  .empty-state .es-icon { font-size: 64px; margin-bottom: 16px; }
+  .empty-state h3 { font-family: var(--serif); font-size: 1.5rem; font-weight: 300; margin-bottom: 8px; }
+  .empty-state p { font-size: 14px; }
+  .section-summary {
+    padding: 12px 24px;
+    background: var(--highlight);
+    border-top: 1px solid var(--border);
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--muted);
+    display: flex;
+    justify-content: space-between;
+  }
+
+  @media (max-width: 768px) {
+    .header-inner { grid-template-columns: 1fr; }
+    .header-decor { display: none; }
+    .wizard-container { grid-template-columns: 1fr; }
+    .wizard-sidebar { position: static; }
+    .checklist-header { flex-direction: column; }
+    .checklist-actions { width: 100%; }
+    .option-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div>
+      <div class="header-badge">ML Best Practices System</div>
+      <h1>Dataset &amp; Algorithm<br><span>Checklist Pro</span></h1>
+      <p class="header-sub">A thorough, step-by-step guide from raw data to deployed model — tailored to your exact use case.</p>
+    </div>
+    <div class="header-decor">{✓}</div>
+  </div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showView('wizard')">① Build My Checklist</button>
+    <button class="nav-tab" onclick="showView('checklist')">② My Checklist</button>
+    <button class="nav-tab" onclick="showView('reference')">③ Reference Library</button>
+  </div>
+</header>
+
+<main>
+
+  <!-- WIZARD VIEW -->
+  <div id="view-wizard" class="view active">
+    <div class="wizard-container">
+      <aside class="wizard-sidebar">
+        <ul class="wizard-step-list" id="stepList">
+          <li class="active" id="sl-0"><div class="step-num">1</div> Algorithm Type</li>
+          <li id="sl-1"><div class="step-num">2</div> Task Specifics</li>
+          <li id="sl-2"><div class="step-num">3</div> Dataset Profile</li>
+          <li id="sl-3"><div class="step-num">4</div> Your Goals</li>
+          <li id="sl-4"><div class="step-num">5</div> Constraints</div></li>
+        </ul>
+        <div class="sidebar-summary" id="sidebarSummary" style="display:none">
+          <h4>Your Profile</h4>
+          <div id="summaryTags"></div>
+        </div>
+      </aside>
+      <div id="wizardContent"></div>
+    </div>
+  </div>
+
+  <!-- CHECKLIST VIEW -->
+  <div id="view-checklist" class="view">
+    <div id="checklistContent">
+      <div class="empty-state">
+        <div class="es-icon">📋</div>
+        <h3>No checklist generated yet</h3>
+        <p>Complete the wizard to build your personalized ML checklist.</p>
+        <br>
+        <button class="btn btn-primary" onclick="showView('wizard')">Start Wizard →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- REFERENCE VIEW -->
+  <div id="view-reference" class="view">
+    <div style="margin-bottom: 28px;">
+      <h2 style="font-family: var(--serif); font-size: 1.8rem; font-weight: 300; margin-bottom: 6px;">Reference <em style="font-style:italic;color:var(--accent)">Library</em></h2>
+      <p style="font-size: 14px; color: var(--muted);">Quick-reference cards for ML concepts, algorithms, and common pitfalls.</p>
+    </div>
+    <div class="ref-grid" id="referenceGrid"></div>
+  </div>
+
+</main>
+
+<script>
+// ============================================================
+// STATE
+// ============================================================
+const state = {
+  wizardStep: 0,
+  answers: {},
+  checklistData: null,
+  checkedItems: {}
+};
+
+// ============================================================
+// WIZARD DATA
+// ============================================================
+const WIZARD_STEPS = [
+  {
+    id: 'algoType',
+    title: 'What type of <em>ML algorithm</em> are you working with?',
+    desc: 'This determines the full pipeline and specific checks needed.',
+    type: 'single',
+    options: [
+      { value: 'supervised_classification', icon: '🎯', label: 'Classification', desc: 'Binary or multiclass prediction' },
+      { value: 'supervised_regression', icon: '📈', label: 'Regression', desc: 'Continuous value prediction' },
+      { value: 'unsupervised_clustering', icon: '🔮', label: 'Clustering', desc: 'K-Means, DBSCAN, hierarchical' },
+      { value: 'unsupervised_dim_reduction', icon: '🌀', label: 'Dimensionality Reduction', desc: 'PCA, t-SNE, UMAP, autoencoders' },
+      { value: 'deep_learning', icon: '🧠', label: 'Deep Learning', desc: 'CNNs, RNNs, Transformers, MLPs' },
+      { value: 'transfer_learning', icon: '🔄', label: 'Transfer Learning', desc: 'Fine-tuning pretrained models' },
+      { value: 'recommender', icon: '⭐', label: 'Recommender Systems', desc: 'Collaborative / content-based filtering' },
+      { value: 'nlp', icon: '💬', label: 'NLP / Text', desc: 'Text classification, generation, NER' },
+    ]
+  },
+  {
+    id: 'taskDetails',
+    title: 'Tell me more about your <em>task specifics</em>',
+    desc: 'These details shape which best practices apply most critically.',
+    type: 'multi',
+    dynamicOptions: true
+  },
+  {
+    id: 'datasetProfile',
+    title: 'What does your <em>dataset look like</em>?',
+    desc: 'Dataset characteristics determine preprocessing and validation strategy.',
+    type: 'sliders_checks',
+    sliders: [
+      { id: 'dataSize', label: 'Dataset size', min: 0, max: 4, labels: ['<1K rows', '1K–10K', '10K–100K', '100K–1M', '1M+'], default: 2 },
+      { id: 'numFeatures', label: 'Number of features', min: 0, max: 3, labels: ['<10', '10–100', '100–1000', '1000+'], default: 1 },
+    ],
+    checks: [
+      { id: 'hasNull', label: 'Has missing values', desc: 'Nulls, NaNs, or empty fields present' },
+      { id: 'imbalanced', label: 'Class imbalance', desc: 'One class significantly outnumbers others (classification only)' },
+      { id: 'hasCategorical', label: 'Has categorical features', desc: 'Text, labels, enums needing encoding' },
+      { id: 'hasTimeseries', label: 'Time-series component', desc: 'Temporal ordering matters, possible autocorrelation' },
+      { id: 'hasOutliers', label: 'Likely has outliers', desc: 'Extreme values, noisy labels, or data quality issues' },
+      { id: 'highDim', label: 'High-dimensional / sparse', desc: 'Many features, possibly more features than rows' },
+      { id: 'multimodal', label: 'Multimodal data', desc: 'Combines text, image, tabular, audio, etc.' },
+    ]
+  },
+  {
+    id: 'goals',
+    title: 'What are your primary <em>optimization goals</em>?',
+    desc: 'Select all that apply — these drive metric choice and regularization strategy.',
+    type: 'multi_check',
+    options: [
+      { value: 'accuracy', icon: '🎯', label: 'Maximize Accuracy / Performance', desc: 'Push the best possible metric score' },
+      { value: 'interpretability', icon: '🔍', label: 'Interpretability / Explainability', desc: 'Stakeholders need to understand decisions' },
+      { value: 'speed', icon: '⚡', label: 'Inference Speed', desc: 'Low latency for production serving' },
+      { value: 'robustness', icon: '🛡️', label: 'Robustness / Reliability', desc: 'Handles edge cases and distribution shifts' },
+      { value: 'fairness', icon: '⚖️', label: 'Fairness / Bias Mitigation', desc: 'Ensure equitable performance across groups' },
+      { value: 'data_efficiency', icon: '💡', label: 'Data Efficiency', desc: 'Learn well from limited labelled data' },
+    ]
+  },
+  {
+    id: 'constraints',
+    title: 'Any <em>constraints</em> or special requirements?',
+    desc: 'These affect architecture choices and validation approaches.',
+    type: 'multi_check',
+    options: [
+      { value: 'limited_compute', icon: '💻', label: 'Limited Compute', desc: 'CPU-only or constrained GPU resources' },
+      { value: 'production', icon: '🚀', label: 'Going to Production', desc: 'Model will be deployed to live system' },
+      { value: 'privacy', icon: '🔒', label: 'Data Privacy / Compliance', desc: 'GDPR, HIPAA, or similar regulations' },
+      { value: 'online_learning', icon: '🔁', label: 'Online / Continual Learning', desc: 'Model must update with new data over time' },
+      { value: 'no_labels', icon: '🏷️', label: 'Limited / No Labels', desc: 'Semi-supervised or unsupervised scenario' },
+      { value: 'realtime', icon: '⏱️', label: 'Real-time Predictions', desc: 'Sub-100ms inference requirements' },
+    ]
+  }
+];
+
+const TASK_DETAIL_OPTIONS = {
+  supervised_classification: [
+    { value: 'binary', icon: '🔵', label: 'Binary Classification', desc: 'Two classes (yes/no, fraud/not fraud)' },
+    { value: 'multiclass', icon: '🎨', label: 'Multi-class', desc: '3+ mutually exclusive classes' },
+    { value: 'multilabel', icon: '🏷️', label: 'Multi-label', desc: 'Multiple labels per sample' },
+    { value: 'ordinal', icon: '📊', label: 'Ordinal Classification', desc: 'Classes have natural ordering' },
+  ],
+  supervised_regression: [
+    { value: 'linear_reg', icon: '📏', label: 'Linear / Polynomial', desc: 'Linear relationships or polynomial features' },
+    { value: 'tree_reg', icon: '🌳', label: 'Tree-based', desc: 'Random Forest, XGBoost, LightGBM' },
+    { value: 'neural_reg', icon: '🧠', label: 'Neural Network', desc: 'MLP or deep regression' },
+    { value: 'quantile', icon: '📉', label: 'Quantile Regression', desc: 'Predict distribution, not just mean' },
+  ],
+  unsupervised_clustering: [
+    { value: 'kmeans', icon: '⭕', label: 'K-Means / K-Medoids', desc: 'Centroid-based clustering' },
+    { value: 'density', icon: '🌊', label: 'Density-based', desc: 'DBSCAN, HDBSCAN, OPTICS' },
+    { value: 'hierarchical', icon: '🌲', label: 'Hierarchical', desc: 'Agglomerative or divisive' },
+    { value: 'gmm', icon: '🔔', label: 'Gaussian Mixture Models', desc: 'Probabilistic soft clustering' },
+  ],
+  unsupervised_dim_reduction: [
+    { value: 'pca', icon: '📐', label: 'PCA / SVD', desc: 'Linear dimensionality reduction' },
+    { value: 'manifold', icon: '🌀', label: 'Manifold (t-SNE/UMAP)', desc: 'Non-linear projection' },
+    { value: 'autoencoder', icon: '🔁', label: 'Autoencoders', desc: 'Neural network compression' },
+    { value: 'nmf', icon: '➕', label: 'NMF / ICA', desc: 'Matrix factorization methods' },
+  ],
+  deep_learning: [
+    { value: 'cnn', icon: '🖼️', label: 'CNN (Vision)', desc: 'Image classification, detection, segmentation' },
+    { value: 'rnn', icon: '🔄', label: 'RNN / LSTM', desc: 'Sequence modeling, time series' },
+    { value: 'transformer', icon: '⚡', label: 'Transformer', desc: 'Self-attention for text/vision' },
+    { value: 'mlp', icon: '🔗', label: 'MLP / Tabular DL', desc: 'Dense networks for tabular data' },
+  ],
+  transfer_learning: [
+    { value: 'fine_tune', icon: '🎛️', label: 'Full Fine-tuning', desc: 'Update all weights on new data' },
+    { value: 'feature_extract', icon: '🧩', label: 'Feature Extraction', desc: 'Freeze backbone, train head only' },
+    { value: 'lora', icon: '🔧', label: 'LoRA / PEFT', desc: 'Efficient parameter-efficient fine-tuning' },
+    { value: 'domain_adapt', icon: '🌐', label: 'Domain Adaptation', desc: 'Adapt to distribution-shifted target domain' },
+  ],
+  recommender: [
+    { value: 'collab', icon: '👥', label: 'Collaborative Filtering', desc: 'User-item matrix factorization' },
+    { value: 'content', icon: '📄', label: 'Content-based', desc: 'Item feature similarity' },
+    { value: 'hybrid', icon: '🤝', label: 'Hybrid', desc: 'Combines CF and content signals' },
+    { value: 'session', icon: '🕐', label: 'Session-based', desc: 'Sequential / contextual recommendations' },
+  ],
+  nlp: [
+    { value: 'text_class', icon: '📝', label: 'Text Classification', desc: 'Sentiment, topic, intent' },
+    { value: 'ner', icon: '🏷️', label: 'NER / Extraction', desc: 'Named entities, spans, relations' },
+    { value: 'generation', icon: '✍️', label: 'Text Generation', desc: 'Summarization, translation, QA' },
+    { value: 'embedding', icon: '📊', label: 'Embeddings / Retrieval', desc: 'Semantic search, RAG' },
+  ]
+};
+
+// ============================================================
+// CHECKLIST DATA
+// ============================================================
+function buildChecklist(answers) {
+  const algoType = answers.algoType;
+  const taskDetail = answers.taskDetails;
+  const profile = answers.datasetProfile || {};
+  const goals = answers.goals || [];
+  const constraints = answers.constraints || [];
+
+  const sections = [];
+
+  // 1. PROBLEM FRAMING
+  sections.push({
+    icon: '🧭',
+    title: 'Problem Framing & Setup',
+    items: [
+      { text: 'Clearly define the business/research objective in one sentence', detail: 'Tie ML task directly to a measurable outcome', tag: 'critical' },
+      { text: 'Identify and document the prediction target (label/signal)', detail: 'What exactly are you predicting? Is it measurable and available?', tag: 'critical' },
+      { text: 'Confirm ML is the right approach (vs. rule-based or heuristics)', detail: 'Is there enough data? Is the pattern learnable?', tag: 'important' },
+      { text: 'Define success metrics aligned with business goals', detail: `For ${algoType?.includes('classification') ? 'classification: precision, recall, F1, AUC-ROC' : algoType?.includes('regression') ? 'regression: RMSE, MAE, R²' : 'your task: select appropriate metric'}`, tag: 'critical' },
+      { text: 'Identify stakeholders and document their requirements', detail: 'Who consumes model outputs? What tolerance for error?', tag: 'important' },
+      { text: 'Establish baseline performance (random, heuristic, or previous model)', detail: 'Every model needs a comparison point', tag: 'critical' },
+      { text: 'Document data sources, data contracts, and access permissions', detail: 'Who owns the data? Are there privacy or legal constraints?', tag: 'important' },
+      ...(goals.includes('fairness') ? [
+        { text: 'Identify protected attributes and fairness constraints', detail: 'Race, gender, age, etc. Define fairness metric (demographic parity, equalized odds)', tag: 'critical' }
+      ] : []),
+      ...(constraints.includes('privacy') ? [
+        { text: 'Document compliance requirements (GDPR, HIPAA, CCPA, etc.)', detail: 'Understand data minimization, right-to-erasure, and audit requirements', tag: 'critical' }
+      ] : []),
+    ]
+  });
+
+  // 2. DATA COLLECTION & EDA
+  sections.push({
+    icon: '🔍',
+    title: 'Exploratory Data Analysis (EDA)',
+    subsections: [
+      {
+        label: 'Data Overview',
+        items: [
+          { text: 'Load dataset and inspect shape (rows × features)', detail: 'Use df.shape, df.head(), df.info(), df.describe()', tag: 'critical' },
+          { text: 'Check data types for each column', detail: 'Identify numeric, categorical, datetime, text, boolean types', tag: 'critical' },
+          { text: 'Audit unique values per column', detail: 'Detect ID-like columns, high-cardinality categoricals, boolean flags', tag: 'important' },
+          { text: 'Check for duplicate rows', detail: 'df.duplicated().sum() — decide on drop strategy', tag: 'important' },
+          { text: 'Document data collection period and any known gaps', detail: 'Temporal coverage, known events that may create distributional shifts', tag: 'important' },
+        ]
+      },
+      {
+        label: 'Missing Data Analysis',
+        items: [
+          { text: 'Compute missing value count and % per feature', detail: 'df.isnull().sum() / len(df) — flag features >50% missing for potential drop', tag: 'critical' },
+          { text: 'Determine missingness mechanism (MCAR, MAR, MNAR)', detail: 'Missing Completely at Random, At Random, or Not At Random — affects imputation strategy', tag: 'important' },
+          { text: 'Visualize missing patterns (missingness matrix / heatmap)', detail: 'Use missingno library — check if missingness is correlated', tag: 'important' },
+          { text: 'Decide imputation strategy for each column', detail: 'Mean/median for numeric; mode/indicator for categorical; KNN or model-based for complex cases', tag: 'critical' },
+          ...(profile.hasNull ? [{ text: 'Add missingness indicator features for informative nulls', detail: 'If NaN itself is predictive, encode as binary flag', tag: 'important' }] : []),
+        ]
+      },
+      {
+        label: 'Distribution Analysis',
+        items: [
+          { text: 'Plot distributions of all numeric features (histograms + KDE)', detail: 'Identify skewness, multimodality, bounded variables', tag: 'important' },
+          { text: 'Plot categorical feature value counts (bar charts)', detail: 'Identify rare categories, cardinality issues', tag: 'important' },
+          { text: 'Analyze target variable distribution', detail: algoType?.includes('classification') ? 'Class balance — compute class frequencies and ratios' : 'Check for skewness, bounded range, zero-inflation', tag: 'critical' },
+          { text: 'Compute and visualize correlation matrix (numeric features)', detail: 'Use Pearson for linear, Spearman for monotonic — flag high correlations (>0.85)', tag: 'important' },
+          { text: 'Examine feature-target relationships (scatter plots, box plots)', detail: 'Use pairplot, violin plots, or SHAP for quick signal assessment', tag: 'important' },
+          ...(profile.hasOutliers ? [
+            { text: 'Identify outliers using IQR, z-score, and domain knowledge', detail: 'IQR rule: outside Q1-1.5×IQR or Q3+1.5×IQR; z-score > 3σ; use boxplots', tag: 'critical' },
+            { text: 'Distinguish legitimate extremes from data errors', detail: 'Consult domain experts — do not blindly remove outliers', tag: 'critical' },
+          ] : []),
+          ...(profile.hasTimeseries ? [
+            { text: 'Plot time series trends, seasonality, and decomposition', detail: 'Use statsmodels STL or seasonal_decompose — check for stationarity', tag: 'critical' },
+            { text: 'Test for stationarity (ADF or KPSS test)', detail: 'Non-stationary series require differencing or detrending', tag: 'critical' },
+            { text: 'Check for autocorrelation (ACF/PACF plots)', detail: 'Critical for lag feature engineering and model selection', tag: 'important' },
+          ] : []),
+        ]
+      },
+      {
+        label: 'Data Quality',
+        items: [
+          { text: 'Check for inconsistent string formatting (case, whitespace, encoding)', detail: 'strip(), lower(), encoding normalization (UTF-8)', tag: 'important' },
+          { text: 'Validate value ranges against domain constraints', detail: 'Age can\'t be negative; probability must be 0–1; dates must be valid', tag: 'critical' },
+          { text: 'Identify and handle conflicting labels or duplicate key samples', detail: 'Same features, different labels — remove or consolidate', tag: 'important' },
+          { text: 'Document all EDA findings in a structured data quality report', detail: 'Share with team — include sample visualizations and decisions made', tag: 'important' },
+        ]
+      }
+    ]
+  });
+
+  // 3. DATA SPLITTING
+  sections.push({
+    icon: '✂️',
+    title: 'Data Splitting Strategy',
+    items: [
+      { text: 'Choose appropriate split strategy for your data type', detail: profile.hasTimeseries ? 'CRITICAL: Use time-based split — never shuffle temporal data' : 'Random stratified split is standard for IID data', tag: 'critical' },
+      { text: 'Create train / validation / test sets before any preprocessing', detail: 'Prevents data leakage — all transformations must be fit on train only', tag: 'critical' },
+      { text: 'Use stratified split for classification to preserve class proportions', detail: 'StratifiedKFold or train_test_split(stratify=y)', tag: algoType?.includes('classification') ? 'critical' : 'optional' },
+      { text: 'Verify no data leakage between splits', detail: 'Check for shared sample IDs, temporal leakage, feature leakage from future data', tag: 'critical' },
+      { text: 'Choose cross-validation strategy (k-fold, nested CV, LOOCV)', detail: 'Use nested CV for hyperparameter search to get unbiased estimates', tag: 'important' },
+      ...(profile.hasTimeseries ? [
+        { text: 'Use TimeSeriesSplit or walk-forward validation', detail: 'sklearn.model_selection.TimeSeriesSplit — each fold respects temporal order', tag: 'critical' },
+      ] : []),
+      { text: 'Document split sizes and random seeds for reproducibility', detail: 'Save seeds, split indices, or use a fixed data versioning system', tag: 'important' },
+      { text: 'Reserve held-out test set — do not touch until final evaluation', detail: 'Test set contamination is one of the most common ML mistakes', tag: 'critical' },
+    ]
+  });
+
+  // 4. PREPROCESSING
+  sections.push({
+    icon: '⚙️',
+    title: 'Data Preprocessing & Cleaning',
+    subsections: [
+      {
+        label: 'Missing Value Imputation',
+        items: [
+          { text: 'Apply chosen imputation strategy, fit only on training data', detail: 'sklearn.impute.SimpleImputer, KNNImputer, or IterativeImputer', tag: 'critical' },
+          { text: 'Validate imputed values are within expected ranges', detail: 'Check for nonsensical imputed values; verify distribution shift is minimal', tag: 'important' },
+          { text: 'Consider model-based imputation for complex dependencies', detail: 'IterativeImputer (MICE) fits a model for each feature with missing values', tag: 'optional' },
+        ]
+      },
+      {
+        label: 'Outlier Handling',
+        items: [
+          ...(profile.hasOutliers ? [
+            { text: 'Decide on outlier strategy: keep, cap (winsorize), transform, or remove', detail: 'Removal only if clearly erroneous — robust scalers can handle outliers in place', tag: 'critical' },
+            { text: 'Apply winsorization / capping at chosen percentile if needed', detail: 'e.g., clip values to 1st–99th percentile', tag: 'important' },
+            { text: 'Use robust metrics and models for outlier-prone data', detail: 'Median instead of mean; HuberRegressor or quantile loss', tag: 'optional' },
+          ] : [
+            { text: 'Confirm outlier presence is minimal and document decision', detail: 'Even if few outliers, document the decision to skip treatment', tag: 'optional' }
+          ])
+        ]
+      },
+      {
+        label: 'Categorical Encoding',
+        items: [
+          ...(profile.hasCategorical ? [
+            { text: 'Identify nominal vs ordinal categorical features', detail: 'Nominal: one-hot/target encoding; Ordinal: label encoding with correct order', tag: 'critical' },
+            { text: 'Apply one-hot encoding for low-cardinality nominals (<20 categories)', detail: 'pd.get_dummies() or OrdinalEncoder — watch for dimensionality explosion', tag: 'important' },
+            { text: 'Apply target/mean encoding for high-cardinality categoricals', detail: 'Use cross-validation folds to prevent leakage in target encoding', tag: 'important' },
+            { text: 'Handle unknown categories in test/production data', detail: 'Add "unknown" bucket or use frequency encoding to handle new categories', tag: 'critical' },
+            { text: 'Consider embeddings for very high cardinality (NLP, IDs)', detail: 'Entity embeddings learn dense representations for categorical IDs', tag: 'optional' },
+          ] : [])
+        ]
+      },
+      {
+        label: 'Feature Scaling',
+        items: [
+          { text: 'Apply appropriate scaling for algorithm requirements', detail: 'Linear models, SVM, KNN, NNs: require scaling. Trees: invariant to scaling', tag: 'important' },
+          { text: 'Choose scaler type based on distribution', detail: 'StandardScaler for normal; MinMaxScaler for bounded; RobustScaler for outliers; Log for skewed', tag: 'important' },
+          { text: 'Fit scaler only on training data, transform train+val+test', detail: 'Prevents data leakage — never fit_transform on full dataset', tag: 'critical' },
+          { text: 'Apply log1p or Box-Cox transform for right-skewed features', detail: 'Particularly important for regression targets and tree-agnostic features', tag: 'optional' },
+        ]
+      }
+    ]
+  });
+
+  // 5. FEATURE ENGINEERING
+  sections.push({
+    icon: '🛠️',
+    title: 'Feature Engineering',
+    subsections: [
+      {
+        label: 'Feature Creation',
+        items: [
+          { text: 'Create domain-relevant interaction features', detail: 'Multiply, divide, or combine features that have meaningful joint effects', tag: 'important' },
+          { text: 'Extract datetime components (year, month, dow, hour, is_weekend)', detail: 'Cyclical encoding for hour/month: sin(2π×val/max), cos(2π×val/max)', tag: profile.hasTimeseries ? 'critical' : 'important' },
+          { text: 'Engineer lag features and rolling statistics', detail: 'Lag-1, lag-7, rolling mean/std/min/max windows for time series', tag: profile.hasTimeseries ? 'critical' : 'optional' },
+          { text: 'Create polynomial features for known non-linear relationships', detail: 'sklearn.preprocessing.PolynomialFeatures — beware exponential growth in feature count', tag: 'optional' },
+          ...(algoType?.includes('nlp') || algoType === 'nlp' ? [
+            { text: 'Extract text features: TF-IDF, n-grams, or embeddings', detail: 'TfidfVectorizer for shallow models; BERT/sentence-transformers for deep semantics', tag: 'critical' },
+            { text: 'Clean and normalize text (lowercase, punctuation, stopwords)', detail: 'Apply consistently across train/val/test using fitted preprocessing', tag: 'critical' },
+          ] : []),
+        ]
+      },
+      {
+        label: 'Feature Selection',
+        items: [
+          { text: 'Remove zero-variance and near-zero-variance features', detail: 'sklearn.feature_selection.VarianceThreshold', tag: 'important' },
+          { text: 'Remove highly correlated redundant features (>0.90 correlation)', detail: 'Pick one from each highly correlated pair based on feature importance', tag: 'important' },
+          { text: 'Use univariate statistical tests for initial screening', detail: 'SelectKBest with f_classif, mutual_info_classif, or f_regression', tag: 'optional' },
+          { text: 'Apply recursive feature elimination or importance-based selection', detail: 'RFECV, SelectFromModel, or permutation importance', tag: 'important' },
+          { text: 'Use SHAP values for model-aware feature selection', detail: 'Global SHAP importance identifies truly predictive features', tag: 'optional' },
+          ...(profile.highDim ? [
+            { text: 'Apply dimensionality reduction before modeling if features >> rows', detail: 'PCA retaining 95% variance, or use regularization-heavy models (Lasso, ElasticNet)', tag: 'critical' },
+          ] : []),
+          { text: 'Document all feature engineering decisions and rationale', detail: 'What was tried, what was kept, and why — essential for reproducibility', tag: 'important' },
+        ]
+      }
+    ]
+  });
+
+  // 6. CLASS IMBALANCE (conditional)
+  if (algoType?.includes('classification') || profile.imbalanced) {
+    sections.push({
+      icon: '⚖️',
+      title: 'Class Imbalance Handling',
+      items: [
+        { text: 'Quantify class imbalance ratio', detail: 'If minority class < 10%, treat as imbalance problem', tag: 'critical' },
+        { text: 'Choose appropriate metric (NOT accuracy for imbalanced data)', detail: 'Use F1, Precision-Recall AUC, G-mean, or Matthews Correlation Coefficient', tag: 'critical' },
+        { text: 'Try class_weight="balanced" as a first low-cost approach', detail: 'Most sklearn classifiers support this — adjusts loss function automatically', tag: 'important' },
+        { text: 'Apply SMOTE or ADASYN for minority class oversampling', detail: 'imbalanced-learn library — apply only inside CV folds to prevent leakage', tag: 'important' },
+        { text: 'Try random undersampling with ensemble methods (EasyEnsemble)', detail: 'Often more effective than oversampling for very high imbalance ratios', tag: 'optional' },
+        { text: 'Tune decision threshold post-training using precision-recall curve', detail: 'Default 0.5 threshold is rarely optimal — use threshold optimization on validation set', tag: 'important' },
+        { text: 'Validate with stratified k-fold to preserve class proportions', detail: 'Regular k-fold may produce folds without minority class samples', tag: 'critical' },
+      ]
+    });
+  }
+
+  // 7. MODEL SELECTION
+  sections.push({
+    icon: '🤖',
+    title: 'Model Selection & Baseline',
+    items: [
+      { text: 'Start with simplest interpretable model first (baseline)', detail: getBaselineModel(algoType, taskDetail), tag: 'critical' },
+      { text: 'Shortlist 3–5 candidate algorithms based on task and data size', detail: getCandidateModels(algoType), tag: 'important' },
+      { text: 'Train all candidates with default hyperparameters', detail: 'Compare apples-to-apples before tuning — some defaults are surprisingly strong', tag: 'important' },
+      { text: 'Evaluate all candidates on validation set with chosen metric', detail: 'Use same CV folds for fair comparison', tag: 'critical' },
+      { text: 'Consider ensemble methods if individual models plateau', detail: 'Stacking, blending, or voting can recover 1–3% additional performance', tag: 'optional' },
+      ...(goals.includes('interpretability') ? [
+        { text: 'Prefer interpretable models (linear, tree, GAM) where performance allows', detail: 'LIME and SHAP can explain any model but native interpretability is stronger', tag: 'critical' },
+      ] : []),
+      ...(profile.dataSize <= 1 ? [
+        { text: 'Apply k-fold CV (k=10) due to small dataset size', detail: 'Small datasets: avoid held-out test — use nested CV instead', tag: 'critical' },
+      ] : []),
+    ]
+  });
+
+  // 8. TRAINING BEST PRACTICES
+  sections.push({
+    icon: '🏋️',
+    title: 'Model Training',
+    subsections: [
+      {
+        label: 'Training Setup',
+        items: [
+          { text: 'Set random seeds for all sources of randomness', detail: 'np.random.seed, random.seed, torch.manual_seed, tf.random.set_seed', tag: 'critical' },
+          { text: 'Log all hyperparameters and training configuration', detail: 'MLflow, Weights & Biases, or simple JSON config file', tag: 'important' },
+          { text: 'Monitor training and validation loss curves', detail: 'Detect overfitting (val loss diverges), underfitting (both losses plateau high)', tag: 'critical' },
+          { text: 'Implement early stopping with patience', detail: 'Stop when validation metric stops improving — prevents overfitting', tag: 'important' },
+          ...(algoType === 'deep_learning' || algoType === 'transfer_learning' ? [
+            { text: 'Use learning rate scheduling (cosine annealing, step decay)', detail: 'Reduces LR over time — significantly improves convergence', tag: 'important' },
+            { text: 'Implement gradient clipping for stable training', detail: 'torch.nn.utils.clip_grad_norm_(params, max_norm=1.0)', tag: 'important' },
+            { text: 'Use mixed precision training (float16) for speed', detail: 'torch.cuda.amp.autocast — 2-3× speedup with near-identical results', tag: 'optional' },
+          ] : []),
+        ]
+      },
+      {
+        label: 'Data Pipeline',
+        items: [
+          { text: 'Use efficient data loading pipeline to avoid GPU starvation', detail: 'DataLoader with num_workers, pin_memory, prefetch_factor', tag: algoType === 'deep_learning' ? 'critical' : 'optional' },
+          { text: 'Apply data augmentation on training set only', detail: 'Image: flips, crops, color jitter; Text: synonym replacement, back-translation', tag: algoType === 'deep_learning' || algoType === 'transfer_learning' ? 'important' : 'optional' },
+          { text: 'Verify batches have correct shape and value ranges', detail: 'Print first batch — catch shape errors and unexpected NaN/Inf values early', tag: 'important' },
+        ]
+      }
+    ]
+  });
+
+  // 9. REGULARIZATION
+  sections.push({
+    icon: '🛡️',
+    title: 'Regularization & Overfitting Prevention',
+    items: [
+      { text: 'Diagnose bias-variance tradeoff from learning curves', detail: 'High bias: model too simple; High variance: model too complex', tag: 'critical' },
+      { text: 'Apply L1 (Lasso) regularization for feature sparsity', detail: 'Drives irrelevant feature weights to exactly zero — built-in feature selection', tag: 'important' },
+      { text: 'Apply L2 (Ridge) regularization for weight shrinkage', detail: 'Reduces overfitting without eliminating features — better for correlated features', tag: 'important' },
+      { text: 'Apply ElasticNet for combined L1+L2 regularization', detail: 'Best of both worlds — tune l1_ratio hyperparameter', tag: 'optional' },
+      ...(algoType === 'deep_learning' || algoType === 'transfer_learning' ? [
+        { text: 'Add Dropout layers (rate 0.2–0.5) for neural regularization', detail: 'Place after dense layers — use SpatialDropout for CNNs, not after batch norm', tag: 'important' },
+        { text: 'Apply Batch Normalization for training stability', detail: 'Accelerates convergence and acts as mild regularizer', tag: 'important' },
+        { text: 'Use weight decay in optimizer (equivalent to L2)', detail: 'AdamW with weight_decay=1e-4 is a strong default', tag: 'important' },
+      ] : []),
+      { text: 'Use cross-validation to detect overfitting to validation set', detail: 'If tuning on single val set, you\'re slowly leaking val set information', tag: 'critical' },
+      { text: 'Monitor gap between training and validation metrics', detail: 'Gap >5% typically indicates overfitting requiring regularization', tag: 'important' },
+    ]
+  });
+
+  // 10. HYPERPARAMETER TUNING
+  sections.push({
+    icon: '🎛️',
+    title: 'Hyperparameter Tuning',
+    items: [
+      { text: 'Define hyperparameter search space with sensible bounds', detail: 'Use log-scale for learning rate, regularization strength; linear for layers/neurons', tag: 'critical' },
+      { text: 'Start with random search before grid search', detail: 'Random search is 10× more efficient than grid search for high-dimensional spaces', tag: 'important' },
+      { text: 'Use Bayesian optimization for expensive models', detail: 'Optuna, Hyperopt, or Ray Tune — learns from previous trials', tag: 'important' },
+      { text: 'Tune with nested cross-validation to avoid overfitting to val set', detail: 'Outer loop: test performance. Inner loop: hyperparameter selection', tag: 'critical' },
+      { text: 'Prioritize most impactful hyperparameters first', detail: getKeyHPs(algoType), tag: 'important' },
+      { text: 'Use early stopping in search to prune unpromising trials', detail: 'Optuna\'s MedianPruner or ASHA scheduler in Ray Tune', tag: 'optional' },
+      { text: 'Log all trials for analysis and reproducibility', detail: 'MLflow or Optuna study.trials_dataframe() — enables learning from failed runs', tag: 'important' },
+      { text: 'Validate final hyperparameters on held-out test set only once', detail: 'Multiple test set evaluations inflate performance estimates', tag: 'critical' },
+    ]
+  });
+
+  // 11. EVALUATION
+  sections.push({
+    icon: '📊',
+    title: 'Model Evaluation & Validation',
+    subsections: [
+      {
+        label: 'Performance Metrics',
+        items: [
+          { text: 'Evaluate with all relevant metrics, not just primary metric', detail: getEvalMetrics(algoType, taskDetail), tag: 'critical' },
+          { text: 'Generate and analyze confusion matrix', detail: 'Understand where errors cluster — are they systematic?', tag: algoType?.includes('classification') ? 'critical' : 'optional' },
+          { text: 'Plot calibration curve to check probability calibration', detail: 'Poorly calibrated probabilities mislead downstream decisions — use Platt scaling or isotonic regression', tag: algoType?.includes('classification') ? 'important' : 'optional' },
+          { text: 'Compute confidence intervals for performance metrics', detail: 'Bootstrap CI or Wilson interval — never report a single point estimate', tag: 'important' },
+          { text: 'Perform statistical significance test vs. baseline', detail: 'McNemar\'s test for classifiers; DM test for time series; bootstrap permutation test', tag: 'important' },
+        ]
+      },
+      {
+        label: 'Error Analysis',
+        items: [
+          { text: 'Analyze errors by subgroup (demographics, time, feature ranges)', detail: 'Slice-based evaluation — identify which subgroups the model fails on', tag: 'critical' },
+          { text: 'Inspect top-k worst predictions manually', detail: 'Find patterns in errors — label noise, edge cases, or systematic failure modes', tag: 'important' },
+          { text: 'Check model performance on edge cases and rare categories', detail: 'Tail performance often matters most in production', tag: 'important' },
+          ...(goals.includes('fairness') ? [
+            { text: 'Evaluate fairness metrics across protected groups', detail: 'Demographic parity, equalized odds, predictive parity — use Fairlearn or AIF360', tag: 'critical' },
+          ] : []),
+        ]
+      },
+      {
+        label: 'Robustness Checks',
+        items: [
+          { text: 'Test model on out-of-distribution (OOD) samples', detail: 'Simulate distribution shift — does performance degrade gracefully?', tag: 'important' },
+          { text: 'Conduct adversarial robustness testing if high-stakes', detail: 'Input perturbations, feature noise injection, worst-case analysis', tag: goals.includes('robustness') ? 'critical' : 'optional' },
+          { text: 'Test model stability with different random seeds', detail: 'High variance across seeds = unstable — consider ensembling', tag: 'important' },
+        ]
+      }
+    ]
+  });
+
+  // 12. INTERPRETABILITY
+  if (goals.includes('interpretability') || true) {
+    sections.push({
+      icon: '🔍',
+      title: 'Model Interpretability & Explainability',
+      items: [
+        { text: 'Compute global feature importances', detail: 'SHAP summary plot, permutation importance, or Gini importance for trees', tag: 'important' },
+        { text: 'Generate SHAP waterfall plots for individual predictions', detail: 'Explain each prediction — essential for high-stakes decisions', tag: goals.includes('interpretability') ? 'critical' : 'optional' },
+        { text: 'Use LIME for local model-agnostic explanations', detail: 'Good for explaining black-box models to non-technical stakeholders', tag: 'optional' },
+        { text: 'Plot partial dependence plots (PDPs) for key features', detail: 'Shows marginal effect of each feature on prediction', tag: 'optional' },
+        { text: 'Validate explanations align with domain knowledge', detail: 'If model explanation contradicts domain expertise, investigate further', tag: 'important' },
+        { text: 'Document known limitations and failure modes', detail: 'Be transparent about what the model cannot do', tag: 'important' },
+      ]
+    });
+  }
+
+  // 13. ALGORITHM-SPECIFIC CHECKS
+  const algoSpecific = getAlgoSpecificSection(algoType, taskDetail, profile, constraints);
+  if (algoSpecific) sections.push(algoSpecific);
+
+  // 14. PRODUCTION & DEPLOYMENT
+  if (constraints.includes('production') || constraints.includes('realtime')) {
+    sections.push({
+      icon: '🚀',
+      title: 'Production & Deployment',
+      subsections: [
+        {
+          label: 'Model Packaging',
+          items: [
+            { text: 'Serialize model with versioning (MLflow, joblib, ONNX)', detail: 'Include preprocessing pipeline in the artifact — never separate them', tag: 'critical' },
+            { text: 'Document model card (purpose, metrics, limitations, training data)', detail: 'Model Card Toolkit — required for responsible deployment', tag: 'critical' },
+            { text: 'Write unit tests for preprocessing pipeline', detail: 'Test each transformation step in isolation with known inputs/outputs', tag: 'important' },
+            { text: 'Load test model for inference latency and throughput', detail: `Target: ${constraints.includes('realtime') ? '<100ms p99 latency' : '<1s acceptable for batch'}`, tag: 'critical' },
+          ]
+        },
+        {
+          label: 'Monitoring',
+          items: [
+            { text: 'Set up data drift monitoring (input distribution tracking)', detail: 'Evidently, Whylogs, or Great Expectations — alert on feature distribution shifts', tag: 'critical' },
+            { text: 'Monitor prediction distribution over time', detail: 'Track output distribution — sudden changes signal problems', tag: 'important' },
+            { text: 'Set up model performance monitoring with ground truth labels', detail: 'Once labels arrive, compute live performance — set up retraining triggers', tag: 'critical' },
+            { text: 'Implement A/B testing framework for model updates', detail: 'Shadow mode or canary deployment before full rollout', tag: 'important' },
+          ]
+        }
+      ]
+    });
+  }
+
+  // 15. REPRODUCIBILITY
+  sections.push({
+    icon: '🔁',
+    title: 'Reproducibility & Documentation',
+    items: [
+      { text: 'Pin all library versions in requirements.txt or environment.yml', detail: 'pip freeze > requirements.txt or conda env export — include OS and Python version', tag: 'critical' },
+      { text: 'Version control data with DVC, LFS, or data snapshot hashing', detail: 'Never rely on mutable files — store hash of data used for each experiment', tag: 'critical' },
+      { text: 'Log all experiments with hyperparameters, metrics, and artifacts', detail: 'MLflow, W&B, or Neptune — every run should be reproducible', tag: 'important' },
+      { text: 'Write README documenting end-to-end pipeline steps', detail: 'A new team member should be able to reproduce results from scratch', tag: 'important' },
+      { text: 'Store all random seeds used', detail: 'Different libraries may need separate seeds — document all', tag: 'important' },
+      { text: 'Create a model validation report summarizing all findings', detail: 'Include: data summary, model card, performance by subgroup, known limitations', tag: 'important' },
+    ]
+  });
+
+  return sections;
+}
+
+// ============================================================
+// HELPER FUNCTIONS
+// ============================================================
+function getBaselineModel(algoType, taskDetail) {
+  const map = {
+    supervised_classification: 'Logistic Regression — simple, interpretable, fast, often surprisingly strong',
+    supervised_regression: 'Linear Regression or Ridge — establishes linear baseline',
+    unsupervised_clustering: 'K-Means with k=5 — simple centroid clustering baseline',
+    unsupervised_dim_reduction: 'PCA — linear reduction before trying non-linear methods',
+    deep_learning: 'Simple MLP with 2 hidden layers before architecturally complex models',
+    transfer_learning: 'Feature extraction (frozen backbone) before full fine-tuning',
+    recommender: 'Popularity-based or user/item average — critical baseline for recall@k',
+    nlp: 'TF-IDF + Logistic Regression — strong baseline for most NLP tasks',
+  };
+  return map[algoType] || 'Simple statistical baseline — always define before complex models';
+}
+
+function getCandidateModels(algoType) {
+  const map = {
+    supervised_classification: 'Logistic Regression, Random Forest, XGBoost/LightGBM, SVM, Neural Net',
+    supervised_regression: 'Ridge, ElasticNet, Random Forest, XGBoost, Neural Net',
+    unsupervised_clustering: 'K-Means, DBSCAN, Agglomerative, GMM, HDBSCAN',
+    unsupervised_dim_reduction: 'PCA, UMAP, t-SNE (visualization only), Autoencoder',
+    deep_learning: 'MLP, CNN/ResNet, Transformer, EfficientNet for vision',
+    transfer_learning: 'BERT/RoBERTa for NLP; ResNet/ViT for vision; check HuggingFace Hub',
+    recommender: 'ALS Matrix Factorization, BPR, Neural CF, LightFM',
+    nlp: 'TF-IDF+LR, fastText, BERT/DistilBERT, GPT-based fine-tuning',
+  };
+  return map[algoType] || 'Select 3–5 models appropriate for your task type';
+}
+
+function getKeyHPs(algoType) {
+  const map = {
+    supervised_classification: 'n_estimators, max_depth, learning_rate (for boosting); C, gamma (for SVM)',
+    supervised_regression: 'alpha (regularization strength); n_estimators, max_depth for trees',
+    unsupervised_clustering: 'n_clusters (k-means); eps, min_samples (DBSCAN)',
+    deep_learning: 'learning_rate, batch_size, dropout_rate, weight_decay, architecture depth/width',
+    transfer_learning: 'learning_rate (much smaller, e.g. 1e-5), unfreezing schedule, batch_size',
+    recommender: 'n_factors, regularization, learning_rate, n_epochs',
+    nlp: 'learning_rate, max_length, warmup_steps, batch_size',
+  };
+  return map[algoType] || 'Learning rate, regularization strength, and model complexity parameters first';
+}
+
+function getEvalMetrics(algoType, taskDetail) {
+  const map = {
+    supervised_classification: 'Accuracy (balanced), F1 (macro/weighted), Precision, Recall, AUC-ROC, AUC-PR (for imbalanced)',
+    supervised_regression: 'RMSE, MAE, MAPE, R², median absolute error',
+    unsupervised_clustering: 'Silhouette score, Davies-Bouldin, Calinski-Harabasz, + domain-specific validation',
+    unsupervised_dim_reduction: 'Reconstruction error, trustworthiness, continuity, downstream task performance',
+    deep_learning: 'Task-specific + training/val loss curves, FLOPs, inference time',
+    transfer_learning: 'Fine-tuning convergence speed, few-shot performance, forgetting on original task',
+    recommender: 'NDCG@k, Precision@k, Recall@k, MRR, Hit Rate, coverage, novelty',
+    nlp: 'Task-specific (F1 for NER, BLEU/ROUGE for generation, accuracy for classification)',
+  };
+  return map[algoType] || 'Select metrics aligned with business objective — use multiple complementary metrics';
+}
+
+function getAlgoSpecificSection(algoType, taskDetail, profile, constraints) {
+  const sections = {
+    supervised_classification: {
+      icon: '🎯',
+      title: 'Classification-Specific Checks',
+      items: [
+        { text: 'Tune classification threshold using precision-recall tradeoff', detail: 'F1-optimal threshold is rarely 0.5 — use PR curve on validation set', tag: 'important' },
+        { text: 'Check for and handle label noise in training data', detail: 'Confident learning (cleanlab) detects likely mislabeled samples', tag: 'optional' },
+        { text: 'Use calibrated probabilities if downstream decisions rely on them', detail: 'CalibratedClassifierCV with Platt scaling or isotonic regression', tag: 'important' },
+        { text: 'Validate model on stratified holdout preserving class balance', detail: 'Ensures consistent evaluation regardless of class proportions', tag: 'critical' },
+      ]
+    },
+    supervised_regression: {
+      icon: '📈',
+      title: 'Regression-Specific Checks',
+      items: [
+        { text: 'Plot and analyze residuals (residual vs fitted, Q-Q plot)', detail: 'Heteroscedasticity, non-normality, or patterns indicate model misspecification', tag: 'critical' },
+        { text: 'Test for heteroscedasticity (Breusch-Pagan or White test)', detail: 'Non-constant error variance — may need variance-stabilizing transformation', tag: 'important' },
+        { text: 'Check for multicollinearity using VIF (>10 is problematic)', detail: 'Variance Inflation Factor — high VIF destabilizes linear coefficients', tag: 'important' },
+        { text: 'Consider log-transforming right-skewed targets', detail: 'Predict log(y) then exponentiate — evaluate with RMSLE', tag: 'optional' },
+      ]
+    },
+    unsupervised_clustering: {
+      icon: '🔮',
+      title: 'Clustering-Specific Checks',
+      items: [
+        { text: 'Run elbow method and silhouette analysis to select k', detail: 'Plot inertia vs k; silhouette score peak indicates optimal clusters', tag: 'critical' },
+        { text: 'Validate cluster stability across different random seeds', detail: 'Cluster assignments should be consistent — instability indicates poor fit', tag: 'important' },
+        { text: 'Inspect cluster profiles with descriptive statistics', detail: 'For each cluster: compute mean/median of key features — do clusters make sense?', tag: 'critical' },
+        { text: 'Use t-SNE or UMAP to visualize clusters in 2D', detail: 'Visual validation — well-separated clusters should be visible', tag: 'important' },
+        { text: 'Validate clusters with domain experts', detail: 'Cluster quality is ultimately a business judgment — involve SMEs', tag: 'critical' },
+      ]
+    },
+    deep_learning: {
+      icon: '🧠',
+      title: 'Deep Learning-Specific Checks',
+      items: [
+        { text: 'Overfit a small batch first to verify model can learn', detail: 'If model cannot overfit 10 samples, there is a bug — check loss, gradients', tag: 'critical' },
+        { text: 'Monitor gradient norms — check for vanishing/exploding gradients', detail: 'Log gradient norms per layer — should be O(1), not O(1e-6) or O(1e6)', tag: 'important' },
+        { text: 'Use weight initialization appropriate for activation function', detail: 'He init for ReLU; Glorot/Xavier for sigmoid/tanh', tag: 'important' },
+        { text: 'Perform learning rate range test (LR finder)', detail: 'Plot loss vs LR — pick value just before divergence', tag: 'important' },
+        { text: 'Validate attention maps / feature maps are sensible', detail: 'GradCAM for CNNs — ensure model attends to right regions', tag: 'optional' },
+      ]
+    },
+    transfer_learning: {
+      icon: '🔄',
+      title: 'Transfer Learning-Specific Checks',
+      items: [
+        { text: 'Verify source and target domain compatibility', detail: 'Large domain gap may make transfer harmful — benchmark vs training from scratch', tag: 'critical' },
+        { text: 'Use discriminative learning rates (lower for early layers)', detail: 'Earlier layers: 1e-5; later layers: 1e-4; head: 1e-3 — prevents destroying pretrained features', tag: 'critical' },
+        { text: 'Warm up learning rate before unfreezing backbone', detail: 'Train head for 1–2 epochs frozen, then gradually unfreeze', tag: 'important' },
+        { text: 'Monitor catastrophic forgetting if reusing on original task', detail: 'Evaluate on original domain if multi-task scenario', tag: 'optional' },
+      ]
+    },
+    recommender: {
+      icon: '⭐',
+      title: 'Recommender System-Specific Checks',
+      items: [
+        { text: 'Handle cold start problem for new users and items', detail: 'Content-based or popularity fallback — never serve empty recommendations', tag: 'critical' },
+        { text: 'Split data temporally — test on most recent interactions', detail: 'Random split on interactions causes severe data leakage in RS', tag: 'critical' },
+        { text: 'Evaluate beyond accuracy: diversity, novelty, serendipity', detail: 'High accuracy + low diversity = filter bubble — balance both', tag: 'important' },
+        { text: 'Monitor and mitigate popularity bias', detail: 'Most recommenders over-recommend popular items — apply exposure control', tag: 'important' },
+        { text: 'Validate offline metrics correlate with online A/B test results', detail: 'NDCG improvements do not always translate to click-through or revenue', tag: 'important' },
+      ]
+    },
+    nlp: {
+      icon: '💬',
+      title: 'NLP-Specific Checks',
+      items: [
+        { text: 'Check for train/test contamination in text data', detail: 'Fuzzy duplicate detection — near-duplicate sentences can leak test signal', tag: 'critical' },
+        { text: 'Handle vocabulary and tokenization consistently', detail: 'Use same tokenizer for train and inference — never refit tokenizer on test', tag: 'critical' },
+        { text: 'Evaluate on multiple languages/dialects if multilingual', detail: 'Per-language performance metrics — models often fail on low-resource languages', tag: 'important' },
+        { text: 'Check for spurious correlations / dataset artifacts', detail: 'Hypothesis-only baselines, label-sensitive patterns — NLI benchmark artifacts', tag: 'important' },
+      ]
+    }
+  };
+  return sections[algoType] || null;
+}
+
+// ============================================================
+// WIZARD RENDERING
+// ============================================================
+function renderWizardStep(step) {
+  const stepDef = WIZARD_STEPS[step];
+  let html = `<div class="wizard-card"><h2>${stepDef.title}</h2><p class="q-desc">${stepDef.desc}</p>`;
+
+  if (stepDef.type === 'single') {
+    html += `<div class="option-grid">`;
+    stepDef.options.forEach(opt => {
+      const sel = state.answers[stepDef.id] === opt.value ? 'selected' : '';
+      html += `<button class="option-btn ${sel}" onclick="selectSingle('${stepDef.id}','${opt.value}',this)">
+        <span class="ob-icon">${opt.icon}</span>
+        <span class="ob-label">${opt.label}</span>
+        <span class="ob-desc">${opt.desc}</span>
+      </button>`;
+    });
+    html += `</div>`;
+  }
+
+  if (stepDef.type === 'multi') {
+    const opts = TASK_DETAIL_OPTIONS[state.answers.algoType] || [];
+    const selected = state.answers.taskDetails || '';
+    html += `<div class="option-grid">`;
+    opts.forEach(opt => {
+      const sel = selected === opt.value ? 'selected' : '';
+      html += `<button class="option-btn ${sel}" onclick="selectSingle('taskDetails','${opt.value}',this)">
+        <span class="ob-icon">${opt.icon}</span>
+        <span class="ob-label">${opt.label}</span>
+        <span class="ob-desc">${opt.desc}</span>
+      </button>`;
+    });
+    html += `</div>`;
+  }
+
+  if (stepDef.type === 'sliders_checks') {
+    const profile = state.answers.datasetProfile || {};
+    stepDef.sliders.forEach(sl => {
+      const val = profile[sl.id] !== undefined ? profile[sl.id] : sl.default;
+      html += `<div class="slider-group">
+        <div class="slider-label"><span>${sl.label}</span><span id="lbl-${sl.id}">${sl.labels[val]}</span></div>
+        <input type="range" min="${sl.min}" max="${sl.max}" value="${val}" oninput="updateSlider('${sl.id}',this.value,${JSON.stringify(sl.labels)})">
+      </div>`;
+    });
+    html += `<div class="checkbox-group">`;
+    stepDef.checks.forEach(ch => {
+      const checked = profile[ch.id] ? 'checked' : '';
+      html += `<label class="checkbox-item">
+        <input type="checkbox" ${checked} onchange="updateCheck('${ch.id}',this.checked)">
+        <div><div class="ci-label">${ch.label}</div><div class="ci-desc">${ch.desc}</div></div>
+      </label>`;
+    });
+    html += `</div>`;
+  }
+
+  if (stepDef.type === 'multi_check') {
+    const selected = state.answers[stepDef.id] || [];
+    html += `<div class="option-grid">`;
+    stepDef.options.forEach(opt => {
+      const sel = selected.includes(opt.value) ? 'selected' : '';
+      html += `<button class="option-btn ${sel}" onclick="toggleMultiCheck('${stepDef.id}','${opt.value}',this)">
+        <span class="ob-icon">${opt.icon}</span>
+        <span class="ob-label">${opt.label}</span>
+        <span class="ob-desc">${opt.desc}</span>
+      </button>`;
+    });
+    html += `</div>`;
+  }
+
+  html += `<div class="wizard-nav">`;
+  if (step > 0) html += `<button class="btn btn-ghost" onclick="wizardBack()">← Back</button>`;
+  if (step < WIZARD_STEPS.length - 1) {
+    html += `<button class="btn btn-primary" onclick="wizardNext()">Continue →</button>`;
+  } else {
+    html += `<button class="btn btn-green" onclick="generateChecklist()">✓ Generate My Checklist</button>`;
+  }
+  html += `</div></div>`;
+
+  document.getElementById('wizardContent').innerHTML = html;
+  updateStepList(step);
+  updateSidebar();
+}
+
+function selectSingle(id, val, btn) {
+  state.answers[id] = val;
+  btn.closest('.option-grid').querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  updateSidebar();
+}
+
+function toggleMultiCheck(id, val, btn) {
+  if (!state.answers[id]) state.answers[id] = [];
+  const idx = state.answers[id].indexOf(val);
+  if (idx === -1) { state.answers[id].push(val); btn.classList.add('selected'); }
+  else { state.answers[id].splice(idx, 1); btn.classList.remove('selected'); }
+  updateSidebar();
+}
+
+function updateSlider(id, val, labels) {
+  if (!state.answers.datasetProfile) state.answers.datasetProfile = {};
+  state.answers.datasetProfile[id] = parseInt(val);
+  document.getElementById('lbl-' + id).textContent = labels[val];
+}
+
+function updateCheck(id, val) {
+  if (!state.answers.datasetProfile) state.answers.datasetProfile = {};
+  state.answers.datasetProfile[id] = val;
+}
+
+function wizardNext() {
+  state.wizardStep++;
+  renderWizardStep(state.wizardStep);
+}
+function wizardBack() {
+  state.wizardStep--;
+  renderWizardStep(state.wizardStep);
+}
+
+function updateStepList(active) {
+  WIZARD_STEPS.forEach((_, i) => {
+    const el = document.getElementById('sl-' + i);
+    el.classList.remove('active', 'done');
+    if (i < active) {
+      el.classList.add('done');
+      el.querySelector('.step-num').textContent = '✓';
+      el.querySelector('.step-num').className = 'step-num done-check';
+    } else if (i === active) {
+      el.classList.add('active');
+      el.querySelector('.step-num').textContent = i + 1;
+      el.querySelector('.step-num').className = 'step-num';
+    }
+  });
+}
+
+function updateSidebar() {
+  const tags = [];
+  if (state.answers.algoType) tags.push(`<span class="summary-tag algo">${state.answers.algoType.replace(/_/g,' ')}</span>`);
+  if (state.answers.taskDetails) tags.push(`<span class="summary-tag">${state.answers.taskDetails.replace(/_/g,' ')}</span>`);
+  const profile = state.answers.datasetProfile || {};
+  const sizes = ['<1K','1K-10K','10K-100K','100K-1M','1M+'];
+  if (profile.dataSize !== undefined) tags.push(`<span class="summary-tag scale">${sizes[profile.dataSize]} rows</span>`);
+  (state.answers.goals || []).slice(0,2).forEach(g => tags.push(`<span class="summary-tag goal">${g}</span>`));
+  if (tags.length) {
+    document.getElementById('sidebarSummary').style.display = 'block';
+    document.getElementById('summaryTags').innerHTML = tags.join('');
+  }
+}
+
+// ============================================================
+// CHECKLIST GENERATION
+// ============================================================
+function generateChecklist() {
+  const sections = buildChecklist(state.answers);
+  state.checklistData = sections;
+  state.checkedItems = {};
+  renderChecklist(sections);
+  showView('checklist');
+}
+
+function renderChecklist(sections) {
+  const algoName = (state.answers.algoType || 'ML').replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
+  let totalItems = 0;
+  sections.forEach(s => {
+    if (s.items) totalItems += s.items.length;
+    if (s.subsections) s.subsections.forEach(sub => totalItems += sub.items.length);
+  });
+
+  let html = `<div class="checklist-header">
+    <div class="checklist-title">
+      <h2>Your <em>${algoName}</em> Checklist</h2>
+      <div class="checklist-meta">
+        <span class="meta-tag">${sections.length} phases</span>
+        <span class="meta-tag">${totalItems} checks</span>
+        ${state.answers.taskDetails ? `<span class="meta-tag">${state.answers.taskDetails.replace(/_/g,' ')}</span>` : ''}
+        ${(state.answers.goals||[]).map(g=>`<span class="meta-tag">${g}</span>`).join('')}
+      </div>
+    </div>
+    <div class="checklist-actions">
+      <button class="btn btn-ghost" onclick="showView('wizard')">← Rebuild</button>
+      <button class="btn btn-primary" onclick="resetChecks()">Reset All</button>
+      <button class="btn btn-green" onclick="downloadPDF()">⬇ Download PDF</button>
+    </div>
+  </div>`;
+
+  html += `<div class="progress-bar-container">
+    <div class="progress-info">
+      <span>Overall Progress</span>
+      <span class="pct" id="progressPct">0%</span>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+  </div>`;
+
+  sections.forEach((sec, si) => {
+    let sectionItemCount = 0;
+    let sectionHtml = '';
+
+    if (sec.subsections) {
+      sec.subsections.forEach((sub, subi) => {
+        sectionHtml += `<div class="subsection-label">${sub.label}</div>`;
+        sub.items.forEach((item, ii) => {
+          const itemId = `${si}-sub${subi}-${ii}`;
+          sectionItemCount++;
+          sectionHtml += renderCheckItem(item, itemId);
+        });
+      });
+    } else if (sec.items) {
+      sec.items.forEach((item, ii) => {
+        const itemId = `${si}-${ii}`;
+        sectionItemCount++;
+        sectionHtml += renderCheckItem(item, itemId);
+      });
+    }
+
+    html += `<div class="section-block">
+      <div class="section-header" onclick="toggleSection(${si})">
+        <span class="section-icon">${sec.icon}</span>
+        <div class="section-title-wrap">
+          <div class="section-num">Phase ${si + 1}</div>
+          <div class="section-name">${sec.title}</div>
+        </div>
+        <span class="section-count">${sectionItemCount} checks</span>
+        <span class="section-arrow" id="arrow-${si}">▼</span>
+      </div>
+      <div class="section-body" id="body-${si}">${sectionHtml}</div>
+    </div>`;
+  });
+
+  document.getElementById('checklistContent').innerHTML = html;
+  updateProgress();
+}
+
+function renderCheckItem(item, itemId) {
+  const tagHtml = item.tag ? `<span class="item-tag tag-${item.tag}">${item.tag}</span>` : '';
+  return `<div class="checklist-item" id="item-${itemId}" onclick="toggleItem('${itemId}')">
+    <div class="item-check" id="check-${itemId}"></div>
+    <div class="item-body">
+      <div class="item-text">${item.text}${tagHtml}</div>
+      ${item.detail ? `<div class="item-detail">${item.detail}</div>` : ''}
+    </div>
+  </div>`;
+}
+
+function toggleItem(id) {
+  state.checkedItems[id] = !state.checkedItems[id];
+  const itemEl = document.getElementById('item-' + id);
+  const checkEl = document.getElementById('check-' + id);
+  if (state.checkedItems[id]) {
+    itemEl.classList.add('checked');
+    checkEl.textContent = '✓';
+  } else {
+    itemEl.classList.remove('checked');
+    checkEl.textContent = '';
+  }
+  updateProgress();
+}
+
+function updateProgress() {
+  const total = Object.keys(state.checkedItems).length + document.querySelectorAll('.checklist-item').length - Object.keys(state.checkedItems).length;
+  const checked = Object.values(state.checkedItems).filter(Boolean).length;
+  const totalItems = document.querySelectorAll('.checklist-item').length;
+  const pct = totalItems === 0 ? 0 : Math.round(checked / totalItems * 100);
+  document.getElementById('progressPct').textContent = pct + '%';
+  document.getElementById('progressFill').style.width = pct + '%';
+}
+
+function resetChecks() {
+  state.checkedItems = {};
+  document.querySelectorAll('.checklist-item').forEach(el => el.classList.remove('checked'));
+  document.querySelectorAll('.item-check').forEach(el => el.textContent = '');
+  updateProgress();
+}
+
+function toggleSection(si) {
+  const body = document.getElementById('body-' + si);
+  const arrow = document.getElementById('arrow-' + si);
+  body.classList.toggle('collapsed');
+  arrow.classList.toggle('open');
+}
+
+// ============================================================
+// PDF GENERATION (client-side)
+// ============================================================
+function downloadPDF() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+  const W = 210, M = 18, contentW = W - M * 2;
+  let y = 0;
+
+  function newPage() {
+    doc.addPage();
+    y = 16;
+    // header stripe
+    doc.setFillColor(13, 13, 13);
+    doc.rect(0, 0, W, 10, 'F');
+    doc.setTextColor(212, 168, 67);
+    doc.setFontSize(7);
+    doc.setFont('helvetica', 'normal');
+    doc.text('ML CHECKLIST PRO — Dataset & Algorithm Best Practices', M, 6.5);
+    doc.setTextColor(180);
+    doc.text(`Page ${doc.internal.getCurrentPageInfo().pageNumber}`, W - M, 6.5, { align: 'right' });
+  }
+
+  function checkY(needed) {
+    if (y + needed > 280) newPage();
+  }
+
+  // COVER PAGE
+  doc.setFillColor(13, 13, 13);
+  doc.rect(0, 0, W, 297, 'F');
+
+  doc.setFillColor(200, 75, 49);
+  doc.rect(0, 60, 6, 60, 'F');
+
+  doc.setTextColor(212, 168, 67);
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'normal');
+  doc.text('ML BEST PRACTICES SYSTEM', M + 4, 72);
+
+  doc.setTextColor(245, 240, 232);
+  doc.setFontSize(32);
+  doc.setFont('helvetica', 'bold');
+  doc.text('Dataset &', M + 4, 95);
+  doc.text('Algorithm', M + 4, 112);
+  doc.setTextColor(212, 168, 67);
+  doc.text('Checklist Pro', M + 4, 129);
+
+  doc.setTextColor(150, 145, 140);
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'normal');
+  const algoName = (state.answers.algoType || 'ML').replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
+  doc.text(`Personalized for: ${algoName}`, M + 4, 150);
+
+  // Profile tags
+  let tagX = M + 4;
+  const tags = [];
+  if (state.answers.algoType) tags.push(state.answers.algoType.replace(/_/g,' '));
+  if (state.answers.taskDetails) tags.push(state.answers.taskDetails.replace(/_/g,' '));
+  (state.answers.goals || []).forEach(g => tags.push(g));
+
+  doc.setFontSize(8);
+  tags.forEach(tag => {
+    doc.setFillColor(30, 30, 30);
+    const tw = doc.getTextWidth(tag) + 8;
+    if (tagX + tw > W - M) { tagX = M + 4; y += 10; }
+    doc.roundedRect(tagX, 160, tw, 7, 1.5, 1.5, 'F');
+    doc.setTextColor(212, 168, 67);
+    doc.text(tag, tagX + 4, 165);
+    tagX += tw + 4;
+  });
+
+  // Total items count
+  let totalItems = 0;
+  if (state.checklistData) state.checklistData.forEach(s => {
+    if (s.items) totalItems += s.items.length;
+    if (s.subsections) s.subsections.forEach(sub => totalItems += sub.items.length);
+  });
+  const checked = Object.values(state.checkedItems).filter(Boolean).length;
+
+  doc.setFillColor(25, 25, 25);
+  doc.roundedRect(M + 4, 185, contentW - 4, 28, 3, 3, 'F');
+  doc.setTextColor(212, 168, 67);
+  doc.setFontSize(22);
+  doc.setFont('helvetica', 'bold');
+  doc.text(`${totalItems}`, M + 22, 200, { align: 'center' });
+  doc.text(`${checked}/${totalItems}`, M + 100, 200, { align: 'center' });
+  doc.setTextColor(120);
+  doc.setFontSize(8);
+  doc.setFont('helvetica', 'normal');
+  doc.text('Total Checks', M + 22, 207, { align: 'center' });
+  doc.text('Completed', M + 100, 207, { align: 'center' });
+
+  doc.setTextColor(60, 60, 60);
+  doc.setFontSize(8);
+  doc.text(`Generated ${new Date().toLocaleDateString('en-US', {year:'numeric',month:'long',day:'numeric'})}`, M + 4, 270);
+
+  // CONTENT PAGES
+  newPage();
+
+  state.checklistData.forEach((sec, si) => {
+    checkY(22);
+
+    // Section header
+    doc.setFillColor(13, 13, 13);
+    doc.rect(M, y, contentW, 12, 'F');
+    doc.setFillColor(200, 75, 49);
+    doc.rect(M, y, 3, 12, 'F');
+    doc.setTextColor(245, 240, 232);
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'bold');
+    doc.text(`${sec.icon}  PHASE ${si + 1}: ${sec.title.toUpperCase()}`, M + 8, y + 7.5);
+    y += 16;
+
+    const renderItems = (items, label) => {
+      if (label) {
+        checkY(10);
+        doc.setFillColor(240, 237, 232);
+        doc.rect(M, y, contentW, 7, 'F');
+        doc.setTextColor(100);
+        doc.setFontSize(7);
+        doc.setFont('helvetica', 'bold');
+        doc.text(label.toUpperCase(), M + 4, y + 4.8);
+        y += 10;
+      }
+
+      items.forEach(item => {
+        const checked = Object.values(state.checkedItems).some((v,i) => v) ? false : false;
+        const isChecked = false; // simplified for PDF
+        const lines = doc.splitTextToSize(item.text, contentW - 18);
+        const detailLines = item.detail ? doc.splitTextToSize(item.detail, contentW - 22) : [];
+        const blockH = lines.length * 5 + detailLines.length * 4 + 6;
+        checkY(blockH);
+
+        // alternating background
+        doc.setFillColor(248, 246, 242);
+        doc.rect(M, y, contentW, blockH, 'F');
+
+        // checkbox
+        doc.setDrawColor(180);
+        doc.setLineWidth(0.3);
+        doc.rect(M + 3, y + 2.5, 5, 5);
+
+        // tag color dot
+        if (item.tag === 'critical') doc.setFillColor(200, 75, 49);
+        else if (item.tag === 'important') doc.setFillColor(212, 168, 67);
+        else doc.setFillColor(42, 107, 94);
+        doc.circle(M + contentW - 4, y + 5, 1.5, 'F');
+
+        doc.setTextColor(13, 13, 13);
+        doc.setFontSize(8.5);
+        doc.setFont('helvetica', 'bold');
+        doc.text(lines, M + 12, y + 6.5);
+
+        if (item.detail) {
+          doc.setTextColor(100);
+          doc.setFontSize(7);
+          doc.setFont('helvetica', 'normal');
+          doc.text(detailLines, M + 14, y + 6.5 + lines.length * 5.2);
+        }
+
+        y += blockH + 1;
+      });
+    };
+
+    if (sec.subsections) {
+      sec.subsections.forEach(sub => renderItems(sub.items, sub.label));
+    } else if (sec.items) {
+      renderItems(sec.items, null);
+    }
+
+    y += 4;
+  });
+
+  // Legend page
+  newPage();
+  checkY(60);
+  doc.setFillColor(248, 246, 242);
+  doc.rect(M, y, contentW, 40, 'F');
+  doc.setTextColor(13);
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'bold');
+  doc.text('LEGEND', M + 4, y + 8);
+  [['critical','#c84b31','Must-do: skipping this significantly risks model quality or validity'],
+   ['important','#d4a843','Should-do: best practice that meaningfully improves outcomes'],
+   ['optional','#2a6b5e','Nice-to-have: situationally valuable, apply based on context']
+  ].forEach(([tag, color, desc], i) => {
+    const r = parseInt(color.slice(1,3),16), g = parseInt(color.slice(3,5),16), b = parseInt(color.slice(5,7),16);
+    doc.setFillColor(r,g,b);
+    doc.circle(M + 8, y + 18 + i*9, 2, 'F');
+    doc.setTextColor(13);
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'bold');
+    doc.text(tag.toUpperCase(), M + 14, y + 20 + i*9);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(80);
+    doc.text(desc, M + 35, y + 20 + i*9);
+  });
+
+  const algoLabel = (state.answers.algoType || 'ML').replace(/_/g,' ');
+  doc.save(`ML_Checklist_${algoLabel.replace(/ /g,'_')}.pdf`);
+}
+
+// ============================================================
+// REFERENCE LIBRARY
+// ============================================================
+function renderReference() {
+  const cards = [
+    {
+      head: { icon: '📏', title: 'Scaling Guide', subtitle: 'When to use which scaler' },
+      items: [
+        'StandardScaler: normally distributed features, linear models, SVMs, neural nets',
+        'MinMaxScaler: bounded output needed [0,1], neural net inputs, KNNs',
+        'RobustScaler: data with significant outliers — uses IQR instead of std dev',
+        'Log1p: right-skewed features or targets — stabilizes variance',
+        'QuantileTransformer: maps to uniform/normal distribution — handles extreme skew',
+        'Tree-based models (RF, XGBoost) are invariant to monotonic transformations'
+      ]
+    },
+    {
+      head: { icon: '🎯', title: 'Metric Selection', subtitle: 'Choose the right evaluation metric' },
+      items: [
+        'Binary classification: AUC-ROC (discrimination), F1 (balanced P/R), MCC (imbalanced)',
+        'Multi-class: Macro F1 (equal weight), Weighted F1 (by support), Kappa',
+        'Regression: RMSE (penalizes large errors), MAE (robust), MAPE (relative), R²',
+        'Clustering: Silhouette (cohesion/separation), Davies-Bouldin (lower=better)',
+        'Recommenders: NDCG@k, MAP@k, Recall@k — always report k-value',
+        'Never use accuracy alone for imbalanced data (>3:1 ratio)'
+      ]
+    },
+    {
+      head: { icon: '🔀', title: 'Cross-Validation', subtitle: 'Choosing the right CV strategy' },
+      items: [
+        'Standard k-fold (k=5 or 10): IID data, sufficient samples per class',
+        'Stratified k-fold: classification with class imbalance — preserves ratios',
+        'TimeSeriesSplit: temporal data — always train on past, test on future',
+        'Group k-fold: when samples have group membership (patient IDs, user IDs)',
+        'Nested CV: hyperparameter tuning — outer loop for test, inner for HP search',
+        'LOOCV: very small datasets (<50 samples) — high variance estimator'
+      ]
+    },
+    {
+      head: { icon: '🛡️', title: 'Regularization', subtitle: 'Overfitting prevention techniques' },
+      items: [
+        'L1 (Lasso): sparse weights, feature selection, C/alpha controls strength',
+        'L2 (Ridge): shrinks weights, handles multicollinearity, never zeroes features',
+        'ElasticNet: blend of L1+L2, l1_ratio controls mix, good default choice',
+        'Dropout (NN): randomly zero activations during training, rate 0.2–0.5',
+        'Early stopping: monitor val loss with patience — prevents over-training',
+        'Data augmentation: artificially expands training set — best regularizer for vision'
+      ]
+    },
+    {
+      head: { icon: '⚠️', title: 'Common Pitfalls', subtitle: 'Mistakes that kill ML projects' },
+      items: [
+        'Data leakage: fitting preprocessors on full dataset — always fit on train only',
+        'Target leakage: including features derived from the label in training',
+        'Temporal leakage: random split on time-series — use temporal split always',
+        'Test set contamination: looking at test set before final evaluation',
+        'Wrong metric: optimizing accuracy on imbalanced data — use F1 or PR-AUC',
+        'Ignoring baselines: complex models should always beat a simple heuristic'
+      ]
+    },
+    {
+      head: { icon: '🧠', title: 'Deep Learning Tips', subtitle: 'Training neural networks right' },
+      items: [
+        'Overfit one batch first — if it can\'t overfit 10 samples, there\'s a bug',
+        'Use He initialization for ReLU, Glorot for tanh/sigmoid activations',
+        'AdamW + cosine LR schedule: the safest default optimizer combination',
+        'Batch size: larger = more stable gradients, smaller = better generalization',
+        'Gradient clipping (max norm 1.0): prevents exploding gradients in RNNs',
+        'Monitor gradient norms per layer — should be O(1), not O(1e-6) or O(1e6)'
+      ]
+    },
+    {
+      head: { icon: '🔍', title: 'EDA Checklist', subtitle: 'Quick EDA reference' },
+      items: [
+        'df.info(), df.describe(), df.shape — first 3 commands always',
+        'df.isnull().sum() / len(df) — missing rate per feature',
+        'df.duplicated().sum() — check for exact duplicate rows',
+        'sns.heatmap(df.corr()) — correlation matrix for numeric features',
+        'df[target].value_counts(normalize=True) — class distribution',
+        'df.hist(bins=50) — distribution of all numeric features at once'
+      ]
+    },
+    {
+      head: { icon: '🚀', title: 'Production Checklist', subtitle: 'Before you go live' },
+      items: [
+        'Package preprocessing + model as single pipeline artifact (no split saves)',
+        'Load test: measure p50, p95, p99 latency under expected QPS',
+        'Set up data drift monitoring — alert when input distributions shift',
+        'A/B test before full rollout — shadow mode or canary deployment',
+        'Write model card: purpose, metrics, limitations, training data snapshot',
+        'Implement prediction logging for future retraining and debugging'
+      ]
+    },
+    {
+      head: { icon: '📊', title: 'Feature Importance', subtitle: 'Methods for understanding your model' },
+      items: [
+        'SHAP values: model-agnostic, consistent, theoretically grounded — best choice',
+        'Permutation importance: shuffles each feature, measures performance drop',
+        'Gini/MDI importance: fast but biased toward high-cardinality features',
+        'LIME: local explanations — good for explaining individual predictions',
+        'Partial Dependence Plots: marginal effect of feature on output',
+        'Always validate importances against domain knowledge — sanity check!'
+      ]
+    },
+    {
+      head: { icon: '🔄', title: 'Transfer Learning', subtitle: 'Getting pretrained models to work' },
+      items: [
+        'Always start with feature extraction (frozen backbone) before fine-tuning',
+        'Use discriminative LRs: early layers ×0.1, later layers ×1, head ×10',
+        'Warmup for 1-2 epochs with frozen backbone to stabilize the head first',
+        'Gradually unfreeze layers from top to bottom during fine-tuning',
+        'Use smaller LR than scratch training: 1e-5 to 5e-5 for BERT, ResNet',
+        'Check source domain similarity — very different domains may not transfer well'
+      ]
+    },
+    {
+      head: { icon: '⭐', title: 'Recommender Systems', subtitle: 'RS-specific best practices' },
+      items: [
+        'Always split temporally — random split creates severe leakage in RS',
+        'Evaluate NDCG@10, Recall@10, HR@10 — report k value always',
+        'Handle cold start: new users (content-based), new items (popularity)',
+        'Monitor popularity bias — naive models over-recommend popular items',
+        'Measure diversity and novelty, not just relevance metrics',
+        'Offline metrics don\'t always predict online A/B test improvements'
+      ]
+    },
+    {
+      head: { icon: '💬', title: 'NLP Best Practices', subtitle: 'Text ML specific guidance' },
+      items: [
+        'TF-IDF + Logistic Regression is a surprisingly strong baseline — always try first',
+        'Use same tokenizer for training and inference — never refit on test data',
+        'Check for near-duplicate texts across train/test — use MinHash or SimHash',
+        'Evaluate on multiple domains/languages if your model will serve them',
+        'Sentence-BERT embeddings > bag-of-words for semantic similarity tasks',
+        'For fine-tuning LLMs: few-shot prompting baseline before gradient updates'
+      ]
+    }
+  ];
+
+  let html = '';
+  cards.forEach(card => {
+    html += `<div class="ref-card">
+      <div class="ref-card-head" style="background: var(--ink); color: var(--paper);">
+        <span class="ref-card-icon">${card.head.icon}</span>
+        <div>
+          <div class="ref-card-title">${card.head.title}</div>
+          <div class="ref-card-subtitle" style="color:#6b6560">${card.head.subtitle}</div>
+        </div>
+      </div>
+      <div class="ref-card-body">
+        ${card.items.map(item => `<div class="ref-item">${item}</div>`).join('')}
+      </div>
+    </div>`;
+  });
+
+  document.getElementById('referenceGrid').innerHTML = html;
+}
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+function showView(name) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('view-' + name).classList.add('active');
+  const tabs = { wizard: 0, checklist: 1, reference: 2 };
+  document.querySelectorAll('.nav-tab')[tabs[name]].classList.add('active');
+}
+
+// ============================================================
+// INIT
+// ============================================================
+renderWizardStep(0);
+renderReference();
+</script>
+</body>
+</html>
