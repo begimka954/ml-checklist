@@ -1,0 +1,1712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IBM ML Course 1 — Exploratory Data Analysis for Machine Learning</title>
+<link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0b0e1a;
+    --surface: #131729;
+    --surface2: #1a2038;
+    --border: #252d4a;
+    --accent: #4f8ef7;
+    --accent2: #7c5cbf;
+    --accent3: #00d4aa;
+    --accent4: #f7934f;
+    --text: #e8ecf8;
+    --text-muted: #8892b0;
+    --text-dim: #4a5578;
+    --code-bg: #0d1117;
+    --correct: #00d4aa;
+    --wrong: #f75f5f;
+    --warn: #f7934f;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Lato', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    font-size: 16px;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    background: linear-gradient(135deg, #0b0e1a 0%, #0f1530 40%, #1a0f30 100%);
+    padding: 80px 24px 60px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(79,142,247,0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-badge {
+    display: inline-block;
+    background: rgba(79,142,247,0.15);
+    border: 1px solid rgba(79,142,247,0.3);
+    color: var(--accent);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    padding: 6px 16px;
+    border-radius: 20px;
+    margin-bottom: 24px;
+  }
+  .hero h1 {
+    font-size: clamp(28px, 5vw, 52px);
+    font-weight: 900;
+    line-height: 1.1;
+    margin-bottom: 16px;
+    letter-spacing: -1px;
+  }
+  .hero h1 span { color: var(--accent); }
+  .hero p {
+    font-size: 18px;
+    color: var(--text-muted);
+    max-width: 600px;
+    margin: 0 auto 36px;
+    font-weight: 300;
+  }
+  .hero-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+  }
+  .pill {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    font-size: 13px;
+    font-weight: 700;
+    padding: 7px 16px;
+    border-radius: 20px;
+  }
+
+  /* ── NAV ── */
+  .sticky-nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(11,14,26,0.95);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  .sticky-nav ul {
+    display: flex;
+    gap: 0;
+    list-style: none;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+  .sticky-nav a {
+    display: block;
+    padding: 16px 18px;
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    transition: color 0.2s;
+    border-bottom: 2px solid transparent;
+  }
+  .sticky-nav a:hover { color: var(--accent); border-bottom-color: var(--accent); }
+
+  /* ── LAYOUT ── */
+  .container { max-width: 1100px; margin: 0 auto; padding: 60px 24px; }
+  .section-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 10px;
+  }
+  .section-title {
+    font-size: clamp(22px, 3vw, 32px);
+    font-weight: 900;
+    margin-bottom: 8px;
+    letter-spacing: -0.5px;
+  }
+  .section-sub {
+    color: var(--text-muted);
+    font-size: 15px;
+    margin-bottom: 40px;
+    font-weight: 300;
+  }
+
+  /* ── CARDS ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px;
+    margin-bottom: 20px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .card:hover { border-color: rgba(79,142,247,0.4); box-shadow: 0 4px 24px rgba(79,142,247,0.08); }
+  .card h3 {
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .card h3 .icon {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px;
+    flex-shrink: 0;
+  }
+  .card p { color: var(--text-muted); font-size: 14px; line-height: 1.6; }
+  .card ul { color: var(--text-muted); font-size: 14px; padding-left: 20px; }
+  .card ul li { margin-bottom: 5px; }
+
+  .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; }
+
+  /* ── TAG ── */
+  .tag {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 3px 10px;
+    border-radius: 4px;
+    margin-bottom: 12px;
+  }
+  .tag-blue { background: rgba(79,142,247,0.15); color: var(--accent); }
+  .tag-purple { background: rgba(124,92,191,0.15); color: #9d7de0; }
+  .tag-green { background: rgba(0,212,170,0.15); color: var(--accent3); }
+  .tag-orange { background: rgba(247,147,79,0.15); color: var(--accent4); }
+  .tag-red { background: rgba(247,95,95,0.15); color: #f75f5f; }
+
+  /* ── CONCEPT BLOCKS ── */
+  .concept-block {
+    background: var(--surface);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    padding: 20px 24px;
+    margin-bottom: 16px;
+  }
+  .concept-block.green { border-left-color: var(--accent3); }
+  .concept-block.orange { border-left-color: var(--accent4); }
+  .concept-block.purple { border-left-color: #9d7de0; }
+  .concept-block.red { border-left-color: #f75f5f; }
+  .concept-block h4 { font-size: 15px; font-weight: 700; margin-bottom: 8px; }
+  .concept-block p { color: var(--text-muted); font-size: 14px; }
+
+  /* ── CALLOUT ── */
+  .callout {
+    display: flex;
+    gap: 16px;
+    background: rgba(79,142,247,0.06);
+    border: 1px solid rgba(79,142,247,0.2);
+    border-radius: var(--radius-sm);
+    padding: 16px 20px;
+    margin: 20px 0;
+  }
+  .callout.warn { background: rgba(247,147,79,0.06); border-color: rgba(247,147,79,0.2); }
+  .callout.success { background: rgba(0,212,170,0.06); border-color: rgba(0,212,170,0.2); }
+  .callout-icon { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+  .callout-body { font-size: 14px; color: var(--text-muted); line-height: 1.6; }
+  .callout-body strong { color: var(--text); }
+
+  /* ── CODE ── */
+  .code-block {
+    background: var(--code-bg);
+    border: 1px solid #21262d;
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin: 20px 0;
+  }
+  .code-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 18px;
+    background: #161b22;
+    border-bottom: 1px solid #21262d;
+  }
+  .code-title {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    color: #58a6ff;
+  }
+  .code-dots { display: flex; gap: 6px; }
+  .code-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .code-dot:nth-child(1) { background: #ff5f57; }
+  .code-dot:nth-child(2) { background: #febc2e; }
+  .code-dot:nth-child(3) { background: #28c840; }
+  .code-block pre {
+    padding: 20px 18px;
+    overflow-x: auto;
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    line-height: 1.7;
+  }
+  .code-block code { color: #e6edf3; }
+  .kw { color: #ff7b72; }
+  .fn { color: #d2a8ff; }
+  .st { color: #a5d6ff; }
+  .cm { color: #8b949e; font-style: italic; }
+  .nm { color: #79c0ff; }
+  .op { color: #ff7b72; }
+  .va { color: #ffa657; }
+
+  /* ── COMPARISON TABLE ── */
+  .table-wrap { overflow-x: auto; margin: 20px 0; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th {
+    background: var(--surface2);
+    color: var(--accent);
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 12px 16px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  td { padding: 12px 16px; border-bottom: 1px solid rgba(37,45,74,0.5); color: var(--text-muted); vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(79,142,247,0.04); }
+  td strong { color: var(--text); }
+
+  /* ── ACCORDION ── */
+  details {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    margin-bottom: 10px;
+    overflow: hidden;
+  }
+  summary {
+    padding: 16px 20px;
+    font-weight: 700;
+    font-size: 15px;
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: background 0.2s;
+  }
+  summary:hover { background: var(--surface2); }
+  summary::after { content: '+'; font-size: 20px; color: var(--accent); font-weight: 300; }
+  details[open] summary::after { content: '−'; }
+  details[open] summary { border-bottom: 1px solid var(--border); }
+  .details-body { padding: 20px; color: var(--text-muted); font-size: 14px; line-height: 1.7; }
+
+  /* ── QUIZ ── */
+  #quiz { background: linear-gradient(180deg, var(--bg) 0%, #0d1030 100%); }
+  .quiz-progress {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+  .progress-bar {
+    flex: 1;
+    height: 4px;
+    background: var(--surface2);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent3));
+    border-radius: 2px;
+    transition: width 0.4s ease;
+  }
+  .quiz-counter { font-size: 13px; color: var(--text-muted); font-weight: 700; white-space: nowrap; }
+
+  .question-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 32px;
+    margin-bottom: 24px;
+    display: none;
+    animation: fadeIn 0.3s ease;
+  }
+  .question-card.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  .q-meta {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  .q-num {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    background: rgba(79,142,247,0.1);
+    padding: 3px 10px;
+    border-radius: 4px;
+  }
+  .q-topic {
+    font-size: 11px;
+    color: var(--text-dim);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .q-text { font-size: 16px; font-weight: 700; margin-bottom: 24px; line-height: 1.5; }
+
+  .options { display: flex; flex-direction: column; gap: 10px; }
+  .option {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 14px 18px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    text-align: left;
+    color: var(--text);
+  }
+  .option:hover:not(.disabled) { border-color: var(--accent); background: rgba(79,142,247,0.08); }
+  .option.correct { border-color: var(--correct); background: rgba(0,212,170,0.1); }
+  .option.wrong { border-color: var(--wrong); background: rgba(247,95,95,0.1); }
+  .option.disabled { cursor: default; }
+  .opt-letter {
+    width: 24px; height: 24px;
+    border-radius: 6px;
+    background: var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    flex-shrink: 0;
+    font-family: 'Space Mono', monospace;
+  }
+  .option.correct .opt-letter { background: var(--correct); color: #000; }
+  .option.wrong .opt-letter { background: var(--wrong); color: #fff; }
+
+  .explanation {
+    margin-top: 16px;
+    padding: 16px;
+    background: rgba(0,212,170,0.06);
+    border: 1px solid rgba(0,212,170,0.2);
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    color: var(--text-muted);
+    display: none;
+    line-height: 1.6;
+  }
+  .explanation strong { color: var(--accent3); }
+  .explanation.show { display: block; }
+
+  .quiz-actions { display: flex; justify-content: flex-end; margin-top: 20px; }
+  .btn {
+    padding: 11px 28px;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    font-weight: 700;
+    font-family: 'Lato', sans-serif;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+    letter-spacing: 0.5px;
+  }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { background: #6ea4ff; transform: translateY(-1px); }
+  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+  .score-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 48px 32px;
+    text-align: center;
+    display: none;
+  }
+  .score-card.show { display: block; animation: fadeIn 0.4s ease; }
+  .score-number {
+    font-size: 72px;
+    font-weight: 900;
+    background: linear-gradient(135deg, var(--accent), var(--accent3));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    line-height: 1;
+    margin: 16px 0;
+  }
+  .score-label { color: var(--text-muted); font-size: 15px; margin-bottom: 24px; }
+  .score-msg { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+  .btn-restart {
+    background: var(--surface2);
+    color: var(--text);
+    border: 1px solid var(--border);
+    margin-top: 24px;
+  }
+  .btn-restart:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* ── FORMULA BLOCKS ── */
+  .formula {
+    background: var(--code-bg);
+    border: 1px solid #21262d;
+    border-radius: var(--radius-sm);
+    padding: 14px 20px;
+    font-family: 'Space Mono', monospace;
+    font-size: 14px;
+    color: #a5d6ff;
+    margin: 12px 0;
+    text-align: center;
+  }
+
+  /* ── BEST PRACTICE CARDS ── */
+  .bp-card {
+    display: flex;
+    gap: 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 18px 20px;
+    margin-bottom: 12px;
+    align-items: flex-start;
+  }
+  .bp-num {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px;
+    font-weight: 900;
+    flex-shrink: 0;
+  }
+  .bp-content h4 { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+  .bp-content p { font-size: 13px; color: var(--text-muted); }
+
+  /* ── DIVIDER ── */
+  .divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border), transparent);
+    margin: 0;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    padding: 32px 24px;
+    text-align: center;
+    color: var(--text-dim);
+    font-size: 13px;
+  }
+  footer span { color: var(--accent); }
+
+  @media (max-width: 600px) {
+    .container { padding: 40px 16px; }
+    .hero { padding: 60px 16px 40px; }
+    .question-card { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-badge">IBM Machine Learning Professional Certificate</div>
+  <h1>Course 1: <span>Exploratory Data Analysis</span><br>for Machine Learning</h1>
+  <p>Everything you need — all terminology, techniques, Python code, and best practices from the full course curriculum.</p>
+  <div class="hero-pills">
+    <span class="pill">📊 EDA</span>
+    <span class="pill">🔧 Feature Engineering</span>
+    <span class="pill">🧹 Data Cleaning</span>
+    <span class="pill">📐 Scaling</span>
+    <span class="pill">🧪 Hypothesis Testing</span>
+    <span class="pill">🐍 Python Code</span>
+    <span class="pill">✅ Quiz</span>
+  </div>
+</section>
+
+<!-- NAV -->
+<nav class="sticky-nav">
+  <ul>
+    <li><a href="#overview">Overview</a></li>
+    <li><a href="#data-retrieval">Data Retrieval</a></li>
+    <li><a href="#cleaning">Data Cleaning</a></li>
+    <li><a href="#feature-eng">Feature Engineering</a></li>
+    <li><a href="#scaling">Scaling</a></li>
+    <li><a href="#outliers">Outliers</a></li>
+    <li><a href="#hypothesis">Hypothesis Testing</a></li>
+    <li><a href="#best-practices">Best Practices</a></li>
+    <li><a href="#quiz">Quiz</a></li>
+  </ul>
+</nav>
+
+<!-- OVERVIEW -->
+<section id="overview">
+<div class="container">
+  <div class="section-label">Module 0</div>
+  <h2 class="section-title">What This Course Is About</h2>
+  <p class="section-sub">Before you build a model, you have to understand, clean, and prepare your data. Garbage in = garbage out.</p>
+
+  <div class="grid-3">
+    <div class="card">
+      <h3><span class="icon" style="background:rgba(79,142,247,0.15)">📥</span> Data Retrieval</h3>
+      <p>SQL, NoSQL, APIs, Cloud platforms. Getting data from the right source in the right format.</p>
+    </div>
+    <div class="card">
+      <h3><span class="icon" style="background:rgba(0,212,170,0.15)">🧹</span> Data Cleaning</h3>
+      <p>Handling missing values, duplicates, incorrect types, and formatting inconsistencies.</p>
+    </div>
+    <div class="card">
+      <h3><span class="icon" style="background:rgba(124,92,191,0.15)">🔧</span> Feature Engineering</h3>
+      <p>Creating, transforming, and selecting features to make your model smarter.</p>
+    </div>
+    <div class="card">
+      <h3><span class="icon" style="background:rgba(247,147,79,0.15)">📐</span> Feature Scaling</h3>
+      <p>StandardScaler, MinMaxScaler — ensuring no feature dominates by magnitude alone.</p>
+    </div>
+    <div class="card">
+      <h3><span class="icon" style="background:rgba(247,95,95,0.15)">🎯</span> Outlier Detection</h3>
+      <p>IQR method, Z-score, box plots — finding and deciding what to do with anomalies.</p>
+    </div>
+    <div class="card">
+      <h3><span class="icon" style="background:rgba(79,142,247,0.15)">🧪</span> Hypothesis Testing</h3>
+      <p>T-tests, chi-square, ANOVA — statistically validating your assumptions about the data.</p>
+    </div>
+  </div>
+</div>
+</section>
+
+<div class="divider"></div>
+
+<!-- DATA RETRIEVAL -->
+<section id="data-retrieval">
+<div class="container">
+  <div class="section-label">Module 1</div>
+  <h2 class="section-title">Data Retrieval</h2>
+  <p class="section-sub">Getting data from SQL, NoSQL, REST APIs, and cloud sources.</p>
+
+  <div class="grid-2">
+    <div class="concept-block">
+      <span class="tag tag-blue">SQL</span>
+      <h4>Relational Databases</h4>
+      <p>Structured data in tables with defined schemas. Use <code>pandas.read_sql()</code> or <code>sqlalchemy</code>. Best for structured, transactional data.</p>
+    </div>
+    <div class="concept-block green">
+      <span class="tag tag-green">NoSQL</span>
+      <h4>Non-Relational Databases</h4>
+      <p>MongoDB, Cassandra, DynamoDB. Flexible schemas, JSON-like documents. Use <code>pymongo</code> for MongoDB. Best for unstructured or semi-structured data.</p>
+    </div>
+    <div class="concept-block purple">
+      <span class="tag tag-purple">API</span>
+      <h4>REST APIs</h4>
+      <p>HTTP requests to web endpoints. Use <code>requests</code> library. Response is typically JSON. Handle pagination, rate limits, and authentication (API keys, OAuth).</p>
+    </div>
+    <div class="concept-block orange">
+      <span class="tag tag-orange">Cloud</span>
+      <h4>Cloud Storage</h4>
+      <p>AWS S3, IBM Cloud Object Storage, Google Cloud Storage. Use <code>boto3</code> for S3. Data is often in CSV, Parquet, or JSON format.</p>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+      <span class="code-title">data_retrieval.py</span>
+    </div>
+    <pre><code><span class="cm"># ── SQL retrieval ──────────────────────────────────────────</span>
+<span class="kw">import</span> pandas <span class="kw">as</span> pd
+<span class="kw">from</span> sqlalchemy <span class="kw">import</span> <span class="fn">create_engine</span>
+
+engine = <span class="fn">create_engine</span>(<span class="st">'postgresql://user:pass@host/dbname'</span>)
+df = pd.<span class="fn">read_sql</span>(<span class="st">"SELECT * FROM customers WHERE active = 1"</span>, engine)
+
+<span class="cm"># ── NoSQL / MongoDB ────────────────────────────────────────</span>
+<span class="kw">from</span> pymongo <span class="kw">import</span> MongoClient
+client = <span class="fn">MongoClient</span>(<span class="st">'mongodb://localhost:27017/'</span>)
+collection = client[<span class="st">'mydb'</span>][<span class="st">'customers'</span>]
+df = pd.<span class="fn">DataFrame</span>(<span class="fn">list</span>(collection.<span class="fn">find</span>()))
+
+<span class="cm"># ── REST API with pagination ───────────────────────────────</span>
+<span class="kw">import</span> requests
+
+all_data = []
+page = <span class="nm">1</span>
+<span class="kw">while</span> <span class="nm">True</span>:
+    resp = requests.<span class="fn">get</span>(<span class="st">f'https://api.example.com/data?page=</span><span class="va">{page}</span><span class="st">'</span>,
+                        headers={<span class="st">'Authorization'</span>: <span class="st">'Bearer TOKEN'</span>})
+    data = resp.<span class="fn">json</span>()
+    <span class="kw">if not</span> data[<span class="st">'results'</span>]: <span class="kw">break</span>
+    all_data.<span class="fn">extend</span>(data[<span class="st">'results'</span>])
+    page += <span class="nm">1</span>
+df = pd.<span class="fn">DataFrame</span>(all_data)
+
+<span class="cm"># ── AWS S3 ─────────────────────────────────────────────────</span>
+<span class="kw">import</span> boto3
+s3 = boto3.<span class="fn">client</span>(<span class="st">'s3'</span>)
+obj = s3.<span class="fn">get_object</span>(Bucket=<span class="st">'my-bucket'</span>, Key=<span class="st">'data/customers.csv'</span>)
+df = pd.<span class="fn">read_csv</span>(obj[<span class="st">'Body'</span>])</code></pre>
+  </div>
+</div>
+</section>
+
+<div class="divider"></div>
+
+<!-- DATA CLEANING -->
+<section id="cleaning">
+<div class="container">
+  <div class="section-label">Module 2</div>
+  <h2 class="section-title">Data Cleaning</h2>
+  <p class="section-sub">The most time-consuming step. Real-world data is messy — your job is to make it model-ready.</p>
+
+  <div class="grid-2">
+    <div>
+      <h3 style="font-size:16px; font-weight:700; margin-bottom:16px;">Missing Value Strategies</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Strategy</th><th>When to Use</th><th>Risk</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Drop rows</strong></td><td>Few missing, random pattern</td><td>Data loss</td></tr>
+            <tr><td><strong>Mean imputation</strong></td><td>Numerical, symmetric distribution</td><td>Reduces variance</td></tr>
+            <tr><td><strong>Median imputation</strong></td><td>Numerical, skewed / outliers present</td><td>Safer than mean</td></tr>
+            <tr><td><strong>Mode imputation</strong></td><td>Categorical features</td><td>Creates bias if mode dominates</td></tr>
+            <tr><td><strong>KNN imputation</strong></td><td>Complex patterns, enough data</td><td>Computationally expensive</td></tr>
+            <tr><td><strong>Indicator flag</strong></td><td>Missingness is informative</td><td>Adds dimensionality</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div>
+      <h3 style="font-size:16px; font-weight:700; margin-bottom:16px;">Data Type Issues</h3>
+      <div class="concept-block">
+        <h4>Common Type Problems</h4>
+        <ul style="color:var(--text-muted); font-size:14px; padding-left:18px;">
+          <li>Numbers stored as strings → <code>pd.to_numeric()</code></li>
+          <li>Dates as objects → <code>pd.to_datetime()</code></li>
+          <li>Boolean stored as 0/1 integers</li>
+          <li>Categorical as generic object dtype</li>
+          <li>Mixed types in a column</li>
+        </ul>
+      </div>
+      <div class="concept-block green">
+        <h4>MCAR / MAR / MNAR</h4>
+        <p><strong>MCAR</strong> — Missing Completely At Random (safe to drop). <strong>MAR</strong> — Missing At Random (impute). <strong>MNAR</strong> — Missing Not At Random (create indicator flag — missingness carries signal).</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+      <span class="code-title">data_cleaning.py</span>
+    </div>
+    <pre><code><span class="kw">import</span> pandas <span class="kw">as</span> pd
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+<span class="kw">from</span> sklearn.impute <span class="kw">import</span> SimpleImputer, KNNImputer
+
+<span class="cm"># ── Inspect missing values ─────────────────────────────────</span>
+<span class="fn">print</span>(df.<span class="fn">isnull</span>().<span class="fn">sum</span>())
+<span class="fn">print</span>(df.<span class="fn">isnull</span>().<span class="fn">mean</span>() * <span class="nm">100</span>)  <span class="cm"># % missing per column</span>
+
+<span class="cm"># ── Drop rows with >50% missing ────────────────────────────</span>
+df = df.<span class="fn">dropna</span>(thresh=<span class="fn">int</span>(df.<span class="fn">shape</span>[<span class="nm">1</span>] * <span class="nm">0.5</span>))
+
+<span class="cm"># ── Mean/Median/Mode imputation ────────────────────────────</span>
+num_imputer = <span class="fn">SimpleImputer</span>(strategy=<span class="st">'median'</span>)
+cat_imputer = <span class="fn">SimpleImputer</span>(strategy=<span class="st">'most_frequent'</span>)
+
+df[num_cols] = num_imputer.<span class="fn">fit_transform</span>(df[num_cols])
+df[cat_cols] = cat_imputer.<span class="fn">fit_transform</span>(df[cat_cols])
+
+<span class="cm"># ── KNN Imputation ─────────────────────────────────────────</span>
+knn = <span class="fn">KNNImputer</span>(n_neighbors=<span class="nm">5</span>)
+df_imputed = pd.<span class="fn">DataFrame</span>(knn.<span class="fn">fit_transform</span>(df), columns=df.columns)
+
+<span class="cm"># ── Create missingness indicator (MNAR case) ───────────────</span>
+df[<span class="st">'salary_missing'</span>] = df[<span class="st">'salary'</span>].<span class="fn">isnull</span>().<span class="fn">astype</span>(<span class="fn">int</span>)
+
+<span class="cm"># ── Fix dtypes ─────────────────────────────────────────────</span>
+df[<span class="st">'price'</span>]    = pd.<span class="fn">to_numeric</span>(df[<span class="st">'price'</span>], errors=<span class="st">'coerce'</span>)
+df[<span class="st">'date'</span>]     = pd.<span class="fn">to_datetime</span>(df[<span class="st">'date'</span>], errors=<span class="st">'coerce'</span>)
+df[<span class="st">'category'</span>] = df[<span class="st">'category'</span>].<span class="fn">astype</span>(<span class="st">'category'</span>)
+
+<span class="cm"># ── Remove duplicates ──────────────────────────────────────</span>
+df = df.<span class="fn">drop_duplicates</span>()
+<span class="fn">print</span>(<span class="st">f"Shape after deduplication: </span><span class="va">{df.shape}</span><span class="st">"</span>)</code></pre>
+  </div>
+
+  <div class="callout warn">
+    <span class="callout-icon">⚠️</span>
+    <div class="callout-body"><strong>Critical Practice:</strong> Always fit imputers on training data only, then transform both train and test. Fitting on the full dataset leaks information about the test set — this is <strong>data leakage</strong>.</div>
+  </div>
+</div>
+</section>
+
+<div class="divider"></div>
+
+<!-- FEATURE ENGINEERING -->
+<section id="feature-eng">
+<div class="container">
+  <div class="section-label">Module 3</div>
+  <h2 class="section-title">Feature Engineering & Selection</h2>
+  <p class="section-sub">Transform raw data into representations that help models learn faster and better.</p>
+
+  <h3 style="font-size:17px; font-weight:700; margin-bottom:20px;">Encoding Categorical Features</h3>
+  <div class="grid-2">
+    <div class="concept-block">
+      <span class="tag tag-blue">Nominal</span>
+      <h4>One-Hot Encoding</h4>
+      <p>For unordered categories (City, Color, Country). Creates binary columns per category. Use <code>drop='first'</code> to avoid the dummy variable trap (multicollinearity).</p>
+      <div class="formula">pd.get_dummies(df['city'], drop_first=True)</div>
+    </div>
+    <div class="concept-block orange">
+      <span class="tag tag-orange">Ordinal</span>
+      <h4>Ordinal Encoding</h4>
+      <p>For ordered categories (Low → Medium → High). Assign meaningful integer ranks. Do NOT use OrdinalEncoder for nominal features — it implies false order.</p>
+      <div class="formula">mapping = {'Low':0, 'Medium':1, 'High':2}</div>
+    </div>
+    <div class="concept-block green">
+      <span class="tag tag-green">High Cardinality</span>
+      <h4>Target Encoding</h4>
+      <p>Replace each category value with the mean target value for that category. Useful when you have many categories (hundreds of cities). Risk: leakage — always encode within cross-validation folds.</p>
+    </div>
+    <div class="concept-block purple">
+      <span class="tag tag-purple">Binary</span>
+      <h4>Label Encoding</h4>
+      <p>Only appropriate for <strong>binary</strong> features (Yes/No → 0/1) or when used as target variable encoding. Never for multi-class nominal features.</p>
+    </div>
+  </div>
+
+  <h3 style="font-size:17px; font-weight:700; margin:32px 0 20px;">Numerical Transformations</h3>
+  <div class="grid-2">
+    <div class="concept-block">
+      <span class="tag tag-blue">Skewness</span>
+      <h4>Log Transformation</h4>
+      <p>Apply <code>np.log1p(x)</code> to right-skewed features (salary, price, revenue). Makes the distribution more normal, improving linear model performance. Use log1p (log+1) to handle zeros safely.</p>
+    </div>
+    <div class="concept-block green">
+      <span class="tag tag-green">Non-linear</span>
+      <h4>Polynomial Features</h4>
+      <p>Create interaction terms and power features (x², x³, x₁×x₂). Allows linear models to capture non-linear relationships. Use <code>PolynomialFeatures</code> from sklearn. Watch for overfitting with high degree.</p>
+    </div>
+    <div class="concept-block orange">
+      <span class="tag tag-orange">Aggregation</span>
+      <h4>Feature Aggregation</h4>
+      <p>Combine related features into a single meaningful one. Example: siblings + parents = family_size. Requires domain knowledge — this is where expertise beats automation.</p>
+    </div>
+    <div class="concept-block purple">
+      <span class="tag tag-purple">Temporal</span>
+      <h4>Date Decomposition</h4>
+      <p>Extract year, month, day, hour, day_of_week, is_weekend from datetime features. These granular components carry more signal than a raw timestamp.</p>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+      <span class="code-title">feature_engineering.py</span>
+    </div>
+    <pre><code><span class="kw">import</span> pandas <span class="kw">as</span> pd
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+<span class="kw">from</span> sklearn.preprocessing <span class="kw">import</span> PolynomialFeatures, LabelEncoder
+
+<span class="cm"># ── One-Hot Encoding ───────────────────────────────────────</span>
+df = pd.<span class="fn">get_dummies</span>(df, columns=[<span class="st">'city'</span>, <span class="st">'country'</span>], drop_first=<span class="nm">True</span>)
+<span class="cm"># OR with sklearn (handles unseen categories in test set)</span>
+<span class="kw">from</span> sklearn.preprocessing <span class="kw">import</span> OneHotEncoder
+ohe = <span class="fn">OneHotEncoder</span>(drop=<span class="st">'first'</span>, sparse_output=<span class="nm">False</span>, handle_unknown=<span class="st">'ignore'</span>)
+encoded = ohe.<span class="fn">fit_transform</span>(df[[<span class="st">'city'</span>]])
+
+<span class="cm"># ── Ordinal Encoding ───────────────────────────────────────</span>
+<span class="kw">from</span> sklearn.preprocessing <span class="kw">import</span> OrdinalEncoder
+oe = <span class="fn">OrdinalEncoder</span>(categories=[[<span class="st">'Low'</span>, <span class="st">'Medium'</span>, <span class="st">'High'</span>]])
+df[[<span class="st">'risk_level'</span>]] = oe.<span class="fn">fit_transform</span>(df[[<span class="st">'risk_level'</span>]])
+
+<span class="cm"># ── Log Transform (handle zeros with log1p) ───────────────</span>
+df[<span class="st">'salary_log'</span>] = np.<span class="fn">log1p</span>(df[<span class="st">'salary'</span>])
+
+<span class="cm"># Check skew before and after</span>
+<span class="fn">print</span>(<span class="st">f"Before: </span><span class="va">{df['salary'].skew():.2f}</span><span class="st">, After: </span><span class="va">{df['salary_log'].skew():.2f}</span><span class="st">"</span>)
+
+<span class="cm"># ── Polynomial Features ────────────────────────────────────</span>
+poly = <span class="fn">PolynomialFeatures</span>(degree=<span class="nm">2</span>, include_bias=<span class="nm">False</span>)
+X_poly = poly.<span class="fn">fit_transform</span>(X)
+
+<span class="cm"># ── Feature Aggregation (Titanic example) ─────────────────</span>
+df[<span class="st">'family_size'</span>] = df[<span class="st">'sibsp'</span>] + df[<span class="st">'parch'</span>] + <span class="nm">1</span>
+df[<span class="st">'is_alone'</span>]    = (df[<span class="st">'family_size'</span>] == <span class="nm">1</span>).<span class="fn">astype</span>(<span class="fn">int</span>)
+
+<span class="cm"># ── Date Feature Decomposition ────────────────────────────</span>
+df[<span class="st">'date'</span>] = pd.<span class="fn">to_datetime</span>(df[<span class="st">'date'</span>])
+df[<span class="st">'year'</span>]        = df[<span class="st">'date'</span>].dt.year
+df[<span class="st">'month'</span>]       = df[<span class="st">'date'</span>].dt.month
+df[<span class="st">'day_of_week'</span>] = df[<span class="st">'date'</span>].dt.dayofweek
+df[<span class="st">'is_weekend'</span>]  = (df[<span class="st">'day_of_week'</span>] >= <span class="nm">5</span>).<span class="fn">astype</span>(<span class="fn">int</span>)</code></pre>
+  </div>
+
+  <h3 style="font-size:17px; font-weight:700; margin:32px 0 20px;">Feature Selection</h3>
+  <div class="grid-2">
+    <div class="card">
+      <span class="tag tag-blue">Filter Methods</span>
+      <h3>Correlation-Based Selection</h3>
+      <p>Remove features highly correlated with each other (multicollinearity). Keep features correlated with the target. Threshold: <code>|r| > 0.9</code> between features = remove one.</p>
+    </div>
+    <div class="card">
+      <span class="tag tag-orange">Embedded Methods</span>
+      <h3>Lasso (L1) Regularization</h3>
+      <p>Lasso adds an L1 penalty that drives some coefficients to exactly zero — effectively removing features. More aggressive selector than Ridge. Tuned via the <code>alpha</code> hyperparameter.</p>
+    </div>
+    <div class="card">
+      <span class="tag tag-green">Wrapper Methods</span>
+      <h3>Recursive Feature Elimination</h3>
+      <p>RFE trains the model, ranks features by importance, prunes the least important, and repeats. Computationally expensive but finds optimal subsets. Use <code>RFECV</code> to auto-select the best count.</p>
+    </div>
+    <div class="card">
+      <span class="tag tag-purple">Statistical</span>
+      <h3>Chi-Square / ANOVA F-test</h3>
+      <p>Chi-square tests association between <strong>categorical</strong> features and target. ANOVA F-test for numerical features vs categorical target. Both in <code>sklearn.feature_selection</code>.</p>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+      <span class="code-title">feature_selection.py</span>
+    </div>
+    <pre><code><span class="kw">import</span> seaborn <span class="kw">as</span> sns
+<span class="kw">import</span> matplotlib.pyplot <span class="kw">as</span> plt
+<span class="kw">from</span> sklearn.feature_selection <span class="kw">import</span> RFE, RFECV, SelectKBest, chi2, f_classif
+<span class="kw">from</span> sklearn.linear_model <span class="kw">import</span> Lasso, LogisticRegression
+
+<span class="cm"># ── Correlation heatmap ────────────────────────────────────</span>
+plt.<span class="fn">figure</span>(figsize=(<span class="nm">10</span>, <span class="nm">8</span>))
+sns.<span class="fn">heatmap</span>(df.<span class="fn">corr</span>(), annot=<span class="nm">True</span>, fmt=<span class="st">'.2f'</span>, cmap=<span class="st">'coolwarm'</span>)
+plt.<span class="fn">show</span>()
+
+<span class="cm"># Remove highly correlated features</span>
+corr_matrix = df.<span class="fn">corr</span>().<span class="fn">abs</span>()
+upper = corr_matrix.<span class="fn">where</span>(np.<span class="fn">triu</span>(np.<span class="fn">ones</span>(corr_matrix.<span class="fn">shape</span>), k=<span class="nm">1</span>).<span class="fn">astype</span>(<span class="fn">bool</span>))
+to_drop = [col <span class="kw">for</span> col <span class="kw">in</span> upper.columns <span class="kw">if</span> <span class="fn">any</span>(upper[col] > <span class="nm">0.9</span>)]
+df = df.<span class="fn">drop</span>(columns=to_drop)
+
+<span class="cm"># ── Lasso Feature Selection ────────────────────────────────</span>
+lasso = <span class="fn">Lasso</span>(alpha=<span class="nm">0.01</span>)
+lasso.<span class="fn">fit</span>(X_train, y_train)
+selected = pd.<span class="fn">Series</span>(lasso.coef_, index=X.columns)
+important_features = selected[selected != <span class="nm">0</span>].<span class="fn">index</span>.<span class="fn">tolist</span>()
+
+<span class="cm"># ── RFECV (auto-selects best number of features) ──────────</span>
+rfe = <span class="fn">RFECV</span>(<span class="fn">LogisticRegression</span>(), cv=<span class="nm">5</span>, scoring=<span class="st">'roc_auc'</span>)
+rfe.<span class="fn">fit</span>(X_train, y_train)
+<span class="fn">print</span>(<span class="st">f"Optimal # features: </span><span class="va">{rfe.n_features_}</span><span class="st">"</span>)
+
+<span class="cm"># ── SelectKBest with chi2 ──────────────────────────────────</span>
+selector = <span class="fn">SelectKBest</span>(chi2, k=<span class="nm">10</span>)
+X_selected = selector.<span class="fn">fit_transform</span>(X_train, y_train)
+chosen = X.<span class="fn">columns</span>[selector.<span class="fn">get_support</span>()].<span class="fn">tolist</span>()</code></pre>
+  </div>
+</div>
+</section>
+
+<div class="divider"></div>
+
+<!-- SCALING -->
+<section id="scaling">
+<div class="container">
+  <div class="section-label">Module 4</div>
+  <h2 class="section-title">Feature Scaling</h2>
+  <p class="section-sub">Models are sensitive to the magnitude of features. Scaling ensures fair comparison and faster convergence.</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Scaler</th><th>Formula</th><th>Range</th><th>Use When</th><th>Weakness</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>StandardScaler</strong></td>
+          <td><code>(x - μ) / σ</code></td>
+          <td>No fixed range</td>
+          <td>Outliers present; Linear models, SVM, PCA, neural networks</td>
+          <td>Not bounded — outliers still exist</td>
+        </tr>
+        <tr>
+          <td><strong>MinMaxScaler</strong></td>
+          <td><code>(x - min) / (max - min)</code></td>
+          <td>[0, 1]</td>
+          <td>No outliers; KNN, neural networks needing bounded range</td>
+          <td>Extremely sensitive to outliers</td>
+        </tr>
+        <tr>
+          <td><strong>RobustScaler</strong></td>
+          <td><code>(x - Q2) / IQR</code></td>
+          <td>No fixed range</td>
+          <td>Data with significant outliers</td>
+          <td>Less common, not always available</td>
+        </tr>
+        <tr>
+          <td><strong>MaxAbsScaler</strong></td>
+          <td><code>x / max(|x|)</code></td>
+          <td>[-1, 1]</td>
+          <td>Sparse data, already centered at 0</td>
+          <td>Sensitive to max outliers</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout warn">
+    <span class="callout-icon">🚨</span>
+    <div class="callout-body">
+      <strong>The Golden Rule — Never Fit on Test Data:</strong> Always <code>fit_transform</code> on training data, then only <code>transform</code> on test data. Fitting the scaler on the full dataset leaks test set statistics (mean, std, min, max) into the training process — this is data leakage and will inflate your performance metrics.
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+      <span class="code-title">scaling.py</span>
+    </div>
+    <pre><code><span class="kw">from</span> sklearn.preprocessing <span class="kw">import</span> StandardScaler, MinMaxScaler, RobustScaler
+<span class="kw">from</span> sklearn.model_selection <span class="kw">import</span> train_test_split
+
+<span class="cm"># ── ALWAYS split first, then scale ────────────────────────</span>
+X_train, X_test, y_train, y_test = <span class="fn">train_test_split</span>(
+    X, y, test_size=<span class="nm">0.2</span>, random_state=<span class="nm">42</span>
+)
+
+<span class="cm"># ── StandardScaler ─────────────────────────────────────────</span>
+scaler = <span class="fn">StandardScaler</span>()
+X_train_scaled = scaler.<span class="fn">fit_transform</span>(X_train)  <span class="cm"># fit + transform</span>
+X_test_scaled  = scaler.<span class="fn">transform</span>(X_test)        <span class="cm"># transform ONLY</span>
+
+<span class="cm"># ── MinMaxScaler ───────────────────────────────────────────</span>
+mm_scaler = <span class="fn">MinMaxScaler</span>()
+X_train_mm = mm_scaler.<span class="fn">fit_transform</span>(X_train)
+X_test_mm  = mm_scaler.<span class="fn">transform</span>(X_test)
+
+<span class="cm"># ── RobustScaler (best when outliers are present) ─────────</span>
+rob = <span class="fn">RobustScaler</span>()
+X_train_rob = rob.<span class="fn">fit_transform</span>(X_train)
+
+<span class="cm"># ── Pipeline (best practice — prevents leakage) ───────────</span>
+<span class="kw">from</span> sklearn.pipeline <span class="kw">import</span> Pipeline
+<span class="kw">from</span> sklearn.linear_model <span class="kw">import</span> LogisticRegression
+
+pipe = <span class="fn">Pipeline</span>([
+    (<span class="st">'scaler'</span>, <span class="fn">StandardScaler</span>()),
+    (<span class="st">'model'</span>,  <span class="fn">LogisticRegression</span>())
+])
+pipe.<span class="fn">fit</span>(X_train, y_train)   <span class="cm"># scaler fitted only on train</span>
+pipe.<span class="fn">score</span>(X_test, y_test)   <span class="cm"># test transformed with train stats</span></code></pre>
+  </div>
+</div>
+</section>
+
+<div class="divider"></div>
+
+<!-- OUTLIERS -->
+<section id="outliers">
+<div class="container">
+  <div class="section-label">Module 5</div>
+  <h2 class="section-title">Outlier Detection & Treatment</h2>
+  <p class="section-sub">Outliers can distort statistics, mislead models, or represent the most important signal in your data.</p>
+
+  <div class="grid-2">
+    <div>
+      <h3 style="font-size:16px;font-weight:700;margin-bottom:16px;">Detection Methods</h3>
+      <div class="concept-block">
+        <span class="tag tag-blue">IQR Method</span>
+        <h4>Interquartile Range</h4>
+        <p>Most robust method. Outlier = value below Q1 − 1.5×IQR or above Q3 + 1.5×IQR. Visualized perfectly with a <strong>box plot</strong>. Not sensitive to extreme values itself.</p>
+        <div class="formula">IQR = Q3 − Q1 &nbsp;|&nbsp; bounds = [Q1 − 1.5×IQR, Q3 + 1.5×IQR]</div>
+      </div>
+      <div class="concept-block orange">
+        <span class="tag tag-orange">Z-Score</span>
+        <h4>Standard Deviations from Mean</h4>
+        <p>Outlier if |z| > 3. Assumes <strong>normal distribution</strong>. Less robust than IQR because mean and std are themselves affected by outliers. Suitable for Gaussian features only.</p>
+        <div class="formula">z = (x − μ) / σ &nbsp;→&nbsp; outlier if |z| > 3</div>
+      </div>
+      <div class="concept-block purple">
+        <span class="tag tag-purple">Isolation Forest</span>
+        <h4>ML-Based Detection</h4>
+        <p>Tree-based algorithm. Outliers are isolated faster (require fewer splits). Best for <strong>high-dimensional data</strong> where univariate methods miss multivariate outliers.</p>
+      </div>
+    </div>
+    <div>
+      <h3 style="font-size:16px;font-weight:700;margin-bottom:16px;">Treatment Strategies</h3>
+      <div class="concept-block green">
+        <h4>✅ Keep Outliers</h4>
+        <ul style="color:var(--text-muted);font-size:14px;padding-left:18px;">
+          <li><strong>Fraud detection</strong> — the outlier IS the signal</li>
+          <li><strong>Medical data</strong> — abnormal readings are critical</li>
+          <li><strong>Network security</strong> — anomalous traffic = attack</li>
+          <li>Outliers verified as genuine (not measurement error)</li>
+        </ul>
+      </div>
+      <div class="concept-block red">
+        <h4>🗑️ Remove / Cap Outliers</h4>
+        <ul style="color:var(--text-muted);font-size:14px;padding-left:18px;">
+          <li>Confirmed data entry errors</li>
+          <li>Measurement instrument failures</li>
+          <li>Business rules violations (age = -5, salary = 0)</li>
+        </ul>
+      </div>
+      <div class="concept-block orange">
+        <h4>📐 Winsorization / Capping</h4>
+        <p>Cap extreme values at a percentile boundary (e.g., 1st–99th percentile). Preserves the data point but limits its influence. Good compromise when outliers may be real but extreme.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+      <span class="code-title">outlier_detection.py</span>
+    </div>
+    <pre><code><span class="kw">import</span> numpy <span class="kw">as</span> np
+<span class="kw">import</span> pandas <span class="kw">as</span> pd
+<span class="kw">import</span> matplotlib.pyplot <span class="kw">as</span> plt
+<span class="kw">import</span> seaborn <span class="kw">as</span> sns
+<span class="kw">from</span> sklearn.ensemble <span class="kw">import</span> IsolationForest
+<span class="kw">from</span> scipy <span class="kw">import</span> stats
+
+<span class="cm"># ── IQR Method ─────────────────────────────────────────────</span>
+Q1 = df[<span class="st">'salary'</span>].<span class="fn">quantile</span>(<span class="nm">0.25</span>)
+Q3 = df[<span class="st">'salary'</span>].<span class="fn">quantile</span>(<span class="nm">0.75</span>)
+IQR = Q3 - Q1
+lower, upper = Q1 - <span class="nm">1.5</span> * IQR, Q3 + <span class="nm">1.5</span> * IQR
+
+outliers   = df[(df[<span class="st">'salary'</span>] < lower) | (df[<span class="st">'salary'</span>] > upper)]
+df_clean   = df[(df[<span class="st">'salary'</span>] >= lower) & (df[<span class="st">'salary'</span>] <= upper)]
+<span class="fn">print</span>(<span class="st">f"Outliers found: </span><span class="va">{len(outliers)}</span><span class="st">"</span>)
+
+<span class="cm"># ── Boxplot Visualization ─────────────────────────────────</span>
+fig, axes = plt.<span class="fn">subplots</span>(<span class="nm">1</span>, <span class="nm">2</span>, figsize=(<span class="nm">12</span>, <span class="nm">4</span>))
+df[<span class="st">'salary'</span>].<span class="fn">plot</span>(kind=<span class="st">'box'</span>, ax=axes[<span class="nm">0</span>], title=<span class="st">'Before'</span>)
+df_clean[<span class="st">'salary'</span>].<span class="fn">plot</span>(kind=<span class="st">'box'</span>, ax=axes[<span class="nm">1</span>], title=<span class="st">'After IQR'</span>)
+
+<span class="cm"># ── Z-Score Method ─────────────────────────────────────────</span>
+z_scores = np.<span class="fn">abs</span>(stats.<span class="fn">zscore</span>(df.<span class="fn">select_dtypes</span>(include=[np.number])))
+df_no_outliers = df[(z_scores < <span class="nm">3</span>).<span class="fn">all</span>(axis=<span class="nm">1</span>)]
+
+<span class="cm"># ── Winsorization (cap at 1st and 99th percentile) ────────</span>
+lower_p = df[<span class="st">'salary'</span>].<span class="fn">quantile</span>(<span class="nm">0.01</span>)
+upper_p = df[<span class="st">'salary'</span>].<span class="fn">quantile</span>(<span class="nm">0.99</span>)
+df[<span class="st">'salary_capped'</span>] = df[<span class="st">'salary'</span>].<span class="fn">clip</span>(lower_p, upper_p)
+
+<span class="cm"># ── Isolation Forest (multivariate) ──────────────────────</span>
+iso = <span class="fn">IsolationForest</span>(contamination=<span class="nm">0.05</span>, random_state=<span class="nm">42</span>)
+df[<span class="st">'is_outlier'</span>] = iso.<span class="fn">fit_predict</span>(X)  <span class="cm"># -1 = outlier, 1 = normal</span>
+df_clean = df[df[<span class="st">'is_outlier'</span>] == <span class="nm">1</span>]</code></pre>
+  </div>
+</div>
+</section>
+
+<div class="divider"></div>
+
+<!-- HYPOTHESIS TESTING -->
+<section id="hypothesis">
+<div class="container">
+  <div class="section-label">Module 6</div>
+  <h2 class="section-title">Hypothesis Testing & Inferential Statistics</h2>
+  <p class="section-sub">Statistically validate your assumptions before modeling — don't feed noise into your pipeline.</p>
+
+  <div class="grid-2">
+    <div class="concept-block">
+      <span class="tag tag-blue">Core Concepts</span>
+      <h4>Null & Alternative Hypothesis</h4>
+      <p><strong>H₀ (Null):</strong> No effect, no difference, no relationship — the default assumption.<br>
+      <strong>H₁ (Alternative):</strong> There IS an effect or difference. What you're trying to prove.<br><br>
+      You never "accept" H₀ — you only <strong>fail to reject</strong> it. The burden of proof lies with H₁.</p>
+    </div>
+    <div class="concept-block orange">
+      <span class="tag tag-orange">P-value</span>
+      <h4>What P-value Actually Means</h4>
+      <p>The probability of observing your results <em>by chance alone</em>, assuming H₀ is true.<br><br>
+      <strong>p ≤ 0.05</strong> → Reject H₀ (result is statistically significant)<br>
+      <strong>p > 0.05</strong> → Fail to reject H₀<br><br>
+      Standard alpha = <strong>0.05</strong>. Medical research often uses 0.01.</p>
+    </div>
+  </div>
+
+  <div class="callout warn">
+    <span class="callout-icon">⚠️</span>
+    <div class="callout-body">
+      <strong>Type I Error (False Positive):</strong> Rejecting H₀ when it's actually true. "Finding" an effect that doesn't exist. Probability = alpha (0.05). &nbsp;&nbsp;
+      <strong>Type II Error (False Negative):</strong> Failing to reject H₀ when it's false. Missing a real effect. Probability = beta.
+    </div>
+  </div>
+
+  <h3 style="font-size:16px;font-weight:700;margin:28px 0 16px;">Which Test to Use?</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Test</th><th>Use Case</th><th>Assumption</th></tr></thead>
+      <tbody>
+        <tr><td><strong>One-sample t-test</strong></td><td>Compare sample mean to known value</td><td>Normal distribution</td></tr>
+        <tr><td><strong>Independent t-test</strong></td><td>Compare means of 2 independent groups</td><td>Normal, equal variance</td></tr>
+        <tr><td><strong>Paired t-test</strong></td><td>Before/after on same subjects</td><td>Normal, paired samples</td></tr>
+        <tr><td><strong>One-way ANOVA</strong></td><td>Compare means of 3+ groups</td><td>Normal, homoscedastic</td></tr>
+        <tr><td><strong>Chi-square test</strong></td><td>Association between 2 categorical variables</td><td>Expected freq ≥ 5</td></tr>
+        <tr><td><strong>Mann-Whitney U</strong></td><td>Non-parametric alternative to t-test</td><td>No normality needed</td></tr>
+        <tr><td><strong>Pearson correlation</strong></td><td>Linear relationship between 2 continuous vars</td><td>Normal, linear</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+      <span class="code-title">hypothesis_testing.py</span>
+    </div>
+    <pre><code><span class="kw">from</span> scipy <span class="kw">import</span> stats
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+
+<span class="cm"># ── Independent t-test ─────────────────────────────────────</span>
+<span class="cm"># H0: mean salary of group A == mean salary of group B</span>
+group_a = df[df[<span class="st">'department'</span>] == <span class="st">'Engineering'</span>][<span class="st">'salary'</span>]
+group_b = df[df[<span class="st">'department'</span>] == <span class="st">'Marketing'</span>][<span class="st">'salary'</span>]
+
+t_stat, p_val = stats.<span class="fn">ttest_ind</span>(group_a, group_b)
+<span class="fn">print</span>(<span class="st">f"t={t_stat:.3f}, p={p_val:.4f}"</span>)
+<span class="kw">if</span> p_val < <span class="nm">0.05</span>:
+    <span class="fn">print</span>(<span class="st">"✓ Reject H0 — salaries differ significantly"</span>)
+<span class="kw">else</span>:
+    <span class="fn">print</span>(<span class="st">"✗ Fail to reject H0 — no significant difference"</span>)
+
+<span class="cm"># ── One-way ANOVA (3+ groups) ─────────────────────────────</span>
+groups = [df[df[<span class="st">'region'</span>] == r][<span class="st">'sales'</span>] <span class="kw">for</span> r <span class="kw">in</span> df[<span class="st">'region'</span>].<span class="fn">unique</span>()]
+f_stat, p_val = stats.<span class="fn">f_oneway</span>(*groups)
+
+<span class="cm"># ── Chi-square test (categorical association) ─────────────</span>
+contingency = pd.<span class="fn">crosstab</span>(df[<span class="st">'gender'</span>], df[<span class="st">'purchased'</span>])
+chi2, p, dof, expected = stats.<span class="fn">chi2_contingency</span>(contingency)
+<span class="fn">print</span>(<span class="st">f"Chi2={chi2:.3f}, p={p:.4f}, dof={dof}"</span>)
+
+<span class="cm"># ── Normality check before running t-test ─────────────────</span>
+stat, p = stats.<span class="fn">shapiro</span>(df[<span class="st">'salary'</span>].<span class="fn">sample</span>(<span class="nm">50</span>))  <span class="cm"># Shapiro-Wilk</span>
+<span class="kw">if</span> p < <span class="nm">0.05</span>:
+    <span class="fn">print</span>(<span class="st">"Not normal — use Mann-Whitney instead"</span>)
+    u_stat, p_mw = stats.<span class="fn">mannwhitneyu</span>(group_a, group_b)
+
+<span class="cm"># ── Pearson correlation ───────────────────────────────────</span>
+r, p = stats.<span class="fn">pearsonr</span>(df[<span class="st">'age'</span>], df[<span class="st">'salary'</span>])
+<span class="fn">print</span>(<span class="st">f"Pearson r={r:.3f}, p={p:.4f}"</span>)</code></pre>
+  </div>
+</div>
+</section>
+
+<div class="divider"></div>
+
+<!-- BEST PRACTICES -->
+<section id="best-practices">
+<div class="container">
+  <div class="section-label">Current Best Practices 2025</div>
+  <h2 class="section-title">State-of-the-Art EDA Practices</h2>
+  <p class="section-sub">What professional ML engineers actually do — beyond the course basics.</p>
+
+  <div class="bp-card">
+    <div class="bp-num">1</div>
+    <div class="bp-content">
+      <h4>Always Use Pipelines</h4>
+      <p>Wrap preprocessing (imputation, encoding, scaling) in sklearn Pipelines. Prevents data leakage, simplifies cross-validation, and makes deployment production-ready. The entire pipeline can be saved with <code>joblib.dump()</code>.</p>
+    </div>
+  </div>
+  <div class="bp-card">
+    <div class="bp-num">2</div>
+    <div class="bp-content">
+      <h4>Profile Before Cleaning</h4>
+      <p>Use <code>ydata-profiling</code> (formerly pandas-profiling) to auto-generate a full EDA report — missing values, distributions, correlations, outliers — in one line of code before touching the data.</p>
+    </div>
+  </div>
+  <div class="bp-card">
+    <div class="bp-num">3</div>
+    <div class="bp-content">
+      <h4>Document Every Decision</h4>
+      <p>Keep an EDA notebook that logs every imputation choice, transformation, and feature dropped — with reasoning. Reproducibility and auditability are non-negotiable in production ML.</p>
+    </div>
+  </div>
+  <div class="bp-card">
+    <div class="bp-num">4</div>
+    <div class="bp-content">
+      <h4>Check Train/Test Distribution Shift</h4>
+      <p>After splitting, verify that feature distributions in train and test are similar. Use KL divergence or the Kolmogorov-Smirnov test. Significant drift means your split isn't representative.</p>
+    </div>
+  </div>
+  <div class="bp-card">
+    <div class="bp-num">5</div>
+    <div class="bp-content">
+      <h4>Don't Drop Target Leakage Features — Find Them</h4>
+      <p>Features perfectly correlated with the target (correlation > 0.99) are almost certainly leaking future information. A feature that wouldn't exist at prediction time must be removed — even if it improves validation score dramatically.</p>
+    </div>
+  </div>
+  <div class="bp-card">
+    <div class="bp-num">6</div>
+    <div class="bp-content">
+      <h4>Use ColumnTransformer for Mixed-Type Data</h4>
+      <p>Apply different preprocessing steps to numerical vs categorical columns in one clean, parallelized operation using sklearn's <code>ColumnTransformer</code>. Composable with Pipeline for full end-to-end flow.</p>
+    </div>
+  </div>
+
+  <div class="code-block" style="margin-top:28px;">
+    <div class="code-header">
+      <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+      <span class="code-title">production_pipeline.py — Best Practice Template</span>
+    </div>
+    <pre><code><span class="kw">from</span> sklearn.pipeline <span class="kw">import</span> Pipeline
+<span class="kw">from</span> sklearn.compose <span class="kw">import</span> ColumnTransformer
+<span class="kw">from</span> sklearn.preprocessing <span class="kw">import</span> StandardScaler, OneHotEncoder
+<span class="kw">from</span> sklearn.impute <span class="kw">import</span> SimpleImputer
+<span class="kw">from</span> sklearn.model_selection <span class="kw">import</span> train_test_split, cross_val_score
+<span class="kw">import</span> joblib
+
+<span class="cm"># ── Define feature types ───────────────────────────────────</span>
+num_features = [<span class="st">'age'</span>, <span class="st">'salary'</span>, <span class="st">'years_exp'</span>]
+cat_features = [<span class="st">'city'</span>, <span class="st">'department'</span>, <span class="st">'education'</span>]
+
+<span class="cm"># ── Numerical pipeline ─────────────────────────────────────</span>
+num_pipeline = <span class="fn">Pipeline</span>([
+    (<span class="st">'imputer'</span>, <span class="fn">SimpleImputer</span>(strategy=<span class="st">'median'</span>)),
+    (<span class="st">'scaler'</span>,  <span class="fn">StandardScaler</span>())
+])
+
+<span class="cm"># ── Categorical pipeline ───────────────────────────────────</span>
+cat_pipeline = <span class="fn">Pipeline</span>([
+    (<span class="st">'imputer'</span>, <span class="fn">SimpleImputer</span>(strategy=<span class="st">'most_frequent'</span>)),
+    (<span class="st">'encoder'</span>, <span class="fn">OneHotEncoder</span>(drop=<span class="st">'first'</span>, handle_unknown=<span class="st">'ignore'</span>))
+])
+
+<span class="cm"># ── Combine with ColumnTransformer ─────────────────────────</span>
+preprocessor = <span class="fn">ColumnTransformer</span>([
+    (<span class="st">'num'</span>, num_pipeline, num_features),
+    (<span class="st">'cat'</span>, cat_pipeline, cat_features)
+])
+
+<span class="cm"># ── Full ML pipeline with model ────────────────────────────</span>
+<span class="kw">from</span> sklearn.linear_model <span class="kw">import</span> LogisticRegression
+full_pipeline = <span class="fn">Pipeline</span>([
+    (<span class="st">'preprocess'</span>, preprocessor),
+    (<span class="st">'model'</span>,      <span class="fn">LogisticRegression</span>(max_iter=<span class="nm">1000</span>))
+])
+
+<span class="cm"># ── Evaluate with cross-validation ────────────────────────</span>
+X_train, X_test, y_train, y_test = <span class="fn">train_test_split</span>(X, y, test_size=<span class="nm">0.2</span>, random_state=<span class="nm">42</span>)
+cv_scores = <span class="fn">cross_val_score</span>(full_pipeline, X_train, y_train, cv=<span class="nm">5</span>, scoring=<span class="st">'roc_auc'</span>)
+<span class="fn">print</span>(<span class="st">f"CV AUC: {cv_scores.mean():.3f} ± {cv_scores.std():.3f}"</span>)
+
+<span class="cm"># ── Save entire pipeline ───────────────────────────────────</span>
+full_pipeline.<span class="fn">fit</span>(X_train, y_train)
+joblib.<span class="fn">dump</span>(full_pipeline, <span class="st">'ml_pipeline.joblib'</span>)</code></pre>
+  </div>
+
+  <h3 style="font-size:17px;font-weight:700;margin:32px 0 20px;">FAQ — Common Pitfalls</h3>
+  <details>
+    <summary>Why should I never use integer encoding for nominal categories?</summary>
+    <div class="details-body">Integer encoding (1, 2, 3) implies an ordinal relationship — City 3 > City 2 > City 1 — which is factually wrong for nominal categories like city names. The model treats these as meaningful distances. Use one-hot encoding for nominal features and ordinal encoding only when a real rank order exists.</div>
+  </details>
+  <details>
+    <summary>When is data leakage NOT obvious?</summary>
+    <div class="details-body">Leakage is sneaky. Common hidden sources: fitting scalers/imputers on the full dataset before splitting; including future-dated features (data from after the event you're predicting); target encoding without doing it inside each CV fold; using features derived from the target variable. If your validation score is suspiciously high, check for leakage first.</div>
+  </details>
+  <details>
+    <summary>How do I know if my data needs log transformation?</summary>
+    <div class="details-body">Check the skewness value: <code>df['col'].skew()</code>. A skew > 1 or &lt; -1 indicates significant skewness. Visually confirm with a histogram. Right-skewed (long right tail) → log transform. Then check skew after: ideally |skew| &lt; 0.5. Always use <code>np.log1p()</code> instead of <code>np.log()</code> to safely handle zero values.</div>
+  </details>
+  <details>
+    <summary>IQR vs Z-score — when do I use which?</summary>
+    <div class="details-body">Use IQR when you don't know the distribution or suspect non-normality — it is more robust. Use Z-score only when you've confirmed the feature is approximately normally distributed. IQR is the better default choice. For high-dimensional multivariate outliers, use Isolation Forest or Local Outlier Factor (LOF) instead.</div>
+  </details>
+  <details>
+    <summary>What's the difference between p-value and confidence interval?</summary>
+    <div class="details-body">P-value tells you whether an effect is statistically significant (yes/no decision). Confidence interval tells you the range of plausible values for the effect size — it's more informative. A 95% CI means: if we repeated the experiment 100 times, 95 of those intervals would contain the true population parameter. Always report both — p-value alone can be misleading.</div>
+  </details>
+</div>
+</section>
+
+<div class="divider"></div>
+
+<!-- QUIZ -->
+<section id="quiz">
+<div class="container">
+  <div class="section-label">Test Your Knowledge</div>
+  <h2 class="section-title">Course 1 Quiz</h2>
+  <p class="section-sub">20 questions covering every topic from this module. No guessing — explain it to yourself after each answer.</p>
+
+  <div class="quiz-progress">
+    <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    <span class="quiz-counter" id="quizCounter">0 / 20</span>
+  </div>
+
+  <!-- Questions -->
+  <div id="quizContainer">
+
+    <div class="question-card active" data-q="0">
+      <div class="q-meta"><span class="q-num">Q01</span><span class="q-topic">Data Cleaning</span></div>
+      <div class="q-text">You have a feature where values are missing because customers who earn under $30k were never asked for their income. What type of missingness is this and what should you do?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>MCAR — safely drop the rows</button>
+        <button class="option" data-correct="false"><span class="opt-letter">B</span>MAR — impute with the mean</button>
+        <button class="option" data-correct="true"><span class="opt-letter">C</span>MNAR — create a missingness indicator flag, as the absence carries information</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>MAR — impute with KNN since pattern is complex</button>
+      </div>
+      <div class="explanation">✅ <strong>MNAR (Missing Not At Random)</strong> — the missingness depends on the value itself (low earners). This means the absence of data IS informative. Create a binary flag column (<code>income_missing</code>) before imputing so the model can learn from the pattern of missingness.</div>
+    </div>
+
+    <div class="question-card" data-q="1">
+      <div class="q-meta"><span class="q-num">Q02</span><span class="q-topic">Feature Encoding</span></div>
+      <div class="q-text">You're encoding a "Size" feature with values Small, Medium, Large. Which encoder is correct and why?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>One-Hot Encoding — creates independent binary columns per category</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>Ordinal Encoding with order [Small=0, Medium=1, Large=2] — preserves the real rank order</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>Label Encoding — assigns 0, 1, 2 arbitrarily</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>Target Encoding — replaces each size with the mean target</button>
+      </div>
+      <div class="explanation">✅ <strong>Ordinal Encoding</strong> is correct because Small &lt; Medium &lt; Large is a genuine ranked order. One-hot would destroy this information. Label Encoding would also assign integers but arbitrarily — you must explicitly define the order using <code>OrdinalEncoder(categories=[['Small','Medium','Large']])</code>.</div>
+    </div>
+
+    <div class="question-card" data-q="2">
+      <div class="q-meta"><span class="q-num">Q03</span><span class="q-topic">Feature Scaling</span></div>
+      <div class="q-text">A dataset for training a neural network has salary (range: $20k–$500k) with several extreme outliers at $10M. Which scaler should you choose?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>MinMaxScaler — it bounds values to [0,1] which neural networks prefer</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>RobustScaler — uses IQR-based scaling, resistant to outlier distortion</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>StandardScaler — centers around 0 so outliers matter less</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>No scaling needed since neural networks are scale-invariant</button>
+      </div>
+      <div class="explanation">✅ <strong>RobustScaler</strong> is best here. MinMaxScaler would compress 95% of the data into a tiny range because the outlier ($10M) inflates the max. StandardScaler's mean and std are also distorted by the extreme value. RobustScaler uses median and IQR which are unaffected by outliers.</div>
+    </div>
+
+    <div class="question-card" data-q="3">
+      <div class="q-meta"><span class="q-num">Q04</span><span class="q-topic">Data Leakage</span></div>
+      <div class="q-text">You fit a StandardScaler on the entire dataset, then split into train/test, and train your model. What problem did you introduce?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>Overfitting — the model has seen too much data</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>Data leakage — test set statistics (mean, std) were used to transform training data</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>Underfitting — scaling reduces the variance the model can learn from</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>Nothing — fitting on all data gives a better, more stable scaler</button>
+      </div>
+      <div class="explanation">✅ <strong>Data leakage.</strong> By fitting the scaler on the full dataset, the test set's mean and standard deviation leaked into the scaling transformation. Your model indirectly "knows" statistics about the test set during training, which inflates reported performance. Always: split first, fit scaler on train only, transform both with train stats.</div>
+    </div>
+
+    <div class="question-card" data-q="4">
+      <div class="q-meta"><span class="q-num">Q05</span><span class="q-topic">Outliers</span></div>
+      <div class="q-text">You're building a fraud detection model and notice that 3% of transactions are flagged as extreme outliers by the IQR method. What should you do?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>Remove them — they'll distort the model</button>
+        <button class="option" data-correct="false"><span class="opt-letter">B</span>Cap them at Q3 + 1.5×IQR using winsorization</button>
+        <button class="option" data-correct="true"><span class="opt-letter">C</span>Keep them — in fraud detection, the outlier IS the signal</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>Replace with the median to reduce noise</button>
+      </div>
+      <div class="explanation">✅ <strong>Keep them.</strong> In fraud detection, anomalous behavior is exactly what you're trying to detect. Removing outliers would eliminate your most valuable training examples. This is a prime example of domain knowledge overriding a mechanical rule.</div>
+    </div>
+
+    <div class="question-card" data-q="5">
+      <div class="q-meta"><span class="q-num">Q06</span><span class="q-topic">Hypothesis Testing</span></div>
+      <div class="q-text">Your t-test returns p = 0.032. What do you conclude at the α = 0.05 significance level?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>Accept the null hypothesis — 0.032 is very small</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>Reject the null hypothesis — result is statistically significant</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>Accept the alternative — p &lt; 0.5 proves the effect is real</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>Inconclusive — p = 0.032 is too close to 0.05 to decide</button>
+      </div>
+      <div class="explanation">✅ <strong>Reject H₀.</strong> Since p = 0.032 &lt; α = 0.05, the result is statistically significant and you reject the null hypothesis. Never say "accept H₁" — the correct language is "reject H₀." Note: 0.05 is the threshold, not 0.5 — this is a very common error.</div>
+    </div>
+
+    <div class="question-card" data-q="6">
+      <div class="q-meta"><span class="q-num">Q07</span><span class="q-topic">Feature Engineering</span></div>
+      <div class="q-text">A salary feature has a skewness value of 2.4. What transformation should you apply, and what function handles zeros safely?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>Square root transformation using <code>np.sqrt(x)</code></button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>Log transformation using <code>np.log1p(x)</code> — log(x+1) handles zeros safely</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>Log transformation using <code>np.log(x)</code> — standard log function</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>No transformation — skewness only matters for classification tasks</button>
+      </div>
+      <div class="explanation">✅ <strong><code>np.log1p(x)</code></strong> is correct. Skewness of 2.4 indicates right-skew (long right tail) — log transformation pulls it toward normality. Use <code>log1p</code> (which computes log(x+1)) instead of <code>log(x)</code> because log(0) = undefined (-∞), and log1p handles zero values safely.</div>
+    </div>
+
+    <div class="question-card" data-q="7">
+      <div class="q-meta"><span class="q-num">Q08</span><span class="q-topic">Feature Selection</span></div>
+      <div class="q-text">Two features have a Pearson correlation of 0.96 with each other. What should you do and what problem does keeping both cause?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>Keep both — more features always helps the model</button>
+        <button class="option" data-correct="false"><span class="opt-letter">B</span>Drop both — they're redundant and useless</button>
+        <button class="option" data-correct="true"><span class="opt-letter">C</span>Drop one — keeping both causes multicollinearity, making coefficients unstable</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>Average them into a single feature</button>
+      </div>
+      <div class="explanation">✅ <strong>Drop one.</strong> Correlation of 0.96 indicates near-perfect multicollinearity. Keeping both makes linear model coefficients unstable and unreliable (small data changes cause wild coefficient swings). Drop the one with lower correlation to the target, or the one less interpretable. Threshold: |r| &gt; 0.9 between features = concern.</div>
+    </div>
+
+    <div class="question-card" data-q="8">
+      <div class="q-meta"><span class="q-num">Q09</span><span class="q-topic">Encoding</span></div>
+      <div class="q-text">You're using one-hot encoding on a "City" feature with 5 categories. How many binary columns should you create and why?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>5 columns — one for each city</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>4 columns — drop one to avoid the dummy variable trap</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>3 columns — use only the most common cities</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>5 columns — the number depends on the model type</button>
+      </div>
+      <div class="explanation">✅ <strong>4 columns (drop one).</strong> With 5 categories, 5 binary columns are perfectly linearly dependent (if all 4 are 0, the 5th must be 1). This causes perfect multicollinearity. Drop one using <code>drop='first'</code> in OneHotEncoder or <code>drop_first=True</code> in <code>pd.get_dummies()</code>. The dropped category becomes the reference group.</div>
+    </div>
+
+    <div class="question-card" data-q="9">
+      <div class="q-meta"><span class="q-num">Q10</span><span class="q-topic">Hypothesis Testing</span></div>
+      <div class="q-text">You want to compare customer satisfaction scores (continuous) across 4 regions. Which statistical test should you use?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>Independent t-test — compare means between groups</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>One-way ANOVA — compare means across 3+ groups</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>Chi-square test — test association between categorical variables</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>Paired t-test — compare before/after measurements</button>
+      </div>
+      <div class="explanation">✅ <strong>One-way ANOVA.</strong> T-test is only for 2 groups. With 4 regions, you need ANOVA which tests whether at least one group mean differs significantly. If ANOVA is significant, follow up with post-hoc tests (Tukey HSD) to find which specific pairs differ.</div>
+    </div>
+
+    <div class="question-card" data-q="10">
+      <div class="q-meta"><span class="q-num">Q11</span><span class="q-topic">Imputation</span></div>
+      <div class="q-text">A highly skewed income feature has 8% missing values. What is the best imputation strategy?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>Mean imputation — uses all available information</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>Median imputation — robust to skewness and outliers</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>Mode imputation — most common value is safest</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>Drop the rows — 8% is too few to matter</button>
+      </div>
+      <div class="explanation">✅ <strong>Median imputation.</strong> For skewed distributions, the mean is pulled towards extreme values and doesn't represent the typical value. The median is more robust. For very skewed income data, median is always preferred over mean. Remember: always fit the imputer on training data only.</div>
+    </div>
+
+    <div class="question-card" data-q="11">
+      <div class="q-meta"><span class="q-num">Q12</span><span class="q-topic">Best Practices</span></div>
+      <div class="q-text">What is the correct order of operations when building a preprocessing pipeline?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>Scale → Impute → Encode → Split</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>Split → Impute → Encode → Scale (all fitted only on train)</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>Impute → Scale → Split → Encode</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>Order doesn't matter if you use a Pipeline</button>
+      </div>
+      <div class="explanation">✅ <strong>Split first, then all preprocessing.</strong> Splitting must happen before ANY preprocessing step. Then impute, encode, and scale — all fitted exclusively on training data, then applied to test. Using sklearn Pipeline enforces this automatically and prevents leakage even during cross-validation.</div>
+    </div>
+
+    <div class="question-card" data-q="12">
+      <div class="q-meta"><span class="q-num">Q13</span><span class="q-topic">Statistics</span></div>
+      <div class="q-text">A Type I error in hypothesis testing means:</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>You failed to detect a real effect (missed it)</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>You rejected H₀ when it was actually true (false positive)</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>Your sample size was too small to detect anything</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>Your p-value was calculated incorrectly</button>
+      </div>
+      <div class="explanation">✅ <strong>False positive.</strong> Type I error = rejecting a true null hypothesis = "finding" an effect that doesn't exist. Its probability equals alpha (0.05). Type II error is the opposite — failing to reject a false H₀ (missing a real effect). Mnemonic: Type I = False Alarm, Type II = Missed Detection.</div>
+    </div>
+
+    <div class="question-card" data-q="13">
+      <div class="q-meta"><span class="q-num">Q14</span><span class="q-topic">Outliers</span></div>
+      <div class="q-text">The IQR for a feature is 40, Q1 = 100, Q3 = 140. A value of 225 appears in the dataset. Is it an outlier?</div>
+      <div class="options">
+        <button class="option" data-correct="true"><span class="opt-letter">A</span>Yes — the upper bound is 200, so 225 exceeds it</button>
+        <button class="option" data-correct="false"><span class="opt-letter">B</span>No — 225 is close enough to Q3 to be acceptable</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>Cannot determine without knowing the mean</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>Yes — but only if it's more than 3 standard deviations away</button>
+      </div>
+      <div class="explanation">✅ <strong>Yes, it's an outlier.</strong> Upper bound = Q3 + 1.5 × IQR = 140 + 1.5 × 40 = 140 + 60 = <strong>200</strong>. Since 225 &gt; 200, it's an outlier by IQR method. The lower bound = Q1 − 1.5 × IQR = 100 − 60 = 40. Any value &lt; 40 or &gt; 200 is an outlier.</div>
+    </div>
+
+    <div class="question-card" data-q="14">
+      <div class="q-meta"><span class="q-num">Q15</span><span class="q-topic">Feature Engineering</span></div>
+      <div class="q-text">What problem does Polynomial Feature expansion solve, and what risk does it introduce?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>Solves multicollinearity; introduces underfitting</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>Allows linear models to capture non-linear relationships; introduces overfitting at high degrees</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>Reduces dimensionality; introduces information loss</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>Handles missing values; introduces data leakage</button>
+      </div>
+      <div class="explanation">✅ Polynomial features (x², x³, x₁×x₂) let linear models learn curved decision boundaries. However, high degrees (3+) create exponentially many features, dramatically increasing model complexity and risk of <strong>overfitting</strong>. Regularization (Ridge, Lasso) is commonly paired with polynomial features to control this risk.</div>
+    </div>
+
+    <div class="question-card" data-q="15">
+      <div class="q-meta"><span class="q-num">Q16</span><span class="q-topic">Data Retrieval</span></div>
+      <div class="q-text">Which Python library is most appropriate for connecting to a MongoDB NoSQL database?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>sqlalchemy</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>pymongo</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>sqlite3</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>psycopg2</button>
+      </div>
+      <div class="explanation">✅ <strong>pymongo</strong> is the official Python driver for MongoDB. SQLAlchemy is for relational (SQL) databases; sqlite3 is for SQLite; psycopg2 is for PostgreSQL. MongoDB stores data as BSON (Binary JSON) documents in collections, not rows in tables.</div>
+    </div>
+
+    <div class="question-card" data-q="16">
+      <div class="q-meta"><span class="q-num">Q17</span><span class="q-topic">Feature Selection</span></div>
+      <div class="q-text">Lasso regression drove the coefficient of a feature to exactly zero. What does this mean?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>The feature is highly important and should be scaled</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>The feature has been effectively removed from the model — Lasso selected against it</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>The feature is perfectly correlated with another</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>The model failed to converge</button>
+      </div>
+      <div class="explanation">✅ <strong>Lasso (L1 regularization) shrinks coefficients to exactly zero</strong>, effectively removing features from the model. This is called automatic feature selection. Increasing the alpha hyperparameter increases the penalty and removes more features. Ridge (L2) shrinks coefficients toward zero but rarely reaches it exactly.</div>
+    </div>
+
+    <div class="question-card" data-q="17">
+      <div class="q-meta"><span class="q-num">Q18</span><span class="q-topic">Statistics</span></div>
+      <div class="q-text">You want to test whether there is an association between "Education Level" (categorical: High School / Bachelor / Master) and "Purchased" (Yes/No). Which test do you use?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>One-way ANOVA — testing group differences</button>
+        <button class="option" data-correct="false"><span class="opt-letter">B</span>Pearson correlation — measuring linear relationship</button>
+        <button class="option" data-correct="true"><span class="opt-letter">C</span>Chi-square test of independence — association between two categorical variables</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>Independent t-test — comparing means of two groups</button>
+      </div>
+      <div class="explanation">✅ <strong>Chi-square test of independence.</strong> Both variables are categorical. Chi-square tests whether the distribution of one categorical variable differs across levels of another. Create a contingency table with <code>pd.crosstab()</code> and pass to <code>scipy.stats.chi2_contingency()</code>.</div>
+    </div>
+
+    <div class="question-card" data-q="18">
+      <div class="q-meta"><span class="q-num">Q19</span><span class="q-topic">Best Practices</span></div>
+      <div class="q-text">Why should ColumnTransformer be preferred over manually transforming each feature type separately?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>It runs faster because it uses GPU acceleration</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>It applies different transformations to different columns cleanly and integrates with Pipeline to prevent leakage</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>It automatically selects the best encoding for each column</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>Manual transformation is always preferred for interpretability</button>
+      </div>
+      <div class="explanation">✅ <strong>ColumnTransformer</strong> applies different transformers to numerical vs categorical columns in one step, composable within a Pipeline. This ensures all preprocessing is leakage-proof, reproducible, deployable (serialize the whole pipeline), and cross-validation safe. Manual step-by-step transforms outside of Pipeline are error-prone and hard to maintain.</div>
+    </div>
+
+    <div class="question-card" data-q="19">
+      <div class="q-meta"><span class="q-num">Q20</span><span class="q-topic">All Topics</span></div>
+      <div class="q-text">Which of the following statements is FALSE?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>p-value of 0.03 at α=0.05 means rejecting the null hypothesis</button>
+        <button class="option" data-correct="false"><span class="opt-letter">B</span>log1p transformation is safer than log because it handles zeros</button>
+        <button class="option" data-correct="true"><span class="opt-letter">C</span>MinMaxScaler is robust to outliers because it clips values to [0,1]</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>Fitting a scaler on the full dataset before splitting causes data leakage</button>
+      </div>
+      <div class="explanation">✅ <strong>C is FALSE.</strong> MinMaxScaler is actually the MOST sensitive scaler to outliers. One extreme value inflates the max and compresses all other values into a tiny range near 0. It clips to [0,1] only because of the formula — the outlier itself becomes 1.0 and everything else is squeezed. RobustScaler is the outlier-resistant choice.</div>
+    </div>
+
+  </div><!-- /quizContainer -->
+
+  <!-- Score Card -->
+  <div class="score-card" id="scoreCard">
+    <div class="section-label">Results</div>
+    <div class="score-msg" id="scoreMsg">Loading...</div>
+    <div class="score-number" id="scoreNumber">0/20</div>
+    <div class="score-label" id="scoreLabel">Keep pushing. Review the explanations above.</div>
+    <button class="btn btn-restart" onclick="restartQuiz()">↺ Restart Quiz</button>
+  </div>
+
+  <div class="quiz-actions">
+    <button class="btn btn-primary" id="nextBtn" onclick="nextQuestion()" disabled>Next Question →</button>
+  </div>
+
+</div>
+</section>
+
+<footer>
+  Built for <span>IBM ML Course 1</span> · Exploratory Data Analysis for Machine Learning · All 6 modules covered
+</footer>
+
+<script>
+  const questions = document.querySelectorAll('.question-card');
+  const progressFill = document.getElementById('progressFill');
+  const quizCounter = document.getElementById('quizCounter');
+  const nextBtn = document.getElementById('nextBtn');
+  const scoreCard = document.getElementById('scoreCard');
+
+  let current = 0;
+  let score = 0;
+  let answered = false;
+
+  function updateProgress() {
+    const pct = (current / questions.length) * 100;
+    progressFill.style.width = pct + '%';
+    quizCounter.textContent = current + ' / ' + questions.length;
+  }
+
+  // Attach click listeners to all options
+  document.querySelectorAll('.option').forEach(btn => {
+    btn.addEventListener('click', function() {
+      if (answered) return;
+      answered = true;
+      const card = this.closest('.question-card');
+      const options = card.querySelectorAll('.option');
+      const isCorrect = this.dataset.correct === 'true';
+
+      options.forEach(o => {
+        o.classList.add('disabled');
+        if (o.dataset.correct === 'true') o.classList.add('correct');
+      });
+      if (!isCorrect) this.classList.add('wrong');
+      else score++;
+
+      card.querySelector('.explanation').classList.add('show');
+      nextBtn.disabled = false;
+    });
+  });
+
+  function nextQuestion() {
+    if (current >= questions.length - 1) {
+      showScore();
+      return;
+    }
+    questions[current].classList.remove('active');
+    current++;
+    questions[current].classList.add('active');
+    answered = false;
+    nextBtn.disabled = true;
+    updateProgress();
+    if (current === questions.length - 1) nextBtn.textContent = 'See Results →';
+  }
+
+  function showScore() {
+    document.getElementById('quizContainer').style.display = 'none';
+    nextBtn.style.display = 'none';
+    scoreCard.classList.add('show');
+    const pct = Math.round((score / questions.length) * 100);
+    document.getElementById('scoreNumber').textContent = score + '/' + questions.length;
+    let msg, label;
+    if (pct >= 90) { msg = '🔥 Mastery Level'; label = 'You know this cold. Ready for Course 2.'; }
+    else if (pct >= 75) { msg = '💪 Strong Performance'; label = 'Solid understanding with a few gaps to close.'; }
+    else if (pct >= 60) { msg = '📘 Good Progress'; label = 'Review the explanations and try again.'; }
+    else { msg = '🔄 Keep Studying'; label = 'Go back through the course material and retry.'; }
+    document.getElementById('scoreMsg').textContent = msg;
+    document.getElementById('scoreLabel').textContent = label;
+    progressFill.style.width = '100%';
+    quizCounter.textContent = questions.length + ' / ' + questions.length;
+  }
+
+  function restartQuiz() {
+    current = 0; score = 0; answered = false;
+    scoreCard.classList.remove('show');
+    document.getElementById('quizContainer').style.display = 'block';
+    nextBtn.style.display = 'flex';
+    nextBtn.disabled = true;
+    nextBtn.textContent = 'Next Question →';
+    questions.forEach((q, i) => {
+      q.classList.toggle('active', i === 0);
+      q.querySelectorAll('.option').forEach(o => {
+        o.classList.remove('correct','wrong','disabled');
+      });
+      q.querySelector('.explanation').classList.remove('show');
+    });
+    updateProgress();
+  }
+
+  updateProgress();
+</script>
+</body>
+</html>
