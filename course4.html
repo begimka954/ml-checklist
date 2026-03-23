@@ -1,0 +1,1499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IBM ML Course 4 — Unsupervised Machine Learning</title>
+<link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0a14;
+    --surface: #13101c;
+    --surface2: #1c1828;
+    --border: #2a2540;
+    --accent: #a78bfa;
+    --accent2: #7c5cbf;
+    --accent3: #38bdf8;
+    --accent4: #fb923c;
+    --accent5: #34d399;
+    --text: #ede9f8;
+    --text-muted: #8b7eb5;
+    --text-dim: #4a4070;
+    --code-bg: #090710;
+    --correct: #34d399;
+    --wrong: #f87171;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'Lato', sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; font-size: 16px; }
+
+  /* ── HERO ── */
+  .hero {
+    background: linear-gradient(135deg, #0d0a14 0%, #14102a 45%, #0a1420 100%);
+    padding: 80px 24px 60px; text-align: center; position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(ellipse 70% 50% at 50% 0%, rgba(167,139,250,0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-badge {
+    display: inline-block; background: rgba(167,139,250,0.12); border: 1px solid rgba(167,139,250,0.3);
+    color: var(--accent); font-size: 11px; font-weight: 700; letter-spacing: 2.5px;
+    text-transform: uppercase; padding: 6px 16px; border-radius: 20px; margin-bottom: 24px;
+  }
+  .hero h1 { font-size: clamp(28px,5vw,52px); font-weight: 900; line-height: 1.1; margin-bottom: 16px; letter-spacing: -1px; }
+  .hero h1 span { color: var(--accent); }
+  .hero p { font-size: 18px; color: var(--text-muted); max-width: 640px; margin: 0 auto 36px; font-weight: 300; }
+  .hero-pills { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+  .pill { background: var(--surface2); border: 1px solid var(--border); color: var(--text-muted); font-size: 13px; font-weight: 700; padding: 7px 16px; border-radius: 20px; }
+
+  /* ── NAV ── */
+  .sticky-nav {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(13,10,20,0.95); backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border); padding: 0 24px; overflow-x: auto; white-space: nowrap;
+  }
+  .sticky-nav ul { display: flex; list-style: none; max-width: 1200px; margin: 0 auto; }
+  .sticky-nav a { display: block; padding: 15px 15px; color: var(--text-muted); text-decoration: none; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; transition: color 0.2s; border-bottom: 2px solid transparent; }
+  .sticky-nav a:hover { color: var(--accent); border-bottom-color: var(--accent); }
+
+  /* ── LAYOUT ── */
+  .container { max-width: 1160px; margin: 0 auto; padding: 60px 24px; }
+  .section-label { font-size: 11px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: var(--accent); margin-bottom: 10px; }
+  .section-title { font-size: clamp(22px,3vw,34px); font-weight: 900; margin-bottom: 8px; letter-spacing: -0.5px; }
+  .section-sub { color: var(--text-muted); font-size: 15px; margin-bottom: 40px; font-weight: 300; }
+
+  /* ── CARDS ── */
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 28px; margin-bottom: 20px; transition: border-color 0.2s, box-shadow 0.2s; }
+  .card:hover { border-color: rgba(167,139,250,0.35); box-shadow: 0 4px 24px rgba(167,139,250,0.07); }
+  .card h3 { font-size: 17px; font-weight: 700; margin-bottom: 10px; display: flex; align-items: center; gap: 10px; }
+  .card .icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
+  .card p, .card ul { color: var(--text-muted); font-size: 14px; }
+  .card ul { padding-left: 20px; }
+  .card ul li { margin-bottom: 5px; }
+  .grid-2 { display: grid; grid-template-columns: repeat(auto-fit,minmax(300px,1fr)); gap: 20px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(auto-fit,minmax(240px,1fr)); gap: 20px; }
+
+  /* ── TAGS ── */
+  .tag { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; padding: 3px 10px; border-radius: 4px; margin-bottom: 12px; }
+  .tag-purple { background: rgba(167,139,250,0.14); color: var(--accent); }
+  .tag-blue   { background: rgba(56,189,248,0.14);  color: var(--accent3); }
+  .tag-orange { background: rgba(251,146,60,0.14);  color: var(--accent4); }
+  .tag-green  { background: rgba(52,211,153,0.14);  color: var(--accent5); }
+  .tag-red    { background: rgba(248,113,113,0.14); color: #f87171; }
+
+  /* ── CONCEPT BLOCKS ── */
+  .concept-block { background: var(--surface); border-left: 3px solid var(--accent); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; padding: 20px 24px; margin-bottom: 16px; }
+  .concept-block.blue   { border-left-color: var(--accent3); }
+  .concept-block.orange { border-left-color: var(--accent4); }
+  .concept-block.green  { border-left-color: var(--accent5); }
+  .concept-block.red    { border-left-color: #f87171; }
+  .concept-block h4 { font-size: 15px; font-weight: 700; margin-bottom: 8px; }
+  .concept-block p  { color: var(--text-muted); font-size: 14px; line-height: 1.6; }
+  .concept-block ul { color: var(--text-muted); font-size: 14px; padding-left: 18px; }
+  .concept-block ul li { margin-bottom: 5px; }
+
+  /* ── FORMULA ── */
+  .formula { background: var(--code-bg); border: 1px solid #1e1a30; border-radius: var(--radius-sm); padding: 12px 18px; font-family: 'Space Mono',monospace; font-size: 13px; color: #c4b5fd; margin: 12px 0; text-align: center; }
+
+  /* ── CALLOUT ── */
+  .callout { display: flex; gap: 16px; background: rgba(167,139,250,0.05); border: 1px solid rgba(167,139,250,0.2); border-radius: var(--radius-sm); padding: 16px 20px; margin: 20px 0; }
+  .callout.warn  { background: rgba(251,146,60,0.05);  border-color: rgba(251,146,60,0.2); }
+  .callout.green { background: rgba(52,211,153,0.05);  border-color: rgba(52,211,153,0.2); }
+  .callout.blue  { background: rgba(56,189,248,0.05);  border-color: rgba(56,189,248,0.2); }
+  .callout-icon  { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+  .callout-body  { font-size: 14px; color: var(--text-muted); line-height: 1.6; }
+  .callout-body strong { color: var(--text); }
+
+  /* ── CODE ── */
+  .code-block { background: var(--code-bg); border: 1px solid #1e1a30; border-radius: var(--radius); overflow: hidden; margin: 20px 0; }
+  .code-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 18px; background: #100d1a; border-bottom: 1px solid #1e1a30; }
+  .code-title  { font-family: 'Space Mono',monospace; font-size: 12px; color: var(--accent); }
+  .code-dots   { display: flex; gap: 6px; }
+  .code-dot    { width: 10px; height: 10px; border-radius: 50%; }
+  .code-dot:nth-child(1) { background: #ff5f57; }
+  .code-dot:nth-child(2) { background: #febc2e; }
+  .code-dot:nth-child(3) { background: #28c840; }
+  .code-block pre { padding: 20px 18px; overflow-x: auto; font-family: 'Space Mono',monospace; font-size: 13px; line-height: 1.7; }
+  .code-block code { color: #ddd6f8; }
+  .kw { color: #f472b6; }  .fn { color: #a78bfa; }  .st { color: #86efac; }
+  .cm { color: #4a4070; font-style: italic; }  .nm { color: #38bdf8; }
+  .va { color: #fb923c; }
+
+  /* ── TABLE ── */
+  .table-wrap { overflow-x: auto; margin: 20px 0; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th { background: var(--surface2); color: var(--accent); font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--border); }
+  td { padding: 12px 16px; border-bottom: 1px solid rgba(42,37,64,0.5); color: var(--text-muted); vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(167,139,250,0.03); }
+  td strong { color: var(--text); }
+
+  /* ── ACCORDION ── */
+  details { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 10px; overflow: hidden; }
+  summary { padding: 16px 20px; font-weight: 700; font-size: 15px; cursor: pointer; list-style: none; display: flex; align-items: center; justify-content: space-between; transition: background 0.2s; }
+  summary:hover { background: var(--surface2); }
+  summary::after { content: '+'; font-size: 20px; color: var(--accent); font-weight: 300; }
+  details[open] summary::after { content: '−'; }
+  details[open] summary { border-bottom: 1px solid var(--border); }
+  .details-body { padding: 20px; color: var(--text-muted); font-size: 14px; line-height: 1.7; }
+
+  /* ── BEST PRACTICE ── */
+  .bp-card { display: flex; gap: 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 18px 20px; margin-bottom: 12px; align-items: flex-start; }
+  .bp-num { width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), var(--accent2)); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 900; flex-shrink: 0; color: #fff; }
+  .bp-content h4 { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+  .bp-content p  { font-size: 13px; color: var(--text-muted); }
+
+  /* ── DIVIDER ── */
+  .divider { height: 1px; background: linear-gradient(90deg, transparent, var(--border), transparent); }
+
+  /* ── ALGO GRID ── */
+  .algo-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(260px,1fr)); gap: 16px; margin: 20px 0; }
+  .algo-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px; }
+  .algo-card h4 { font-size: 15px; font-weight: 700; margin-bottom: 8px; }
+  .algo-card p  { font-size: 13px; color: var(--text-muted); line-height: 1.55; margin-bottom: 8px; }
+  .algo-card ul { font-size: 12px; color: var(--text-muted); padding-left: 16px; }
+  .algo-card ul li { margin-bottom: 3px; }
+
+  /* ── QUIZ ── */
+  #quiz { background: linear-gradient(180deg, var(--bg) 0%, #090710 100%); }
+  .quiz-progress { display: flex; align-items: center; gap: 16px; margin-bottom: 32px; }
+  .progress-bar { flex: 1; height: 4px; background: var(--surface2); border-radius: 2px; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent3)); border-radius: 2px; transition: width 0.4s ease; }
+  .quiz-counter { font-size: 13px; color: var(--text-muted); font-weight: 700; white-space: nowrap; }
+  .question-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 32px; margin-bottom: 24px; display: none; animation: fadeIn 0.3s ease; }
+  .question-card.active { display: block; }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)} }
+  .q-meta { display: flex; gap: 10px; align-items: center; margin-bottom: 20px; }
+  .q-num  { font-family:'Space Mono',monospace; font-size:11px; color:var(--accent); background:rgba(167,139,250,0.1); padding:3px 10px; border-radius:4px; }
+  .q-topic { font-size:11px; color:var(--text-dim); font-weight:700; text-transform:uppercase; letter-spacing:1px; }
+  .q-text  { font-size:16px; font-weight:700; margin-bottom:24px; line-height:1.5; }
+  .options { display: flex; flex-direction: column; gap: 10px; }
+  .option { background:var(--surface2); border:1px solid var(--border); border-radius:var(--radius-sm); padding:14px 18px; cursor:pointer; font-size:14px; transition:all 0.2s; display:flex; align-items:flex-start; gap:12px; text-align:left; color:var(--text); }
+  .option:hover:not(.disabled) { border-color:var(--accent); background:rgba(167,139,250,0.07); }
+  .option.correct { border-color:var(--correct); background:rgba(52,211,153,0.08); }
+  .option.wrong   { border-color:var(--wrong);   background:rgba(248,113,113,0.08); }
+  .option.disabled { cursor:default; }
+  .opt-letter { width:24px; height:24px; border-radius:6px; background:var(--border); display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; flex-shrink:0; font-family:'Space Mono',monospace; }
+  .option.correct .opt-letter { background:var(--correct); color:#000; }
+  .option.wrong   .opt-letter { background:var(--wrong);   color:#fff; }
+  .explanation { margin-top:16px; padding:16px; background:rgba(167,139,250,0.05); border:1px solid rgba(167,139,250,0.2); border-radius:var(--radius-sm); font-size:14px; color:var(--text-muted); display:none; line-height:1.6; }
+  .explanation strong { color:var(--accent); }
+  .explanation.show { display:block; }
+  .quiz-actions { display:flex; justify-content:flex-end; margin-top:20px; }
+  .btn { padding:11px 28px; border-radius:var(--radius-sm); font-size:14px; font-weight:700; font-family:'Lato',sans-serif; cursor:pointer; border:none; transition:all 0.2s; letter-spacing:0.5px; }
+  .btn-primary { background:var(--accent); color:#fff; }
+  .btn-primary:hover { background:#c4b5fd; color:#0d0a14; transform:translateY(-1px); }
+  .btn-primary:disabled { opacity:0.4; cursor:not-allowed; transform:none; }
+  .score-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:48px 32px; text-align:center; display:none; }
+  .score-card.show { display:block; animation:fadeIn 0.4s ease; }
+  .score-number { font-size:72px; font-weight:900; background:linear-gradient(135deg,var(--accent),var(--accent3)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; line-height:1; margin:16px 0; }
+  .score-label { color:var(--text-muted); font-size:15px; margin-bottom:24px; }
+  .score-msg { font-size:22px; font-weight:700; margin-bottom:8px; }
+  .btn-restart { background:var(--surface2); color:var(--text); border:1px solid var(--border); margin-top:24px; }
+  .btn-restart:hover { border-color:var(--accent); color:var(--accent); }
+
+  footer { background:var(--surface); border-top:1px solid var(--border); padding:32px 24px; text-align:center; color:var(--text-dim); font-size:13px; }
+  footer span { color:var(--accent); }
+  @media(max-width:600px){.container{padding:40px 16px}.hero{padding:60px 16px 40px}.question-card{padding:20px}}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-badge">IBM Machine Learning Professional Certificate — Course 4 of 6</div>
+  <h1>Unsupervised<br><span>Machine Learning</span></h1>
+  <p>Find structure in unlabeled data. Every clustering algorithm, dimensionality reduction technique, and matrix factorization method — with full Python code.</p>
+  <div class="hero-pills">
+    <span class="pill">📊 K-Means</span>
+    <span class="pill">🌲 Hierarchical</span>
+    <span class="pill">🔵 DBSCAN</span>
+    <span class="pill">↗️ Mean Shift</span>
+    <span class="pill">📐 PCA</span>
+    <span class="pill">🌀 t-SNE / UMAP</span>
+    <span class="pill">🧮 NMF</span>
+    <span class="pill">📏 Curse of Dimensionality</span>
+    <span class="pill">✅ Quiz</span>
+  </div>
+</section>
+
+<!-- NAV -->
+<nav class="sticky-nav">
+  <ul>
+    <li><a href="#overview">Overview</a></li>
+    <li><a href="#curse">Curse of Dim.</a></li>
+    <li><a href="#kmeans">K-Means</a></li>
+    <li><a href="#hierarchical">Hierarchical</a></li>
+    <li><a href="#density">DBSCAN</a></li>
+    <li><a href="#metrics">Cluster Metrics</a></li>
+    <li><a href="#pca">PCA</a></li>
+    <li><a href="#nonlinear">t-SNE / UMAP</a></li>
+    <li><a href="#nmf">NMF</a></li>
+    <li><a href="#best-practices">Best Practices</a></li>
+    <li><a href="#quiz">Quiz</a></li>
+  </ul>
+</nav>
+
+<!-- OVERVIEW -->
+<section id="overview">
+<div class="container">
+  <div class="section-label">Module 0</div>
+  <h2 class="section-title">Unsupervised Learning: The Big Picture</h2>
+  <p class="section-sub">No labels. No target variable. The algorithm must discover hidden structure entirely on its own.</p>
+
+  <div class="grid-2">
+    <div>
+      <div class="concept-block">
+        <span class="tag tag-purple">Clustering</span>
+        <h4>Group Similar Points Together</h4>
+        <p>Partition data into groups (clusters) where members are more similar to each other than to members of other clusters. No predefined categories — the algorithm defines them.</p>
+        <p style="margin-top:8px;"><strong>Algorithms:</strong> K-Means, Hierarchical Agglomerative Clustering, DBSCAN, Mean Shift, Spectral Clustering</p>
+      </div>
+      <div class="concept-block blue">
+        <span class="tag tag-blue">Dimensionality Reduction</span>
+        <h4>Compress Without Losing Signal</h4>
+        <p>Reduce the number of features while preserving the most important structure. Used for visualization, noise removal, and speeding up downstream models.</p>
+        <p style="margin-top:8px;"><strong>Algorithms:</strong> PCA, Kernel PCA, MDS, t-SNE, UMAP, NMF, Autoencoders</p>
+      </div>
+    </div>
+    <div>
+      <div class="concept-block orange">
+        <span class="tag tag-orange">Supervised vs Unsupervised</span>
+        <h4>Key Differences</h4>
+        <ul>
+          <li><strong>No labels:</strong> Cannot use classification/regression metrics</li>
+          <li><strong>No ground truth:</strong> Evaluation is harder — use internal metrics</li>
+          <li><strong>Exploratory:</strong> You're discovering patterns, not predicting</li>
+          <li><strong>Subjective:</strong> "Correct" number of clusters depends on the question</li>
+          <li><strong>Use cases:</strong> Customer segmentation, anomaly detection, topic modeling, image compression, visualization</li>
+        </ul>
+      </div>
+      <div class="concept-block green">
+        <span class="tag tag-green">When to Use</span>
+        <h4>Right Problems for Unsupervised Learning</h4>
+        <ul>
+          <li>No labeled data exists or labeling is expensive</li>
+          <li>Exploring unknown structure in new datasets</li>
+          <li>Preprocessing step before supervised learning</li>
+          <li>Anomaly / outlier detection</li>
+          <li>Recommendation systems (collaborative filtering)</li>
+          <li>Visualizing high-dimensional data</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<div class="divider"></div>
+
+<!-- CURSE OF DIMENSIONALITY -->
+<section id="curse">
+<div class="container">
+  <div class="section-label">Module 1</div>
+  <h2 class="section-title">The Curse of Dimensionality</h2>
+  <p class="section-sub">As features increase, data becomes exponentially sparse. Distance metrics break down. This is the core challenge behind unsupervised learning at scale.</p>
+
+  <div class="grid-2">
+    <div class="concept-block">
+      <span class="tag tag-purple">The Problem</span>
+      <h4>Why More Features Hurts</h4>
+      <p>As dimensions increase, the volume of the feature space grows exponentially. Points that seem "close" in 2D become equidistant in 100D — distances lose meaning. The ratio of the nearest neighbor's distance to the farthest neighbor approaches 1 in high dimensions.</p>
+      <div class="formula">To cover 1D with 0.01 spacing → 100 points<br>To cover 10D → 100¹⁰ = 10²⁰ points</div>
+    </div>
+    <div class="concept-block blue">
+      <span class="tag tag-blue">Effects on Clustering</span>
+      <h4>Why Clustering Breaks in High Dimensions</h4>
+      <ul>
+        <li>All pairwise distances converge to the same value</li>
+        <li>Cluster boundaries become meaningless</li>
+        <li>Need exponentially more samples to maintain data density</li>
+        <li>Many features are spurious correlations that add noise</li>
+        <li>KNN (used in many methods) becomes unreliable</li>
+      </ul>
+    </div>
+    <div class="concept-block orange">
+      <span class="tag tag-orange">Distance Metrics</span>
+      <h4>Common Distance Functions</h4>
+      <p><strong>Euclidean (L2):</strong> Straight-line distance. Default. Sensitive to scale.<br>
+      <strong>Manhattan (L1):</strong> Sum of absolute differences. More robust in high dimensions.<br>
+      <strong>Cosine:</strong> Angle between vectors. Good for text/sparse data (direction, not magnitude).<br>
+      <strong>Jaccard:</strong> |A∩B| / |A∪B|. Binary/set data. Fails on continuous GPS data (division by zero when no exact matches).</p>
+    </div>
+    <div class="concept-block green">
+      <span class="tag tag-green">Solutions</span>
+      <h4>Fighting the Curse</h4>
+      <ul>
+        <li><strong>Feature selection:</strong> Remove irrelevant/redundant features</li>
+        <li><strong>PCA/dimensionality reduction:</strong> Before clustering, reduce to top components</li>
+        <li><strong>Domain knowledge:</strong> Manually select meaningful features</li>
+        <li><strong>Regularization:</strong> Prevent models from overfitting to noise dimensions</li>
+        <li><strong>More data:</strong> More samples help maintain density per dimension</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="callout warn">
+    <span class="callout-icon">⚠️</span>
+    <div class="callout-body"><strong>Always reduce dimensions before clustering.</strong> Apply PCA first to remove noise dimensions, then cluster in the lower-dimensional space. This improves both cluster quality and computation speed. The IBM course recommends this as a standard preprocessing step for high-dimensional data.</div>
+  </div>
+</div>
+</section>
+
+<div class="divider"></div>
+
+<!-- K-MEANS -->
+<section id="kmeans">
+<div class="container">
+  <div class="section-label">Module 2</div>
+  <h2 class="section-title">K-Means Clustering</h2>
+  <p class="section-sub">The most widely used clustering algorithm. Fast, scalable, and intuitive. Iteratively assigns points to the nearest centroid and updates centroids until convergence.</p>
+
+  <div class="grid-2">
+    <div>
+      <div class="concept-block">
+        <span class="tag tag-purple">Algorithm Steps</span>
+        <h4>How K-Means Works</h4>
+        <ol style="color:var(--text-muted);font-size:14px;padding-left:18px;">
+          <li style="margin-bottom:6px;">Choose k (number of clusters)</li>
+          <li style="margin-bottom:6px;">Initialize k centroids (randomly or K-Means++)</li>
+          <li style="margin-bottom:6px;"><strong>Assignment step:</strong> Assign each point to its nearest centroid</li>
+          <li style="margin-bottom:6px;"><strong>Update step:</strong> Recalculate centroid as mean of assigned points</li>
+          <li style="margin-bottom:6px;">Repeat 3–4 until centroids stop moving (convergence)</li>
+        </ol>
+        <div class="formula">Objective: minimize Σ Σ ||xᵢ − μₖ||²</div>
+      </div>
+      <div class="concept-block orange">
+        <span class="tag tag-orange">Initialization</span>
+        <h4>K-Means++ vs Random</h4>
+        <p><strong>Random init:</strong> Can lead to poor local minima — centroids may cluster together. Results vary with random seed.<br><br>
+        <strong>K-Means++ (default in sklearn):</strong> Initializes centroids spread far apart. First centroid is random; each subsequent centroid is chosen with probability proportional to distance² from existing centroids. Much more reliable and faster to converge.</p>
+      </div>
+    </div>
+    <div>
+      <div class="concept-block blue">
+        <span class="tag tag-blue">Choosing k</span>
+        <h4>The Elbow Method</h4>
+        <p>Plot inertia (within-cluster sum of squares) vs k. Look for the "elbow" — where adding more clusters gives diminishing returns. Not always obvious — use Silhouette Score or domain knowledge to confirm.</p>
+        <div class="formula">Inertia = Σ min_k ||xᵢ − μₖ||²</div>
+      </div>
+      <div class="concept-block red">
+        <span class="tag tag-red">Limitations</span>
+        <h4>When K-Means Fails</h4>
+        <ul>
+          <li>Assumes spherical, equally-sized clusters</li>
+          <li>Sensitive to outliers (centroid = mean)</li>
+          <li>Must specify k in advance</li>
+          <li>Non-convex cluster shapes (use DBSCAN)</li>
+          <li>Clusters of very different densities</li>
+          <li>Scale-sensitive — always scale first</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+      <span class="code-title">kmeans_clustering.py</span>
+    </div>
+    <pre><code><span class="kw">from</span> sklearn.cluster <span class="kw">import</span> KMeans
+<span class="kw">from</span> sklearn.preprocessing <span class="kw">import</span> StandardScaler
+<span class="kw">from</span> sklearn.metrics <span class="kw">import</span> silhouette_score
+<span class="kw">import</span> matplotlib.pyplot <span class="kw">as</span> plt
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+
+<span class="cm"># ── Always scale before clustering ────────────────────────</span>
+scaler = <span class="fn">StandardScaler</span>()
+X_scaled = scaler.<span class="fn">fit_transform</span>(X)
+
+<span class="cm"># ── Fit K-Means ───────────────────────────────────────────</span>
+kmeans = <span class="fn">KMeans</span>(
+    n_clusters=<span class="nm">5</span>,
+    init=<span class="st">'k-means++'</span>,   <span class="cm"># smarter initialization (default)</span>
+    n_init=<span class="nm">10</span>,           <span class="cm"># run 10 times, pick best inertia</span>
+    max_iter=<span class="nm">300</span>,
+    random_state=<span class="nm">42</span>
+)
+labels = kmeans.<span class="fn">fit_predict</span>(X_scaled)
+<span class="fn">print</span>(<span class="st">f"Inertia: </span><span class="va">{kmeans.inertia_:.2f}</span><span class="st">"</span>)
+<span class="fn">print</span>(<span class="st">f"Centroids shape: </span><span class="va">{kmeans.cluster_centers_.shape}</span><span class="st">"</span>)
+
+<span class="cm"># ── Elbow Method ─────────────────────────────────────────</span>
+inertias = []
+k_range = <span class="fn">range</span>(<span class="nm">1</span>, <span class="nm">11</span>)
+<span class="kw">for</span> k <span class="kw">in</span> k_range:
+    km = <span class="fn">KMeans</span>(n_clusters=k, init=<span class="st">'k-means++'</span>, n_init=<span class="nm">10</span>, random_state=<span class="nm">42</span>)
+    km.<span class="fn">fit</span>(X_scaled)
+    inertias.<span class="fn">append</span>(km.inertia_)
+
+plt.<span class="fn">plot</span>(k_range, inertias, <span class="st">'bo-'</span>)
+plt.<span class="fn">xlabel</span>(<span class="st">'Number of clusters k'</span>); plt.<span class="fn">ylabel</span>(<span class="st">'Inertia'</span>)
+plt.<span class="fn">title</span>(<span class="st">'Elbow Method'</span>); plt.<span class="fn">show</span>()
+
+<span class="cm"># ── Silhouette Score (confirms elbow choice) ──────────────</span>
+sil_scores = []
+<span class="kw">for</span> k <span class="kw">in</span> <span class="fn">range</span>(<span class="nm">2</span>, <span class="nm">11</span>):
+    km = <span class="fn">KMeans</span>(n_clusters=k, n_init=<span class="nm">10</span>, random_state=<span class="nm">42</span>)
+    lbl = km.<span class="fn">fit_predict</span>(X_scaled)
+    sil_scores.<span class="fn">append</span>(<span class="fn">silhouette_score</span>(X_scaled, lbl))
+
+best_k = <span class="fn">range</span>(<span class="nm">2</span>, <span class="nm">11</span>)[sil_scores.<span class="fn">index</span>(<span class="fn">max</span>(sil_scores))]
+<span class="fn">print</span>(<span class="st">f"Best k by silhouette: </span><span class="va">{best_k}</span><span class="st">, score=</span><span class="va">{max(sil_scores):.3f}</span><span class="st">"</span>)
+
+<span class="cm"># ── Per-cluster analysis ──────────────────────────────────</span>
+<span class="kw">import</span> pandas <span class="kw">as</span> pd
+df[<span class="st">'cluster'</span>] = labels
+cluster_profile = df.<span class="fn">groupby</span>(<span class="st">'cluster'</span>).<span class="fn">mean</span>()
+<span class="fn">print</span>(cluster_profile)</code></pre>
+  </div>
+</div>
+</section>
+
+<div class="divider"></div>
+
+<!-- HIERARCHICAL -->
+<section id="hierarchical">
+<div class="container">
+  <div class="section-label">Module 3</div>
+  <h2 class="section-title">Hierarchical Agglomerative Clustering</h2>
+  <p class="section-sub">Builds a tree of clusters from the bottom up. No need to specify k in advance — cut the dendrogram at any level to get the desired number of clusters.</p>
+
+  <div class="grid-2">
+    <div>
+      <div class="concept-block">
+        <span class="tag tag-purple">Algorithm</span>
+        <h4>Bottom-Up (Agglomerative)</h4>
+        <ol style="color:var(--text-muted);font-size:14px;padding-left:18px;">
+          <li style="margin-bottom:5px;">Start: each point is its own cluster</li>
+          <li style="margin-bottom:5px;">Find the two closest clusters</li>
+          <li style="margin-bottom:5px;">Merge them into one cluster</li>
+          <li style="margin-bottom:5px;">Repeat until one cluster remains</li>
+          <li>Visualize as a <strong>dendrogram</strong></li>
+        </ol>
+        <p style="margin-top:10px;color:var(--text-muted);font-size:14px;">Divisive (top-down) is the opposite — split the full dataset recursively. Less common.</p>
+      </div>
+      <div class="concept-block blue">
+        <span class="tag tag-blue">Linkage Criteria</span>
+        <h4>How to Measure Distance Between Clusters</h4>
+        <p><strong>Single linkage:</strong> Minimum distance between points in two clusters. Elongated, chained clusters. Sensitive to outliers.<br><br>
+        <strong>Complete linkage:</strong> Maximum distance. Compact, balanced clusters. Less sensitive to outliers.<br><br>
+        <strong>Average linkage:</strong> Mean distance between all pairs. Good compromise.<br><br>
+        <strong>Ward linkage (default):</strong> Minimizes total within-cluster variance. Produces the most compact, balanced clusters. Usually best choice.</p>
+      </div>
+    </div>
+    <div>
+      <div class="concept-block orange">
+        <span class="tag tag-orange">Dendrogram</span>
+        <h4>Reading a Dendrogram</h4>
+        <p>The y-axis shows the distance at which clusters merged. The further up a merge happens, the more dissimilar those clusters are. To choose k clusters: draw a horizontal line where the dendrogram has the longest vertical spans (biggest gaps) without crossing horizontal lines. The number of lines crossed = k.</p>
+      </div>
+      <div class="concept-block">
+        <span class="tag tag-purple">vs K-Means</span>
+        <h4>Hierarchical Advantages</h4>
+        <ul>
+          <li>No need to pre-specify k</li>
+          <li>Dendrogram reveals cluster structure at every level</li>
+          <li>Can handle non-spherical clusters (with right linkage)</li>
+          <li>Deterministic — same result every run</li>
+          <li>Works with any distance metric</li>
+          <li><strong>Cons:</strong> O(n²) memory, slow on large datasets</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+      <span class="code-title">hierarchical_clustering.py</span>
+    </div>
+    <pre><code><span class="kw">from</span> sklearn.cluster <span class="kw">import</span> AgglomerativeClustering
+<span class="kw">from</span> scipy.cluster.hierarchy <span class="kw">import</span> dendrogram, linkage
+<span class="kw">from</span> scipy.spatial.distance <span class="kw">import</span> pdist
+<span class="kw">import</span> matplotlib.pyplot <span class="kw">as</span> plt
+
+<span class="cm"># ── Plot Dendrogram to choose k ───────────────────────────</span>
+linked = <span class="fn">linkage</span>(X_scaled, method=<span class="st">'ward'</span>)  <span class="cm"># 'single','complete','average','ward'</span>
+
+plt.<span class="fn">figure</span>(figsize=(<span class="nm">14</span>, <span class="nm">6</span>))
+<span class="fn">dendrogram</span>(
+    linked,
+    truncate_mode=<span class="st">'lastp'</span>,   <span class="cm"># show only last p merges</span>
+    p=<span class="nm">30</span>,
+    leaf_font_size=<span class="nm">8</span>,
+    show_contracted=<span class="nm">True</span>
+)
+plt.<span class="fn">axhline</span>(y=<span class="nm">50</span>, color=<span class="st">'red'</span>, linestyle=<span class="st">'--'</span>, label=<span class="st">'Cut line'</span>)
+plt.<span class="fn">title</span>(<span class="st">'Hierarchical Clustering Dendrogram'</span>); plt.<span class="fn">show</span>()
+
+<span class="cm"># ── Fit Agglomerative Clustering ──────────────────────────</span>
+hc = <span class="fn">AgglomerativeClustering</span>(
+    n_clusters=<span class="nm">4</span>,
+    linkage=<span class="st">'ward'</span>,     <span class="cm"># 'complete', 'average', 'single'</span>
+    metric=<span class="st">'euclidean'</span>  <span class="cm"># must be 'euclidean' for ward</span>
+)
+labels = hc.<span class="fn">fit_predict</span>(X_scaled)
+
+<span class="cm"># ── Without specifying n_clusters (use distance threshold) ─</span>
+hc_auto = <span class="fn">AgglomerativeClustering</span>(
+    n_clusters=<span class="nm">None</span>,
+    distance_threshold=<span class="nm">50</span>,  <span class="cm"># cut at distance 50</span>
+    linkage=<span class="st">'ward'</span>
+)
+labels_auto = hc_auto.<span class="fn">fit_predict</span>(X_scaled)
+<span class="fn">print</span>(<span class="st">f"Clusters found: </span><span class="va">{hc_auto.n_clusters_}</span><span class="st">"</span>)</code></pre>
+  </div>
+</div>
+</section>
+
+<div class="divider"></div>
+
+<!-- DBSCAN & DENSITY -->
+<section id="density">
+<div class="container">
+  <div class="section-label">Module 4</div>
+  <h2 class="section-title">Density-Based Clustering: DBSCAN & Mean Shift</h2>
+  <p class="section-sub">Find arbitrarily-shaped clusters based on data density. Identifies noise/outliers automatically. No need to specify k.</p>
+
+  <div class="grid-2">
+    <div>
+      <div class="concept-block">
+        <span class="tag tag-purple">DBSCAN</span>
+        <h4>Density-Based Spatial Clustering</h4>
+        <p>Groups points that are closely packed together (high density regions), marking isolated points as noise/outliers. Uses two parameters:<br><br>
+        <strong>ε (eps):</strong> Maximum radius to search for neighbors. Neighborhood size.<br>
+        <strong>MinPts (min_samples):</strong> Minimum points within ε to be a core point.</p>
+      </div>
+      <div class="concept-block blue">
+        <span class="tag tag-blue">Point Types</span>
+        <h4>Core, Border, and Noise Points</h4>
+        <p><strong>Core point:</strong> Has ≥ MinPts neighbors within ε. Sits inside a dense region.<br><br>
+        <strong>Border point:</strong> Has &lt; MinPts neighbors but is within ε of a core point. On the edge of a cluster.<br><br>
+        <strong>Noise point (outlier):</strong> Not a core point and not within ε of any core point. Labeled as −1.</p>
+        <div class="formula">label = −1 means outlier/noise</div>
+      </div>
+    </div>
+    <div>
+      <div class="concept-block orange">
+        <span class="tag tag-orange">Advantages</span>
+        <h4>Why DBSCAN Outshines K-Means</h4>
+        <ul>
+          <li>Finds arbitrarily-shaped clusters (not just spherical)</li>
+          <li>Automatically identifies outliers as noise</li>
+          <li>No need to specify k in advance</li>
+          <li>Robust to outliers — they don't distort centroids</li>
+          <li>Good for geospatial and irregularly-shaped data</li>
+        </ul>
+      </div>
+      <div class="concept-block green">
+        <span class="tag tag-green">Mean Shift</span>
+        <h4>Centroid Migration Algorithm</h4>
+        <p>Iteratively shifts each point toward the highest density region in its neighborhood (the mean of points within a bandwidth). Converges to density peaks = cluster centers. No need to specify k — bandwidth controls cluster granularity. Computationally expensive O(n²) but excellent for mode-seeking applications like image segmentation.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout blue">
+    <span class="callout-icon">💡</span>
+    <div class="callout-body"><strong>Choosing ε for DBSCAN:</strong> Plot the k-distance graph (sorted distances to kth nearest neighbor). Look for the "knee" — the point where distance starts increasing sharply. That distance is a good ε value. Set MinPts = 2 × dimensions as a starting point (rule of thumb).</div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+      <span class="code-title">dbscan_meanshift.py</span>
+    </div>
+    <pre><code><span class="kw">from</span> sklearn.cluster <span class="kw">import</span> DBSCAN, MeanShift, estimate_bandwidth
+<span class="kw">from</span> sklearn.neighbors <span class="kw">import</span> NearestNeighbors
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+<span class="kw">import</span> matplotlib.pyplot <span class="kw">as</span> plt
+
+<span class="cm"># ── Find optimal eps using k-distance graph ───────────────</span>
+nbrs = <span class="fn">NearestNeighbors</span>(n_neighbors=<span class="nm">5</span>).<span class="fn">fit</span>(X_scaled)
+distances, _ = nbrs.<span class="fn">kneighbors</span>(X_scaled)
+distances = np.<span class="fn">sort</span>(distances[:, -<span class="nm">1</span>])
+
+plt.<span class="fn">plot</span>(distances)
+plt.<span class="fn">xlabel</span>(<span class="st">'Points sorted by distance'</span>); plt.<span class="fn">ylabel</span>(<span class="st">'5th Nearest Neighbor Distance'</span>)
+plt.<span class="fn">title</span>(<span class="st">'k-Distance Graph — look for the knee'</span>); plt.<span class="fn">show</span>()
+
+<span class="cm"># ── Fit DBSCAN ────────────────────────────────────────────</span>
+dbscan = <span class="fn">DBSCAN</span>(
+    eps=<span class="nm">0.5</span>,          <span class="cm"># neighborhood radius — tune this!</span>
+    min_samples=<span class="nm">5</span>,    <span class="cm"># minimum points to form a core (2*dims rule)</span>
+    metric=<span class="st">'euclidean'</span>
+)
+labels = dbscan.<span class="fn">fit_predict</span>(X_scaled)
+
+n_clusters = <span class="fn">len</span>(<span class="fn">set</span>(labels)) - (<span class="nm">1</span> <span class="kw">if</span> -<span class="nm">1</span> <span class="kw">in</span> labels <span class="kw">else</span> <span class="nm">0</span>)
+n_noise    = <span class="fn">list</span>(labels).<span class="fn">count</span>(-<span class="nm">1</span>)
+<span class="fn">print</span>(<span class="st">f"Clusters: </span><span class="va">{n_clusters}</span><span class="st">, Noise points: </span><span class="va">{n_noise}</span><span class="st">"</span>)
+
+<span class="cm"># Core, border, noise classification</span>
+core_mask   = np.<span class="fn">zeros</span>(<span class="fn">len</span>(labels), dtype=<span class="fn">bool</span>)
+core_mask[dbscan.core_sample_indices_] = <span class="nm">True</span>
+noise_mask  = labels == -<span class="nm">1</span>
+border_mask = ~core_mask & ~noise_mask
+
+<span class="cm"># ── Mean Shift ────────────────────────────────────────────</span>
+bandwidth = <span class="fn">estimate_bandwidth</span>(X_scaled, quantile=<span class="nm">0.2</span>, n_samples=<span class="nm">500</span>)
+ms = <span class="fn">MeanShift</span>(bandwidth=bandwidth, bin_seeding=<span class="nm">True</span>)
+ms.<span class="fn">fit</span>(X_scaled)
+<span class="fn">print</span>(<span class="st">f"Mean Shift clusters: </span><span class="va">{len(ms.cluster_centers_)}</span><span class="st">"</span>)</code></pre>
+  </div>
+</div>
+</section>
+
+<div class="divider"></div>
+
+<!-- CLUSTER METRICS -->
+<section id="metrics">
+<div class="container">
+  <div class="section-label">Module 5</div>
+  <h2 class="section-title">Cluster Evaluation Metrics</h2>
+  <p class="section-sub">No labels = no accuracy. Cluster evaluation relies on internal metrics that measure cohesion and separation.</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Metric</th><th>What It Measures</th><th>Range</th><th>Best Value</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Silhouette Score</strong></td><td>How similar a point is to its own cluster vs neighbors</td><td>[−1, 1]</td><td>Near +1</td><td>Most widely used. Works without ground truth</td></tr>
+        <tr><td><strong>Inertia (WCSS)</strong></td><td>Within-cluster sum of squares</td><td>[0, ∞)</td><td>Lower is better</td><td>Only for K-Means. Use with elbow method</td></tr>
+        <tr><td><strong>Davies-Bouldin Index</strong></td><td>Average ratio of within-cluster to between-cluster distance</td><td>[0, ∞)</td><td>Lower is better</td><td>Penalizes spread and proximity of clusters</td></tr>
+        <tr><td><strong>Calinski-Harabasz</strong></td><td>Ratio of between-cluster to within-cluster dispersion</td><td>[0, ∞)</td><td>Higher is better</td><td>Fast to compute, good for comparing k values</td></tr>
+        <tr><td><strong>Adjusted Rand Index</strong></td><td>Similarity to ground truth labels (if available)</td><td>[−1, 1]</td><td>Near +1</td><td>Requires known labels. Good for benchmarking</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="concept-block">
+    <span class="tag tag-purple">Silhouette Score — The Formula</span>
+    <h4>s(i) = (b − a) / max(a, b)</h4>
+    <p><strong>a</strong> = mean distance to all other points in the same cluster (cohesion). <strong>b</strong> = mean distance to all points in the nearest different cluster (separation). Score = +1 means perfectly clustered. Score = 0 means on a boundary. Score = −1 means misclassified.</p>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+      <span class="code-title">cluster_evaluation.py</span>
+    </div>
+    <pre><code><span class="kw">from</span> sklearn.metrics <span class="kw">import</span> (
+    silhouette_score, silhouette_samples,
+    davies_bouldin_score, calinski_harabasz_score,
+    adjusted_rand_score
+)
+<span class="kw">import</span> matplotlib.pyplot <span class="kw">as</span> plt
+<span class="kw">import</span> matplotlib.cm <span class="kw">as</span> cm
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+
+<span class="cm"># ── Core metrics ──────────────────────────────────────────</span>
+<span class="fn">print</span>(<span class="st">f"Silhouette Score:     </span><span class="va">{silhouette_score(X_scaled, labels):.3f}</span><span class="st">"</span>)
+<span class="fn">print</span>(<span class="st">f"Davies-Bouldin Index: </span><span class="va">{davies_bouldin_score(X_scaled, labels):.3f}</span><span class="st">"</span>)
+<span class="fn">print</span>(<span class="st">f"Calinski-Harabasz:    </span><span class="va">{calinski_harabasz_score(X_scaled, labels):.1f}</span><span class="st">"</span>)
+
+<span class="cm"># ── Silhouette plot (per-sample visualization) ────────────</span>
+n_clusters = <span class="fn">len</span>(<span class="fn">set</span>(labels))
+sample_sil_values = <span class="fn">silhouette_samples</span>(X_scaled, labels)
+
+fig, ax = plt.<span class="fn">subplots</span>(figsize=(<span class="nm">8</span>, <span class="nm">6</span>))
+y_lower = <span class="nm">10</span>
+<span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(n_clusters):
+    sil_vals = <span class="fn">sorted</span>(sample_sil_values[labels == i])
+    y_upper = y_lower + <span class="fn">len</span>(sil_vals)
+    color = cm.nipy_spectral(i / n_clusters)
+    ax.<span class="fn">fill_betweenx</span>(np.<span class="fn">arange</span>(y_lower, y_upper), <span class="nm">0</span>, sil_vals, color=color)
+    y_lower = y_upper + <span class="nm">10</span>
+ax.<span class="fn">axvline</span>(x=<span class="fn">silhouette_score</span>(X_scaled, labels), color=<span class="st">'red'</span>, linestyle=<span class="st">'--'</span>)
+ax.<span class="fn">set_xlabel</span>(<span class="st">'Silhouette coefficient'</span>); plt.<span class="fn">show</span>()
+
+<span class="cm"># ── Compare multiple k values across all metrics ──────────</span>
+results = []
+<span class="kw">for</span> k <span class="kw">in</span> <span class="fn">range</span>(<span class="nm">2</span>, <span class="nm">11</span>):
+    km = <span class="fn">KMeans</span>(n_clusters=k, n_init=<span class="nm">10</span>, random_state=<span class="nm">42</span>)
+    lbl = km.<span class="fn">fit_predict</span>(X_scaled)
+    results.<span class="fn">append</span>({
+        <span class="st">'k'</span>: k,
+        <span class="st">'silhouette'</span>: <span class="fn">silhouette_score</span>(X_scaled, lbl),
+        <span class="st">'db_index'</span>:   <span class="fn">davies_bouldin_score</span>(X_scaled, lbl),
+        <span class="st">'ch_score'</span>:   <span class="fn">calinski_harabasz_score</span>(X_scaled, lbl),
+        <span class="st">'inertia'</span>:    km.inertia_
+    })
+<span class="kw">import</span> pandas <span class="kw">as</span> pd
+<span class="fn">print</span>(pd.<span class="fn">DataFrame</span>(results).<span class="fn">set_index</span>(<span class="st">'k'</span>))</code></pre>
+  </div>
+</div>
+</section>
+
+<div class="divider"></div>
+
+<!-- PCA -->
+<section id="pca">
+<div class="container">
+  <div class="section-label">Module 6</div>
+  <h2 class="section-title">Principal Component Analysis (PCA)</h2>
+  <p class="section-sub">Linear dimensionality reduction. Finds orthogonal axes of maximum variance. The workhorse of preprocessing and visualization.</p>
+
+  <div class="grid-2">
+    <div>
+      <div class="concept-block">
+        <span class="tag tag-purple">Core Concept</span>
+        <h4>What PCA Does</h4>
+        <p>PCA finds new orthogonal axes (Principal Components) that capture the most variance in the data. PC1 captures the most variance, PC2 the second most (orthogonal to PC1), and so on. Data is projected onto these axes, compressing dimensions while preserving maximum information.</p>
+        <div class="formula">Cov(X) → Eigendecomposition → Eigenvectors (directions) + Eigenvalues (variance explained)</div>
+      </div>
+      <div class="concept-block blue">
+        <span class="tag tag-blue">Explained Variance</span>
+        <h4>Choosing Number of Components</h4>
+        <p><strong>Explained variance ratio:</strong> The proportion of total variance each PC captures.<br><br>
+        <strong>Scree plot:</strong> Plot variance explained vs component number. Look for the elbow.<br><br>
+        <strong>Cumulative explained variance:</strong> Common practice: keep enough components to explain 95% (or 90%) of variance. Use <code>n_components=0.95</code> in sklearn to do this automatically.</p>
+      </div>
+    </div>
+    <div>
+      <div class="concept-block orange">
+        <span class="tag tag-orange">Assumptions & Limitations</span>
+        <h4>When PCA Struggles</h4>
+        <ul>
+          <li>Linear relationships only — can't capture non-linear manifolds</li>
+          <li>Scale-sensitive — must standardize first</li>
+          <li>Components are not directly interpretable (linear combinations)</li>
+          <li>Assumes Gaussian distributions (but works reasonably outside them)</li>
+          <li>Removes interpretability — use NMF if interpretability matters</li>
+        </ul>
+      </div>
+      <div class="concept-block green">
+        <span class="tag tag-green">Use Cases</span>
+        <h4>When PCA Shines</h4>
+        <ul>
+          <li>Preprocessing before clustering (remove noise dimensions)</li>
+          <li>Visualizing high-dimensional data in 2D/3D</li>
+          <li>Speeding up downstream ML (reduce features first)</li>
+          <li>Removing multicollinearity before linear regression</li>
+          <li>Image compression (facial recognition, medical imaging)</li>
+          <li>Noise filtering</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+      <span class="code-title">pca.py</span>
+    </div>
+    <pre><code><span class="kw">from</span> sklearn.decomposition <span class="kw">import</span> PCA
+<span class="kw">from</span> sklearn.preprocessing <span class="kw">import</span> StandardScaler
+<span class="kw">import</span> matplotlib.pyplot <span class="kw">as</span> plt
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+
+<span class="cm"># ── Always standardize before PCA ─────────────────────────</span>
+scaler = <span class="fn">StandardScaler</span>()
+X_scaled = scaler.<span class="fn">fit_transform</span>(X)
+
+<span class="cm"># ── Fit PCA — explore all components first ────────────────</span>
+pca_full = <span class="fn">PCA</span>()
+pca_full.<span class="fn">fit</span>(X_scaled)
+
+<span class="cm"># Scree plot</span>
+plt.<span class="fn">figure</span>(figsize=(<span class="nm">10</span>, <span class="nm">4</span>))
+plt.<span class="fn">subplot</span>(<span class="nm">1</span>, <span class="nm">2</span>, <span class="nm">1</span>)
+plt.<span class="fn">bar</span>(<span class="fn">range</span>(<span class="nm">1</span>, <span class="fn">len</span>(pca_full.explained_variance_ratio_)+<span class="nm">1</span>),
+        pca_full.explained_variance_ratio_)
+plt.<span class="fn">xlabel</span>(<span class="st">'Principal Component'</span>); plt.<span class="fn">ylabel</span>(<span class="st">'Variance Explained'</span>)
+
+plt.<span class="fn">subplot</span>(<span class="nm">1</span>, <span class="nm">2</span>, <span class="nm">2</span>)
+plt.<span class="fn">plot</span>(np.<span class="fn">cumsum</span>(pca_full.explained_variance_ratio_), <span class="st">'o-'</span>)
+plt.<span class="fn">axhline</span>(y=<span class="nm">0.95</span>, color=<span class="st">'r'</span>, linestyle=<span class="st">'--'</span>, label=<span class="st">'95% threshold'</span>)
+plt.<span class="fn">xlabel</span>(<span class="st">'Number of Components'</span>); plt.<span class="fn">ylabel</span>(<span class="st">'Cumulative Variance'</span>)
+plt.<span class="fn">show</span>()
+
+<span class="cm"># ── Fit PCA with 95% variance retention ───────────────────</span>
+pca = <span class="fn">PCA</span>(n_components=<span class="nm">0.95</span>)  <span class="cm"># auto-selects components for 95% variance</span>
+X_pca = pca.<span class="fn">fit_transform</span>(X_scaled)
+<span class="fn">print</span>(<span class="st">f"Original: </span><span class="va">{X.shape[1]}</span><span class="st"> features → PCA: </span><span class="va">{X_pca.shape[1]}</span><span class="st"> components"</span>)
+
+<span class="cm"># ── Inspect loadings (which original features drive each PC)</span>
+loadings = pca.<span class="fn">components_</span>   <span class="cm"># shape: (n_components, n_features)</span>
+<span class="kw">import</span> pandas <span class="kw">as</span> pd
+loading_df = pd.<span class="fn">DataFrame</span>(
+    loadings.T,
+    index=feature_names,
+    columns=[<span class="st">f'PC</span><span class="va">{i+1}</span><span class="st">'</span> <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(pca.n_components_)]
+)
+<span class="fn">print</span>(loading_df.<span class="fn">abs</span>().<span class="fn">sort_values</span>(<span class="st">'PC1'</span>, ascending=<span class="nm">False</span>))
+
+<span class="cm"># ── 2D Visualization ──────────────────────────────────────</span>
+pca2d = <span class="fn">PCA</span>(n_components=<span class="nm">2</span>)
+X_2d  = pca2d.<span class="fn">fit_transform</span>(X_scaled)
+plt.<span class="fn">scatter</span>(X_2d[:, <span class="nm">0</span>], X_2d[:, <span class="nm">1</span>], c=labels, cmap=<span class="st">'tab10'</span>, alpha=<span class="nm">0.7</span>)
+plt.<span class="fn">xlabel</span>(<span class="st">f'PC1 ({pca2d.explained_variance_ratio_[0]*100:.1f}%)'</span>)
+plt.<span class="fn">ylabel</span>(<span class="st">f'PC2 ({pca2d.explained_variance_ratio_[1]*100:.1f}%)'</span>); plt.<span class="fn">show</span>()
+
+<span class="cm"># ── Reconstruct (inverse transform) ──────────────────────</span>
+X_reconstructed = pca.<span class="fn">inverse_transform</span>(X_pca)
+reconstruction_error = np.<span class="fn">mean</span>((X_scaled - X_reconstructed) ** <span class="nm">2</span>)
+<span class="fn">print</span>(<span class="st">f"Reconstruction MSE: </span><span class="va">{reconstruction_error:.4f}</span><span class="st">"</span>)</code></pre>
+  </div>
+</div>
+</section>
+
+<div class="divider"></div>
+
+<!-- t-SNE / UMAP / Kernel PCA -->
+<section id="nonlinear">
+<div class="container">
+  <div class="section-label">Module 7</div>
+  <h2 class="section-title">Non-Linear Dimensionality Reduction</h2>
+  <p class="section-sub">When data lives on a non-linear manifold, PCA fails. t-SNE, UMAP, and Kernel PCA reveal the true structure.</p>
+
+  <div class="algo-grid">
+    <div class="algo-card">
+      <h4><span class="tag tag-purple">t-SNE</span></h4>
+      <p>Preserves local structure — similar points cluster together in the 2D embedding. Excellent for visualizing clusters. <strong>Not suitable for dimensionality reduction before ML</strong> — non-deterministic, not invertible, distance between clusters is meaningless.</p>
+      <ul>
+        <li><strong>perplexity:</strong> Balances local vs global (5–50 typical)</li>
+        <li>Run on PCA-reduced data first for speed</li>
+        <li>Set <code>random_state</code> for reproducibility</li>
+        <li>Use <code>n_components=2</code> or <code>3</code> only</li>
+      </ul>
+    </div>
+    <div class="algo-card">
+      <h4><span class="tag tag-blue">UMAP</span></h4>
+      <p>Faster than t-SNE, preserves more global structure, and IS suitable as a preprocessing step (invertible). The 2025 go-to for visualization and manifold learning. Scalable to millions of points.</p>
+      <ul>
+        <li><code>n_neighbors</code>: local neighborhood size (15 default)</li>
+        <li><code>min_dist</code>: tightness of embedding (0.1 default)</li>
+        <li><code>n_components</code>: output dimensions (2/3 for viz, more for preprocessing)</li>
+        <li>Supports supervised/semi-supervised mode</li>
+      </ul>
+    </div>
+    <div class="algo-card">
+      <h4><span class="tag tag-orange">Kernel PCA</span></h4>
+      <p>Applies the kernel trick to PCA — maps data to a higher-dimensional space via a kernel function, then applies linear PCA. Can capture non-linear relationships that standard PCA misses.</p>
+      <ul>
+        <li><code>kernel='rbf'</code>: Gaussian. Most common.</li>
+        <li><code>kernel='poly'</code>: Polynomial relationships</li>
+        <li>Controlled by <code>gamma</code> (like SVM)</li>
+        <li>Not invertible by default (no inverse_transform)</li>
+      </ul>
+    </div>
+    <div class="algo-card">
+      <h4><span class="tag tag-green">MDS</span></h4>
+      <p>Multidimensional Scaling. Preserves pairwise distances between points in the lower-dimensional embedding. Two types: <strong>metric MDS</strong> (preserves actual distances) and <strong>non-metric MDS</strong> (preserves ranks of distances).</p>
+      <ul>
+        <li>Works on any distance matrix (not just Euclidean)</li>
+        <li>Good for visualizing dissimilarity matrices</li>
+        <li>Computationally expensive O(n²)</li>
+        <li>Classical MDS equivalent to PCA for Euclidean distances</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+      <span class="code-title">nonlinear_dim_reduction.py</span>
+    </div>
+    <pre><code><span class="kw">from</span> sklearn.manifold <span class="kw">import</span> TSNE, MDS
+<span class="kw">from</span> sklearn.decomposition <span class="kw">import</span> KernelPCA
+<span class="kw">import</span> umap  <span class="cm"># pip install umap-learn</span>
+
+<span class="cm"># ── t-SNE — visualization only ────────────────────────────</span>
+<span class="cm"># Best practice: apply PCA first to ~50 dims for speed</span>
+X_pca50 = <span class="fn">PCA</span>(n_components=<span class="nm">50</span>).<span class="fn">fit_transform</span>(X_scaled)
+
+tsne = <span class="fn">TSNE</span>(
+    n_components=<span class="nm">2</span>,
+    perplexity=<span class="nm">30</span>,       <span class="cm"># try 5–50, larger datasets need higher values</span>
+    n_iter=<span class="nm">1000</span>,
+    learning_rate=<span class="st">'auto'</span>,
+    init=<span class="st">'pca'</span>,          <span class="cm"># more stable than random init</span>
+    random_state=<span class="nm">42</span>
+)
+X_tsne = tsne.<span class="fn">fit_transform</span>(X_pca50)
+
+<span class="cm"># ── UMAP — visualization + preprocessing ──────────────────</span>
+reducer = umap.<span class="fn">UMAP</span>(
+    n_components=<span class="nm">2</span>,
+    n_neighbors=<span class="nm">15</span>,      <span class="cm"># local structure: smaller = more local</span>
+    min_dist=<span class="nm">0.1</span>,        <span class="cm"># tightness of point clusters</span>
+    metric=<span class="st">'euclidean'</span>,
+    random_state=<span class="nm">42</span>
+)
+X_umap = reducer.<span class="fn">fit_transform</span>(X_scaled)
+<span class="cm"># UMAP is invertible — can transform new data</span>
+X_new_embedded = reducer.<span class="fn">transform</span>(X_new)
+
+<span class="cm"># ── Kernel PCA ────────────────────────────────────────────</span>
+kpca = <span class="fn">KernelPCA</span>(
+    n_components=<span class="nm">10</span>,
+    kernel=<span class="st">'rbf'</span>,
+    gamma=<span class="nm">0.1</span>,
+    fit_inverse_transform=<span class="nm">True</span>  <span class="cm"># enables reconstruction</span>
+)
+X_kpca = kpca.<span class="fn">fit_transform</span>(X_scaled)
+
+<span class="cm"># ── Compare visualizations side by side ───────────────────</span>
+fig, axes = plt.<span class="fn">subplots</span>(<span class="nm">1</span>, <span class="nm">3</span>, figsize=(<span class="nm">18</span>, <span class="nm">5</span>))
+<span class="kw">for</span> ax, X_emb, title <span class="kw">in</span> <span class="fn">zip</span>(axes,
+        [X_pca2, X_tsne, X_umap], [<span class="st">'PCA'</span>, <span class="st">'t-SNE'</span>, <span class="st">'UMAP'</span>]):
+    ax.<span class="fn">scatter</span>(X_emb[:, <span class="nm">0</span>], X_emb[:, <span class="nm">1</span>], c=labels, cmap=<span class="st">'tab10'</span>, s=<span class="nm">5</span>)
+    ax.<span class="fn">set_title</span>(title)
+plt.<span class="fn">tight_layout</span>(); plt.<span class="fn">show</span>()</code></pre>
+  </div>
+</div>
+</section>
+
+<div class="divider"></div>
+
+<!-- NMF -->
+<section id="nmf">
+<div class="container">
+  <div class="section-label">Module 8</div>
+  <h2 class="section-title">Matrix Factorization & NMF</h2>
+  <p class="section-sub">Decompose data matrices into interpretable parts. NMF is uniquely powerful for text, images, and any non-negative data.</p>
+
+  <div class="grid-2">
+    <div>
+      <div class="concept-block">
+        <span class="tag tag-purple">NMF Core Concept</span>
+        <h4>Non-Negative Matrix Factorization</h4>
+        <p>Factorizes matrix V ≈ W × H where all values in V, W, and H are non-negative. Unlike PCA which allows negative components (which cancel out), NMF produces <strong>additive, parts-based</strong> representations that are more interpretable.</p>
+        <div class="formula">V ≈ W × H &nbsp;|&nbsp; V(n×m) = W(n×k) × H(k×m)</div>
+        <p style="margin-top:10px;color:var(--text-muted);font-size:14px;"><strong>W:</strong> Basis components (e.g., topics, facial features). <strong>H:</strong> Activation weights (how much of each component a sample contains). <strong>k:</strong> Number of components (hyperparameter).</p>
+      </div>
+      <div class="concept-block blue">
+        <span class="tag tag-blue">vs PCA</span>
+        <h4>NMF vs PCA Comparison</h4>
+        <p><strong>PCA:</strong> Orthogonal components, allows negatives, global/holistic representations. Not interpretable for many domains.<br><br>
+        <strong>NMF:</strong> Parts-based, all positive, additive. Facial components look like actual facial parts (nose, eyes, mouth). Topic model components look like actual topics. More interpretable.<br><br>
+        <strong>Limitation:</strong> NMF is a non-convex optimization — no closed-form solution, sensitive to initialization, not unique.</p>
+      </div>
+    </div>
+    <div>
+      <div class="concept-block orange">
+        <span class="tag tag-orange">Applications</span>
+        <h4>Where NMF Excels</h4>
+        <ul>
+          <li><strong>Topic modeling:</strong> Documents × Terms → Topics (like LDA)</li>
+          <li><strong>Facial recognition:</strong> Faces decompose into interpretable parts</li>
+          <li><strong>Music source separation:</strong> Mixed audio into instruments</li>
+          <li><strong>Gene expression:</strong> Genes × Samples → Gene modules</li>
+          <li><strong>Recommendation:</strong> Users × Items → Latent factors</li>
+          <li><strong>Image compression:</strong> Pixel matrices into components</li>
+        </ul>
+      </div>
+      <div class="concept-block green">
+        <span class="tag tag-green">Choosing k</span>
+        <h4>Number of Components</h4>
+        <p>Similar to PCA's explained variance. Use reconstruction error vs k curve. Look for elbow. In topic modeling, evaluate topic coherence (human interpretability). Try multiple k values and inspect components visually. There is no single "correct" k — it's driven by the application.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+      <span class="code-title">nmf_matrix_factorization.py</span>
+    </div>
+    <pre><code><span class="kw">from</span> sklearn.decomposition <span class="kw">import</span> NMF, TruncatedSVD
+<span class="kw">from</span> sklearn.feature_extraction.text <span class="kw">import</span> TfidfVectorizer
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+<span class="kw">import</span> pandas <span class="kw">as</span> pd
+
+<span class="cm"># ── NMF on numerical data ─────────────────────────────────</span>
+<span class="cm"># Note: Input must be non-negative! (e.g. pixel values, word counts)</span>
+nmf = <span class="fn">NMF</span>(
+    n_components=<span class="nm">10</span>,        <span class="cm"># number of latent factors</span>
+    init=<span class="st">'nndsvd'</span>,          <span class="cm"># better init than random (nndsvd or nndsvda)</span>
+    max_iter=<span class="nm">300</span>,
+    random_state=<span class="nm">42</span>
+)
+W = nmf.<span class="fn">fit_transform</span>(X)  <span class="cm"># sample activations (n_samples × k)</span>
+H = nmf.components_        <span class="cm"># basis components (k × n_features)</span>
+X_reconstructed = W @ H    <span class="cm"># approximate reconstruction</span>
+
+reconstruction_error = nmf.reconstruction_err_
+<span class="fn">print</span>(<span class="st">f"Reconstruction error: </span><span class="va">{reconstruction_error:.3f}</span><span class="st">"</span>)
+
+<span class="cm"># ── NMF for Topic Modeling (text data) ───────────────────</span>
+vectorizer = <span class="fn">TfidfVectorizer</span>(max_features=<span class="nm">1000</span>, stop_words=<span class="st">'english'</span>)
+X_tfidf = vectorizer.<span class="fn">fit_transform</span>(documents)  <span class="cm"># non-negative TF-IDF</span>
+
+nmf_topics = <span class="fn">NMF</span>(n_components=<span class="nm">5</span>, init=<span class="st">'nndsvd'</span>, random_state=<span class="nm">42</span>)
+W_docs = nmf_topics.<span class="fn">fit_transform</span>(X_tfidf)
+
+<span class="cm"># Print top words per topic</span>
+feature_names = vectorizer.get_feature_names_out()
+<span class="kw">for</span> topic_idx, topic <span class="kw">in</span> <span class="fn">enumerate</span>(nmf_topics.components_):
+    top_words = [feature_names[i] <span class="kw">for</span> i <span class="kw">in</span> topic.<span class="fn">argsort</span>()[-<span class="nm">10</span>:][::-<span class="nm">1</span>]]
+    <span class="fn">print</span>(<span class="st">f"Topic </span><span class="va">{topic_idx}</span><span class="st">: </span><span class="va">{', '.join(top_words)}</span><span class="st">"</span>)
+
+<span class="cm"># ── Compare reconstruction error vs k (choose components) ─</span>
+errors = []
+<span class="kw">for</span> k <span class="kw">in</span> <span class="fn">range</span>(<span class="nm">2</span>, <span class="nm">16</span>):
+    model = <span class="fn">NMF</span>(n_components=k, init=<span class="st">'nndsvd'</span>, random_state=<span class="nm">42</span>)
+    model.<span class="fn">fit</span>(X)
+    errors.<span class="fn">append</span>(model.reconstruction_err_)
+
+plt.<span class="fn">plot</span>(<span class="fn">range</span>(<span class="nm">2</span>, <span class="nm">16</span>), errors, <span class="st">'o-'</span>)
+plt.<span class="fn">xlabel</span>(<span class="st">'Number of Components k'</span>); plt.<span class="fn">ylabel</span>(<span class="st">'Reconstruction Error'</span>)
+plt.<span class="fn">title</span>(<span class="st">'NMF Elbow — Choose k'</span>); plt.<span class="fn">show</span>()</code></pre>
+  </div>
+</div>
+</section>
+
+<div class="divider"></div>
+
+<!-- BEST PRACTICES -->
+<section id="best-practices">
+<div class="container">
+  <div class="section-label">State-of-the-Art 2025</div>
+  <h2 class="section-title">Best Practices & Algorithm Selection</h2>
+  <p class="section-sub">How pros approach unsupervised problems — from algorithm choice to validation strategy.</p>
+
+  <h3 style="font-size:16px;font-weight:700;margin-bottom:16px;">Algorithm Selection Guide</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Algorithm</th><th>Best For</th><th>Avoid When</th><th>Must Specify k?</th></tr></thead>
+      <tbody>
+        <tr><td><strong>K-Means</strong></td><td>Large datasets, spherical clusters, fast iteration</td><td>Non-spherical shapes, many outliers, unknown k</td><td>✅ Yes</td></tr>
+        <tr><td><strong>Hierarchical</strong></td><td>Small-medium data, exploring structure, no k intuition</td><td>Datasets &gt;10k points (slow)</td><td>❌ No (dendrogram)</td></tr>
+        <tr><td><strong>DBSCAN</strong></td><td>Arbitrary shapes, outlier detection, geospatial data</td><td>High-dimensional data, variable density</td><td>❌ No</td></tr>
+        <tr><td><strong>Mean Shift</strong></td><td>Image segmentation, automatic k discovery</td><td>Large datasets (O(n²))</td><td>❌ No</td></tr>
+        <tr><td><strong>PCA</strong></td><td>Linear reduction, preprocessing, visualization</td><td>Non-linear manifolds, interpretability required</td><td>No (explained variance %)</td></tr>
+        <tr><td><strong>t-SNE</strong></td><td>2D/3D visualization of cluster structure</td><td>Preprocessing for ML, large datasets</td><td>No</td></tr>
+        <tr><td><strong>UMAP</strong></td><td>Visualization + preprocessing, large datasets</td><td>When global distance preservation matters</td><td>No</td></tr>
+        <tr><td><strong>NMF</strong></td><td>Text, images, non-negative data, interpretability</td><td>Data with negative values (use PCA/SVD)</td><td>Yes</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3 style="font-size:16px;font-weight:700;margin:32px 0 16px;">Professional Checklist</h3>
+  <div class="bp-card">
+    <div class="bp-num">1</div>
+    <div class="bp-content">
+      <h4>Always Scale Before Clustering or PCA</h4>
+      <p>K-Means, DBSCAN, Hierarchical, and PCA are all sensitive to feature magnitude. A feature ranging 0–1000 will dominate Euclidean distances. Standardize with StandardScaler first. Exception: if scale itself is meaningful (e.g., comparing monetary amounts).</p>
+    </div>
+  </div>
+  <div class="bp-card">
+    <div class="bp-num">2</div>
+    <div class="bp-content">
+      <h4>Reduce Dimensions Before Clustering</h4>
+      <p>Apply PCA (or UMAP) to your data before clustering to remove noise dimensions that hurt distance calculations. This is particularly important for data with >20 features. A standard pipeline: StandardScaler → PCA(0.95) → KMeans.</p>
+    </div>
+  </div>
+  <div class="bp-card">
+    <div class="bp-num">3</div>
+    <div class="bp-content">
+      <h4>Use Multiple Metrics to Validate Clusters</h4>
+      <p>No single metric is definitive. Combine Silhouette Score (cohesion/separation), Davies-Bouldin Index (cluster compactness), and Calinski-Harabasz Score. Cross-reference with the elbow method. And critically — visualize the clusters. Do they make business sense?</p>
+    </div>
+  </div>
+  <div class="bp-card">
+    <div class="bp-num">4</div>
+    <div class="bp-content">
+      <h4>Profile Your Clusters After Fitting</h4>
+      <p>Clustering is only halfway — the real value comes from interpreting what each cluster means. Do <code>df.groupby('cluster').mean()</code> and examine the feature profiles. Assign meaningful business names (e.g., "high-value dormant customers"). This is what makes unsupervised learning actionable.</p>
+    </div>
+  </div>
+  <div class="bp-card">
+    <div class="bp-num">5</div>
+    <div class="bp-content">
+      <h4>t-SNE Is Visualization Only — Never Use for Preprocessing</h4>
+      <p>t-SNE is non-invertible, non-deterministic, and inter-cluster distances are meaningless. It's purely for visualization. For preprocessing, use PCA (linear, fast, invertible) or UMAP (non-linear, invertible, scalable). This is one of the most common mistakes in unsupervised ML practice.</p>
+    </div>
+  </div>
+  <div class="bp-card">
+    <div class="bp-num">6</div>
+    <div class="bp-content">
+      <h4>Set random_state for Reproducibility</h4>
+      <p>K-Means, t-SNE, UMAP, and NMF are all non-deterministic. Always set <code>random_state=42</code> (or any fixed integer) to ensure your results are reproducible. Report the seed in papers and notebooks. Run multiple seeds and compare stability as a form of cluster validation.</p>
+    </div>
+  </div>
+
+  <h3 style="font-size:16px;font-weight:700;margin:32px 0 16px;">FAQ — Common Pitfalls</h3>
+  <details>
+    <summary>Why does K-Means keep giving different results each run?</summary>
+    <div class="details-body">K-Means is sensitive to centroid initialization. With random initialization, different starting points lead to different local minima. Fix this with: (1) <code>init='k-means++'</code> for smarter initialization, (2) <code>n_init=10</code> to run 10 times and pick the best, and (3) <code>random_state=42</code> for reproducibility. The sklearn default already uses k-means++ and n_init=10, so just set the random_state.</div>
+  </details>
+  <details>
+    <summary>How do I interpret the components from PCA?</summary>
+    <div class="details-body">Each principal component is a linear combination of original features. Inspect <code>pca.components_</code> — the loadings. Features with large absolute loadings in PC1 are the primary drivers of variance. But PCA components are often uninterpretable (e.g., PC1 = 0.4×age − 0.6×income + ...). If interpretability matters, use NMF instead. For understanding which original features matter most, use feature importance from a supervised model trained on the cluster labels.</div>
+  </details>
+  <details>
+    <summary>DBSCAN found too many noise points — what do I adjust?</summary>
+    <div class="details-body">Two options: (1) Increase <code>eps</code> — a larger neighborhood means more points qualify as core, fewer are labeled noise. (2) Decrease <code>min_samples</code> — lower density requirement means more core points. Use the k-distance graph to find a good eps. Also make sure your data is scaled — unscaled features cause eps to be applied inconsistently across dimensions. If your data has very different densities in different regions, consider HDBSCAN which adapts to variable density.</div>
+  </details>
+  <details>
+    <summary>When should I use t-SNE vs UMAP?</summary>
+    <div class="details-body">In 2025, UMAP is preferred in almost all scenarios: it's faster (10–100x), preserves more global structure, is reproducible with fixed random_state, can transform new data, and can be used as a preprocessing step. t-SNE is only preferable when you specifically need its local-structure-preservation properties for a visualization and computational cost isn't a concern. For large datasets (&gt;100k points), UMAP is the only practical option — t-SNE becomes impractical.</div>
+  </details>
+  <details>
+    <summary>What's the difference between PCA and SVD (Truncated SVD)?</summary>
+    <div class="details-body">PCA centers the data (subtracts the mean) before applying SVD, then decomposes the covariance matrix. TruncatedSVD (LSA) applies SVD directly to the data matrix without centering — this is why it's used for sparse data like TF-IDF matrices (centering would destroy sparsity). For dense data, PCA and TruncatedSVD on the mean-centered data are equivalent. Use PCA for dense data, TruncatedSVD for text and other sparse matrices.</div>
+  </details>
+</div>
+</section>
+
+<div class="divider"></div>
+
+<!-- QUIZ -->
+<section id="quiz">
+<div class="container">
+  <div class="section-label">Test Your Knowledge</div>
+  <h2 class="section-title">Course 4 Quiz</h2>
+  <p class="section-sub">20 questions across every topic — clustering, dimensionality reduction, metrics, and practical best practices.</p>
+
+  <div class="quiz-progress">
+    <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    <span class="quiz-counter" id="quizCounter">0 / 20</span>
+  </div>
+
+  <div id="quizContainer">
+
+    <div class="question-card active" data-q="0">
+      <div class="q-meta"><span class="q-num">Q01</span><span class="q-topic">Unsupervised Learning</span></div>
+      <div class="q-text">What is the fundamental difference between supervised and unsupervised learning, and why does it make evaluation harder?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>Supervised uses more data; unsupervised is harder to scale</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>Unsupervised has no labels or target variable, so there is no ground truth to compare predictions against — internal metrics must be used instead</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>Unsupervised is harder because it requires more hyperparameter tuning</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>Supervised uses labeled data; unsupervised uses random data</button>
+      </div>
+      <div class="explanation">✅ <strong>No labels = no ground truth.</strong> In supervised learning you measure error against known correct answers (accuracy, F1, MSE). In unsupervised learning you're discovering unknown structure — you can't compare to "correct" answers because they don't exist. Instead you use internal metrics like Silhouette Score (how well-separated are the clusters?) which measure geometric quality, not prediction accuracy.</div>
+    </div>
+
+    <div class="question-card" data-q="1">
+      <div class="q-meta"><span class="q-num">Q02</span><span class="q-topic">Curse of Dimensionality</span></div>
+      <div class="q-text">Why does the curse of dimensionality specifically break distance-based clustering algorithms?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>More dimensions require more RAM, slowing the algorithm</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>In high dimensions, all pairwise distances converge to the same value, making "nearest neighbor" meaningless</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>High-dimensional data always has more outliers that confuse centroids</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>Euclidean distance only works in 2D and 3D space</button>
+      </div>
+      <div class="explanation">✅ <strong>Distance concentration.</strong> In high dimensions, the ratio of the nearest to farthest neighbor distance approaches 1 — everything is approximately equidistant. When all points are the same distance from each other, clustering based on "nearest neighbors" becomes meaningless. The fix: reduce dimensions with PCA before clustering, or use algorithms that don't rely purely on distance (e.g., DBSCAN with careful eps tuning).</div>
+    </div>
+
+    <div class="question-card" data-q="2">
+      <div class="q-meta"><span class="q-num">Q03</span><span class="q-topic">K-Means</span></div>
+      <div class="q-text">K-Means uses an iterative assignment and update process. What is its objective function (what is it actually minimizing)?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>Maximizing the distance between cluster centroids</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>Minimizing the within-cluster sum of squared distances (inertia) from each point to its centroid</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>Minimizing the number of iterations until convergence</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>Maximizing the total variance explained by cluster membership</button>
+      </div>
+      <div class="explanation">✅ <strong>Minimize inertia = within-cluster sum of squares (WCSS).</strong> Formally: Σ Σ ||xᵢ − μₖ||². K-Means is a greedy algorithm that alternates between assigning points to the nearest centroid and updating centroids to the mean of assigned points. It converges to a local minimum of inertia (not guaranteed to find the global minimum — hence multiple restarts via n_init).</div>
+    </div>
+
+    <div class="question-card" data-q="3">
+      <div class="q-meta"><span class="q-num">Q04</span><span class="q-topic">K-Means</span></div>
+      <div class="q-text">What is K-Means++ and why is it better than random initialization?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>It runs K-Means multiple times and picks the run with the best silhouette score</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>It initializes centroids spread far apart by selecting each new centroid with probability proportional to distance² from existing centroids</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>It automatically selects the optimal k before running</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>It adds L2 regularization to the centroid update step</button>
+      </div>
+      <div class="explanation">✅ <strong>K-Means++ spreads initial centroids intelligently.</strong> First centroid: random. Each subsequent centroid: chosen from remaining points with probability proportional to distance² from the nearest existing centroid. This ensures centroids start spread across the data space, avoiding the bad local minima that plague random initialization. Result: faster convergence, better final clusters, more consistent results. This is the sklearn default.</div>
+    </div>
+
+    <div class="question-card" data-q="4">
+      <div class="q-meta"><span class="q-num">Q05</span><span class="q-topic">DBSCAN</span></div>
+      <div class="q-text">In DBSCAN, what label does a noise point receive, and what makes a point a "core point"?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>Noise points receive label 0; core points have zero neighbors within ε</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>Noise points receive label −1; core points have ≥ min_samples neighbors within ε radius</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>Noise points are removed before fitting; core points are cluster centroids</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>Noise points receive the majority cluster label; core points have the highest density</button>
+      </div>
+      <div class="explanation">✅ <strong>Noise = label −1. Core = ≥ min_samples within ε.</strong> DBSCAN has three point types: Core (dense interior, ≥ min_samples neighbors within ε), Border (within ε of a core but not itself core), Noise (not core, not within ε of any core point → labeled −1). The −1 label for noise is why you need to subtract 1 from len(set(labels)) when counting clusters in DBSCAN results.</div>
+    </div>
+
+    <div class="question-card" data-q="5">
+      <div class="q-meta"><span class="q-num">Q06</span><span class="q-topic">Hierarchical</span></div>
+      <div class="q-text">Which linkage criterion is generally best for producing compact, balanced clusters in hierarchical clustering?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>Single linkage — uses minimum distance, finds the most natural clusters</button>
+        <button class="option" data-correct="false"><span class="opt-letter">B</span>Complete linkage — uses maximum distance, avoids chaining</button>
+        <button class="option" data-correct="true"><span class="opt-letter">C</span>Ward linkage — minimizes total within-cluster variance, produces most compact clusters</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>Average linkage — always the most robust choice regardless of data</button>
+      </div>
+      <div class="explanation">✅ <strong>Ward linkage</strong> is the sklearn default and generally performs best for compact, roughly equal-sized clusters. It merges clusters that result in the minimum increase to total within-cluster variance — similar to K-Means' objective but in a hierarchical framework. Single linkage produces elongated "chained" clusters and is very sensitive to outliers. Complete linkage is good but tends to break large clusters. Ward + Euclidean is the go-to starting point.</div>
+    </div>
+
+    <div class="question-card" data-q="6">
+      <div class="q-meta"><span class="q-num">Q07</span><span class="q-topic">Cluster Metrics</span></div>
+      <div class="q-text">A silhouette score of +0.7 vs −0.2 — what does each tell you about cluster quality?</div>
+      <div class="options">
+        <button class="option" data-correct="true"><span class="opt-letter">A</span>+0.7 means well-separated clusters (point is much closer to its cluster than neighbors); −0.2 means likely misclassified (closer to another cluster)</button>
+        <button class="option" data-correct="false"><span class="opt-letter">B</span>+0.7 means 70% accuracy; −0.2 means 20% error rate</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>+0.7 is the proportion of points in the cluster; −0.2 is below acceptable threshold</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>Both are acceptable — silhouette scores are always between 0 and 1</button>
+      </div>
+      <div class="explanation">✅ <strong>Silhouette = (b − a) / max(a, b).</strong> Where a = mean intra-cluster distance, b = mean nearest-cluster distance. Score near +1 → well inside cluster, far from others (a ≪ b). Score near 0 → on cluster boundary. Score negative → a &gt; b, meaning the point is on average closer to another cluster than its own → likely misclustered. Use per-sample silhouette plots to identify which clusters are poorly defined.</div>
+    </div>
+
+    <div class="question-card" data-q="7">
+      <div class="q-meta"><span class="q-num">Q08</span><span class="q-topic">PCA</span></div>
+      <div class="q-text">What does "explained variance ratio" mean in PCA, and how do you use it to choose the number of components?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>The correlation between the original feature and the principal component</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>The proportion of total variance in the data captured by each component. Choose enough components to retain 90–95% cumulative variance</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>The percentage of data points correctly reconstructed from the reduced dimensions</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>The ratio of between-component variance to within-component variance</button>
+      </div>
+      <div class="explanation">✅ <strong>Explained variance ratio = eigenvalue / sum(eigenvalues).</strong> Each component captures a fraction of the total variance. PC1 captures the most, PC2 the second most (orthogonal to PC1), etc. Best practice: plot cumulative explained variance vs number of components. Choose the point where adding more components gives diminishing returns (the knee). Use <code>PCA(n_components=0.95)</code> to auto-select for 95% variance retention.</div>
+    </div>
+
+    <div class="question-card" data-q="8">
+      <div class="q-meta"><span class="q-num">Q09</span><span class="q-topic">PCA</span></div>
+      <div class="q-text">Why must you standardize your features before applying PCA?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>PCA cannot process negative values without normalization</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>PCA finds directions of maximum variance — without scaling, high-range features dominate and PCA would just capture their scale, not true data structure</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>Standardization makes the covariance matrix symmetric so eigendecomposition works</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>Standardization ensures all principal components have equal variance</button>
+      </div>
+      <div class="explanation">✅ <strong>Scale dominates variance.</strong> If salary ranges 0–200,000 and age ranges 18–80, salary has ~2,500× more raw variance. Without scaling, PC1 will almost entirely represent salary variation — age will be ignored. StandardScaler removes this scale bias, ensuring PCA finds genuine structural variance rather than just the feature with the largest numerical range. This is one of the most critical preprocessing steps in PCA.</div>
+    </div>
+
+    <div class="question-card" data-q="9">
+      <div class="q-meta"><span class="q-num">Q10</span><span class="q-topic">t-SNE</span></div>
+      <div class="q-text">Why should t-SNE NEVER be used as a preprocessing step before feeding data into a machine learning model?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>t-SNE is too slow and computationally expensive</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>t-SNE is non-invertible, non-deterministic, cannot transform new data, and distances in the embedding are not meaningful for ML models</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>t-SNE only outputs 2 dimensions which is insufficient for most models</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>t-SNE requires labeled data which defeats the purpose of unsupervised preprocessing</button>
+      </div>
+      <div class="explanation">✅ <strong>t-SNE is visualization only.</strong> Key reasons: (1) Non-invertible — can't reconstruct original features. (2) Can't transform new/unseen data at prediction time. (3) Non-deterministic — different runs give different layouts. (4) Inter-cluster distances in t-SNE plots are meaningless. (5) Destroys global structure. Use PCA for linear preprocessing, UMAP for non-linear preprocessing (it's invertible and can transform new data).</div>
+    </div>
+
+    <div class="question-card" data-q="10">
+      <div class="q-meta"><span class="q-num">Q11</span><span class="q-topic">NMF</span></div>
+      <div class="q-text">What constraint makes NMF produce more interpretable components than PCA?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>NMF components are orthogonal, making each one independent and distinct</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>NMF enforces non-negativity — all components and weights are ≥ 0, producing additive parts-based representations rather than cancellations</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>NMF normalizes each component to unit length, making them easier to compare</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>NMF uses Lasso regularization to zero out irrelevant features in each component</button>
+      </div>
+      <div class="explanation">✅ <strong>Non-negativity = additive parts.</strong> PCA components can be positive or negative, so the reconstruction involves adding and subtracting components (cancellation). NMF forces all values ≥ 0, meaning every component is purely additive. For a face: NMF components look like actual facial parts (eyes, nose, mouth), while PCA hologram-like components that subtract from each other. For text: NMF topics contain only positive word associations. Interpretability comes from this additive, parts-based decomposition.</div>
+    </div>
+
+    <div class="question-card" data-q="11">
+      <div class="q-meta"><span class="q-num">Q12</span><span class="q-topic">DBSCAN</span></div>
+      <div class="q-text">DBSCAN requires two parameters: eps and min_samples. How do you find a good value for eps empirically?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>Set eps = standard deviation of all pairwise distances in the dataset</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>Plot the k-distance graph (distance to kth nearest neighbor for each point, sorted) and look for the "knee" where distance jumps sharply</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>Use cross-validation with multiple eps values and select the one maximizing accuracy</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>Set eps = mean nearest neighbor distance × number of dimensions</button>
+      </div>
+      <div class="explanation">✅ <strong>k-Distance Graph / knee point.</strong> Sort all points by their distance to their kth nearest neighbor (k = min_samples). Plot these sorted distances. In dense regions, this distance is small and stable. At outliers/sparse regions, it jumps sharply — this knee is your eps threshold. Points below the knee are core/border points; above are noise. Also remember: always scale your data before running DBSCAN or eps becomes scale-dependent.</div>
+    </div>
+
+    <div class="question-card" data-q="12">
+      <div class="q-meta"><span class="q-num">Q13</span><span class="q-topic">Clustering</span></div>
+      <div class="q-text">K-Means fails to correctly cluster two interleaved crescent shapes (like two half-moons). Which algorithm handles this and why?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>Hierarchical clustering with Ward linkage — it minimizes variance and finds any shape</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>DBSCAN — it finds clusters based on density regardless of shape, and can trace the crescents as connected dense regions</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>K-Means with K-Means++ initialization — the better init handles non-convex shapes</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>PCA pre-processing — reducing to 2D makes K-Means work for any shape</button>
+      </div>
+      <div class="explanation">✅ <strong>DBSCAN handles arbitrary shapes.</strong> K-Means finds spherical (Voronoi) clusters — it literally draws straight-line boundaries. Crescent/moon shapes are non-convex and CANNOT be correctly separated by straight lines. DBSCAN follows density connectivity — it "traces" along dense regions, correctly identifying each crescent as one cluster. Spectral Clustering also handles this but requires specifying k. The half-moon dataset is a classic benchmark for demonstrating K-Means' limitations.</div>
+    </div>
+
+    <div class="question-card" data-q="13">
+      <div class="q-meta"><span class="q-num">Q14</span><span class="q-topic">PCA</span></div>
+      <div class="q-text">You run PCA and find that the first two components explain 45% of variance. Your colleague says "PCA failed — we need 95%." How do you respond?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>They're right — less than 50% explained variance means PCA is not appropriate for this data</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>For 2D visualization, 45% is acceptable — you can still see meaningful cluster patterns. For preprocessing, use more components to reach 90–95%</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>PCA always requires 95% variance in two components to be useful</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>Switch to t-SNE which always explains 100% of local structure</button>
+      </div>
+      <div class="explanation">✅ <strong>Context matters.</strong> For 2D visualization, 45% in two components is often perfectly fine — you're seeing nearly half the structure in two dimensions, and cluster separation may still be clearly visible. For preprocessing before a downstream model, you'd use more components (targeting 90–95%). For visualization, you want 2 or 3 components to plot and 45% is acceptable. The 95% rule is a preprocessing guideline, not a fixed requirement for visualization.</div>
+    </div>
+
+    <div class="question-card" data-q="14">
+      <div class="q-meta"><span class="q-num">Q15</span><span class="q-topic">Metrics</span></div>
+      <div class="q-text">The Davies-Bouldin Index is 0.4 for k=3 and 1.8 for k=5. What does this tell you?</div>
+      <div class="options">
+        <button class="option" data-correct="true"><span class="opt-letter">A</span>k=3 is better — lower Davies-Bouldin means clusters are more compact and well-separated</button>
+        <button class="option" data-correct="false"><span class="opt-letter">B</span>k=5 is better — higher Davies-Bouldin means higher cluster quality</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>Both are equally valid — Davies-Bouldin only compares methods, not k values</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>Neither is useful — Davies-Bouldin only works when ground truth labels are known</button>
+      </div>
+      <div class="explanation">✅ <strong>Lower Davies-Bouldin = better clusters.</strong> DB Index measures the average ratio of within-cluster scatter to between-cluster separation. Lower = clusters are tight (small within-cluster scatter) AND well-separated (large between-cluster distances). DB = 0.4 is excellent. DB = 1.8 suggests overlapping or poorly separated clusters. Combine with Silhouette Score (higher = better) and Calinski-Harabasz (higher = better) for a fuller picture.</div>
+    </div>
+
+    <div class="question-card" data-q="15">
+      <div class="q-meta"><span class="q-num">Q16</span><span class="q-topic">UMAP</span></div>
+      <div class="q-text">What is the key advantage of UMAP over t-SNE that makes UMAP suitable as a preprocessing step for machine learning?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>UMAP preserves more local structure than t-SNE</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>UMAP is invertible and can transform new/unseen data, making it usable in production ML pipelines</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>UMAP always produces better visualizations than t-SNE</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>UMAP requires fewer hyperparameters and is always deterministic</button>
+      </div>
+      <div class="explanation">✅ <strong>UMAP is invertible and can transform new data.</strong> You can call <code>reducer.transform(X_new)</code> on unseen test data — the same transformation applied to training. t-SNE only produces embeddings for the training data itself; running on new data gives unrelated coordinates. UMAP also runs 10–100× faster than t-SNE and scales to millions of points. These properties make UMAP suitable for production pipelines where you need to transform incoming data at inference time.</div>
+    </div>
+
+    <div class="question-card" data-q="16">
+      <div class="q-meta"><span class="q-num">Q17</span><span class="q-topic">NMF</span></div>
+      <div class="q-text">NMF requires non-negative input. Which of the following datasets is NOT appropriate for NMF without transformation?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>TF-IDF document-term matrix (word counts)</button>
+        <button class="option" data-correct="false"><span class="opt-letter">B</span>RGB pixel values from an image (0–255)</button>
+        <button class="option" data-correct="true"><span class="opt-letter">C</span>Standardized (z-scored) features with negative values</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>User-item rating matrix (1–5 stars)</button>
+      </div>
+      <div class="explanation">✅ <strong>Standardized (z-scored) data has negative values.</strong> StandardScaler produces values centered at 0 with both positive and negative values — this violates NMF's non-negativity constraint. NMF requires all values ≥ 0. Word counts, pixel values, and star ratings are naturally non-negative. For z-scored data, use PCA or TruncatedSVD instead. If you must use NMF on data with negatives, you can apply MinMaxScaler to shift to [0,1] range first.</div>
+    </div>
+
+    <div class="question-card" data-q="17">
+      <div class="q-meta"><span class="q-num">Q18</span><span class="q-topic">Clustering Strategy</span></div>
+      <div class="q-text">You have a customer dataset with 50 features. What is the recommended preprocessing pipeline before K-Means clustering?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>Apply K-Means directly — it handles high-dimensional data natively</button>
+        <button class="option" data-correct="false"><span class="opt-letter">B</span>Apply MinMaxScaler, then cluster on all 50 features</button>
+        <button class="option" data-correct="true"><span class="opt-letter">C</span>StandardScaler → PCA (reduce to ~95% variance explained) → K-Means on reduced dimensions</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>t-SNE to 2D → K-Means on the 2D embedding</button>
+      </div>
+      <div class="explanation">✅ <strong>Scale → PCA → K-Means.</strong> This is the recommended pipeline for high-dimensional clustering. StandardScaler removes scale bias. PCA reduces noise dimensions and fights the curse of dimensionality (improving distance meaningfulness). K-Means then operates in a cleaner, lower-dimensional space. Never use t-SNE before clustering — its 2D embedding is designed for visualization only and destroys global structure that K-Means needs. Use UMAP if you need non-linear preprocessing.</div>
+    </div>
+
+    <div class="question-card" data-q="18">
+      <div class="q-meta"><span class="q-num">Q19</span><span class="q-topic">Elbow Method</span></div>
+      <div class="q-text">The elbow method plots inertia vs k and sometimes shows no clear elbow. What should you do?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>Always choose k=2 as the default when no elbow is visible</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>Supplement with Silhouette Score and Calinski-Harabasz, and use domain knowledge to determine the most meaningful number of clusters</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>The absence of an elbow means the data has no natural clustering structure — abandon K-Means</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>Pick the k where inertia drops below 10% of the initial value</button>
+      </div>
+      <div class="explanation">✅ <strong>Triangulate with multiple metrics and domain knowledge.</strong> The elbow method often produces ambiguous results on real-world data (the "elbow" is often a gradual curve, not a sharp bend). Always cross-reference: Silhouette Score (pick k with highest score), Davies-Bouldin (pick k with lowest), Calinski-Harabasz (pick k with highest). Then validate with business logic — does k=4 customer segments make actionable business sense? A statistically "optimal" k with no business interpretation is not useful.</div>
+    </div>
+
+    <div class="question-card" data-q="19">
+      <div class="q-meta"><span class="q-num">Q20</span><span class="q-topic">All Topics</span></div>
+      <div class="q-text">Which of the following statements about unsupervised learning is FALSE?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>DBSCAN can identify outliers automatically by labeling them −1</button>
+        <button class="option" data-correct="false"><span class="opt-letter">B</span>PCA must be applied to standardized data to produce meaningful components</button>
+        <button class="option" data-correct="true"><span class="opt-letter">C</span>t-SNE is the best choice for preprocessing high-dimensional data before training a classifier</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>Hierarchical clustering does not require specifying k in advance</button>
+      </div>
+      <div class="explanation">✅ <strong>C is FALSE.</strong> t-SNE is the WORST choice for preprocessing before a classifier. It's non-invertible (can't transform test data), non-deterministic, destroys global structure, and cannot generalize to new data. Use PCA or UMAP for preprocessing. A is true: DBSCAN noise = label −1. B is true: unscaled PCA is dominated by high-range features. D is true: hierarchical clustering reveals structure at all levels via dendrogram — you cut at any desired k.</div>
+    </div>
+
+  </div>
+
+  <div class="score-card" id="scoreCard">
+    <div class="section-label">Results</div>
+    <div class="score-msg" id="scoreMsg">Loading...</div>
+    <div class="score-number" id="scoreNumber">0/20</div>
+    <div class="score-label" id="scoreLabel">Review the explanations above.</div>
+    <button class="btn btn-restart" onclick="restartQuiz()">↺ Restart Quiz</button>
+  </div>
+
+  <div class="quiz-actions">
+    <button class="btn btn-primary" id="nextBtn" onclick="nextQuestion()" disabled>Next Question →</button>
+  </div>
+
+</div>
+</section>
+
+<footer>
+  Built for <span>IBM ML Course 4</span> · Unsupervised Machine Learning · K-Means · Hierarchical · DBSCAN · PCA · t-SNE · UMAP · NMF
+</footer>
+
+<script>
+  const questions = document.querySelectorAll('.question-card');
+  const progressFill = document.getElementById('progressFill');
+  const quizCounter = document.getElementById('quizCounter');
+  const nextBtn = document.getElementById('nextBtn');
+  const scoreCard = document.getElementById('scoreCard');
+  let current = 0, score = 0, answered = false;
+
+  function updateProgress() {
+    progressFill.style.width = (current / questions.length * 100) + '%';
+    quizCounter.textContent = current + ' / ' + questions.length;
+  }
+
+  document.querySelectorAll('.option').forEach(btn => {
+    btn.addEventListener('click', function () {
+      if (answered) return;
+      answered = true;
+      const card = this.closest('.question-card');
+      card.querySelectorAll('.option').forEach(o => {
+        o.classList.add('disabled');
+        if (o.dataset.correct === 'true') o.classList.add('correct');
+      });
+      if (this.dataset.correct !== 'true') this.classList.add('wrong');
+      else score++;
+      card.querySelector('.explanation').classList.add('show');
+      nextBtn.disabled = false;
+    });
+  });
+
+  function nextQuestion() {
+    if (current >= questions.length - 1) { showScore(); return; }
+    questions[current].classList.remove('active');
+    current++;
+    questions[current].classList.add('active');
+    answered = false;
+    nextBtn.disabled = true;
+    updateProgress();
+    if (current === questions.length - 1) nextBtn.textContent = 'See Results →';
+  }
+
+  function showScore() {
+    document.getElementById('quizContainer').style.display = 'none';
+    nextBtn.style.display = 'none';
+    scoreCard.classList.add('show');
+    const pct = Math.round(score / questions.length * 100);
+    document.getElementById('scoreNumber').textContent = score + '/' + questions.length;
+    const msgs = [
+      [90, '🔥 Unsupervised Expert', 'Exceptional. Course 5 awaits.'],
+      [75, '💪 Strong Understanding', 'Solid grasp — a few edge cases to nail down.'],
+      [60, '📘 Good Progress', 'Review the code and explanations, then retry.'],
+      [0,  '🔄 Keep Studying', 'Go back through the modules and try again.']
+    ];
+    const m = msgs.find(m => pct >= m[0]);
+    document.getElementById('scoreMsg').textContent = m[1];
+    document.getElementById('scoreLabel').textContent = m[2];
+    progressFill.style.width = '100%';
+    quizCounter.textContent = questions.length + ' / ' + questions.length;
+  }
+
+  function restartQuiz() {
+    current = 0; score = 0; answered = false;
+    scoreCard.classList.remove('show');
+    document.getElementById('quizContainer').style.display = 'block';
+    nextBtn.style.display = 'flex';
+    nextBtn.disabled = true;
+    nextBtn.textContent = 'Next Question →';
+    questions.forEach((q, i) => {
+      q.classList.toggle('active', i === 0);
+      q.querySelectorAll('.option').forEach(o => o.classList.remove('correct', 'wrong', 'disabled'));
+      q.querySelector('.explanation').classList.remove('show');
+    });
+    updateProgress();
+  }
+
+  updateProgress();
+</script>
+</body>
+</html>
