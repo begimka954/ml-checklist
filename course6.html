@@ -1,0 +1,1468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IBM ML Course 6 — Machine Learning Capstone</title>
+<link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080b10;
+    --surface: #0f1420;
+    --surface2: #161d2e;
+    --border: #1e2a42;
+    --accent: #f59e0b;
+    --accent2: #d97706;
+    --accent3: #38bdf8;
+    --accent4: #a78bfa;
+    --accent5: #34d399;
+    --text: #e8edf8;
+    --text-muted: #7a90b8;
+    --text-dim: #2e3d5c;
+    --code-bg: #040608;
+    --correct: #34d399;
+    --wrong: #f87171;
+    --radius: 14px;
+    --radius-sm: 9px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'Lato', sans-serif; background: var(--bg); color: var(--text); line-height: 1.75; font-size: 16px; }
+
+  /* ── HERO ── */
+  .hero {
+    background: linear-gradient(135deg, #080b10 0%, #12100a 45%, #0d1018 100%);
+    padding: 80px 24px 64px; text-align: center; position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(ellipse 70% 50% at 50% 0%, rgba(245,158,11,0.11) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-badge { display: inline-block; background: rgba(245,158,11,0.12); border: 1px solid rgba(245,158,11,0.35); color: var(--accent); font-size: 11px; font-weight: 700; letter-spacing: 2.5px; text-transform: uppercase; padding: 6px 18px; border-radius: 20px; margin-bottom: 20px; }
+  .hero h1 { font-size: clamp(28px,5vw,52px); font-weight: 900; line-height: 1.08; margin-bottom: 14px; letter-spacing: -1px; }
+  .hero h1 span { color: var(--accent); }
+  .hero .tagline { font-size: 18px; color: var(--text-muted); max-width: 660px; margin: 0 auto 14px; font-weight: 300; }
+  .hero .finish-note { display: inline-block; background: rgba(52,211,153,0.1); border: 1px solid rgba(52,211,153,0.3); color: var(--accent5); font-size: 13px; font-weight: 700; padding: 8px 20px; border-radius: 20px; margin-bottom: 32px; }
+  .hero-pills { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+  .pill { background: var(--surface2); border: 1px solid var(--border); color: var(--text-muted); font-size: 13px; font-weight: 700; padding: 7px 16px; border-radius: 20px; }
+
+  /* ── NAV ── */
+  .sticky-nav { position: sticky; top: 0; z-index: 100; background: rgba(8,11,16,0.96); backdrop-filter: blur(14px); border-bottom: 1px solid var(--border); padding: 0 24px; overflow-x: auto; white-space: nowrap; }
+  .sticky-nav ul { display: flex; list-style: none; max-width: 1200px; margin: 0 auto; }
+  .sticky-nav a { display: block; padding: 15px 14px; color: var(--text-muted); text-decoration: none; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; transition: color 0.2s; border-bottom: 2px solid transparent; }
+  .sticky-nav a:hover { color: var(--accent); border-bottom-color: var(--accent); }
+
+  /* ── LAYOUT ── */
+  .container { max-width: 1140px; margin: 0 auto; padding: 64px 24px; }
+  .section-label { font-size: 11px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: var(--accent); margin-bottom: 10px; }
+  .section-title { font-size: clamp(22px,3vw,34px); font-weight: 900; margin-bottom: 10px; letter-spacing: -0.5px; }
+  .section-sub { color: var(--text-muted); font-size: 15px; margin-bottom: 40px; font-weight: 300; line-height: 1.7; max-width: 760px; }
+
+  /* ── ANALOGY ── */
+  .analogy { display: flex; gap: 18px; background: rgba(245,158,11,0.06); border: 1px solid rgba(245,158,11,0.22); border-radius: var(--radius-sm); padding: 18px 22px; margin: 18px 0; }
+  .analogy-icon { font-size: 26px; flex-shrink: 0; line-height: 1; margin-top: 2px; }
+  .analogy-body strong { color: var(--accent); font-size: 12px; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 5px; font-weight: 900; }
+  .analogy-body p { color: var(--text-muted); font-size: 14px; line-height: 1.7; }
+
+  /* ── CARDS ── */
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 26px; margin-bottom: 20px; transition: border-color 0.2s; }
+  .card:hover { border-color: rgba(245,158,11,0.3); }
+  .card h3 { font-size: 16px; font-weight: 700; margin-bottom: 10px; display: flex; align-items: center; gap: 10px; }
+  .card .icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
+  .card p, .card ul { color: var(--text-muted); font-size: 14px; line-height: 1.7; }
+  .card ul { padding-left: 20px; }
+  .card ul li { margin-bottom: 5px; }
+  .grid-2 { display: grid; grid-template-columns: repeat(auto-fit,minmax(300px,1fr)); gap: 20px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(auto-fit,minmax(230px,1fr)); gap: 18px; }
+
+  /* ── TAGS ── */
+  .tag { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; padding: 3px 10px; border-radius: 4px; margin-bottom: 12px; }
+  .tag-gold   { background: rgba(245,158,11,0.14);  color: var(--accent); }
+  .tag-blue   { background: rgba(56,189,248,0.14);  color: var(--accent3); }
+  .tag-purple { background: rgba(167,139,250,0.14); color: var(--accent4); }
+  .tag-green  { background: rgba(52,211,153,0.14);  color: var(--accent5); }
+  .tag-red    { background: rgba(248,113,113,0.14); color: #f87171; }
+
+  /* ── CONCEPT BLOCKS ── */
+  .cb { background: var(--surface); border-left: 3px solid var(--accent); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; padding: 20px 24px; margin-bottom: 16px; }
+  .cb.blue   { border-left-color: var(--accent3); }
+  .cb.purple { border-left-color: var(--accent4); }
+  .cb.green  { border-left-color: var(--accent5); }
+  .cb.red    { border-left-color: #f87171; }
+  .cb h4 { font-size: 15px; font-weight: 700; margin-bottom: 8px; }
+  .cb p  { color: var(--text-muted); font-size: 14px; line-height: 1.7; }
+  .cb ul { color: var(--text-muted); font-size: 14px; padding-left: 18px; line-height: 1.8; }
+
+  /* ── FORMULA ── */
+  .formula { background: var(--code-bg); border: 1px solid #1a2030; border-radius: var(--radius-sm); padding: 12px 18px; font-family: 'Space Mono',monospace; font-size: 13px; color: #fcd34d; margin: 12px 0; text-align: center; }
+
+  /* ── CALLOUT ── */
+  .callout { display: flex; gap: 16px; background: rgba(245,158,11,0.05); border: 1px solid rgba(245,158,11,0.2); border-radius: var(--radius-sm); padding: 16px 20px; margin: 20px 0; }
+  .callout.blue  { background: rgba(56,189,248,0.05);  border-color: rgba(56,189,248,0.2); }
+  .callout.green { background: rgba(52,211,153,0.05);  border-color: rgba(52,211,153,0.2); }
+  .callout.purple{ background: rgba(167,139,250,0.05); border-color: rgba(167,139,250,0.2); }
+  .callout-icon  { font-size: 22px; flex-shrink: 0; }
+  .callout-body  { font-size: 14px; color: var(--text-muted); line-height: 1.7; }
+  .callout-body strong { color: var(--text); }
+
+  /* ── CODE ── */
+  .code-block { background: var(--code-bg); border: 1px solid #1a2030; border-radius: var(--radius); overflow: hidden; margin: 20px 0; }
+  .code-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 18px; background: #0a0e18; border-bottom: 1px solid #1a2030; }
+  .code-title  { font-family: 'Space Mono',monospace; font-size: 12px; color: var(--accent); }
+  .code-dots   { display: flex; gap: 6px; }
+  .code-dot    { width: 10px; height: 10px; border-radius: 50%; }
+  .code-dot:nth-child(1){background:#ff5f57} .code-dot:nth-child(2){background:#febc2e} .code-dot:nth-child(3){background:#28c840}
+  .code-block pre { padding: 20px 18px; overflow-x: auto; font-family: 'Space Mono',monospace; font-size: 13px; line-height: 1.75; }
+  .code-block code { color: #cdd9f5; }
+  .kw{color:#f472b6} .fn{color:#93c5fd} .st{color:#86efac} .cm{color:#2e3d5c;font-style:italic} .nm{color:#fbbf24} .va{color:#fb923c}
+
+  /* ── TABLE ── */
+  .table-wrap { overflow-x: auto; margin: 20px 0; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th { background: var(--surface2); color: var(--accent); font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--border); }
+  td { padding: 12px 16px; border-bottom: 1px solid rgba(30,42,66,0.5); color: var(--text-muted); vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(245,158,11,0.03); }
+  td strong { color: var(--text); }
+
+  /* ── ACCORDION ── */
+  details { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 10px; overflow: hidden; }
+  summary { padding: 16px 20px; font-weight: 700; font-size: 15px; cursor: pointer; list-style: none; display: flex; align-items: center; justify-content: space-between; transition: background 0.2s; }
+  summary:hover { background: var(--surface2); }
+  summary::after { content: '+'; font-size: 20px; color: var(--accent); font-weight: 300; }
+  details[open] summary::after { content: '−'; }
+  details[open] summary { border-bottom: 1px solid var(--border); }
+  .details-body { padding: 20px; color: var(--text-muted); font-size: 14px; line-height: 1.8; }
+
+  /* ── STEPS ── */
+  .step { display: flex; gap: 18px; margin-bottom: 18px; align-items: flex-start; }
+  .step-num { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), var(--accent2)); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 900; flex-shrink: 0; color: #080b10; }
+  .step-body h4 { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+  .step-body p  { font-size: 13px; color: var(--text-muted); line-height: 1.65; }
+
+  /* ── BEST PRACTICE ── */
+  .bp-card { display: flex; gap: 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 18px 20px; margin-bottom: 12px; align-items: flex-start; }
+  .bp-num { width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), var(--accent2)); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 900; flex-shrink: 0; color: #080b10; }
+  .bp-content h4 { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+  .bp-content p  { font-size: 13px; color: var(--text-muted); }
+
+  /* ── DIVIDER ── */
+  .divider { height: 1px; background: linear-gradient(90deg, transparent, var(--border), transparent); }
+
+  /* ── CELEBRATION BANNER ── */
+  .celebration {
+    background: linear-gradient(135deg, rgba(245,158,11,0.12), rgba(52,211,153,0.08));
+    border: 1px solid rgba(245,158,11,0.3);
+    border-radius: var(--radius);
+    padding: 40px 32px;
+    text-align: center;
+    margin-bottom: 60px;
+  }
+  .celebration h2 { font-size: 28px; font-weight: 900; margin-bottom: 12px; }
+  .celebration h2 span { color: var(--accent); }
+  .celebration p { color: var(--text-muted); font-size: 16px; max-width: 560px; margin: 0 auto; }
+
+  /* ── QUIZ ── */
+  #quiz { background: linear-gradient(180deg, var(--bg) 0%, #050508 100%); }
+  .quiz-progress { display: flex; align-items: center; gap: 16px; margin-bottom: 32px; }
+  .progress-bar { flex: 1; height: 4px; background: var(--surface2); border-radius: 2px; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent5)); border-radius: 2px; transition: width 0.4s ease; }
+  .quiz-counter { font-size: 13px; color: var(--text-muted); font-weight: 700; white-space: nowrap; }
+  .question-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 32px; margin-bottom: 24px; display: none; animation: fadeIn 0.3s ease; }
+  .question-card.active { display: block; }
+  @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+  .q-meta { display: flex; gap: 10px; align-items: center; margin-bottom: 20px; }
+  .q-num  { font-family:'Space Mono',monospace; font-size:11px; color:var(--accent); background:rgba(245,158,11,0.1); padding:3px 10px; border-radius:4px; }
+  .q-topic { font-size:11px; color:var(--text-dim); font-weight:700; text-transform:uppercase; letter-spacing:1px; }
+  .q-text  { font-size:16px; font-weight:700; margin-bottom:24px; line-height:1.55; }
+  .options { display: flex; flex-direction: column; gap: 10px; }
+  .option { background:var(--surface2); border:1px solid var(--border); border-radius:var(--radius-sm); padding:14px 18px; cursor:pointer; font-size:14px; transition:all 0.2s; display:flex; align-items:flex-start; gap:12px; text-align:left; color:var(--text); }
+  .option:hover:not(.disabled){border-color:var(--accent);background:rgba(245,158,11,0.07)}
+  .option.correct{border-color:var(--correct);background:rgba(52,211,153,0.08)}
+  .option.wrong{border-color:var(--wrong);background:rgba(248,113,113,0.08)}
+  .option.disabled{cursor:default}
+  .opt-letter{width:24px;height:24px;border-radius:6px;background:var(--border);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;font-family:'Space Mono',monospace}
+  .option.correct .opt-letter{background:var(--correct);color:#000}
+  .option.wrong   .opt-letter{background:var(--wrong);color:#fff}
+  .explanation{margin-top:16px;padding:16px;background:rgba(245,158,11,0.05);border:1px solid rgba(245,158,11,0.2);border-radius:var(--radius-sm);font-size:14px;color:var(--text-muted);display:none;line-height:1.7}
+  .explanation strong{color:var(--accent)}
+  .explanation.show{display:block}
+  .quiz-actions{display:flex;justify-content:flex-end;margin-top:20px}
+  .btn{padding:11px 28px;border-radius:var(--radius-sm);font-size:14px;font-weight:700;font-family:'Lato',sans-serif;cursor:pointer;border:none;transition:all 0.2s;letter-spacing:0.5px}
+  .btn-primary{background:var(--accent);color:#080b10}
+  .btn-primary:hover{background:#fbbf24;transform:translateY(-1px)}
+  .btn-primary:disabled{opacity:0.4;cursor:not-allowed;transform:none}
+  .score-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:48px 32px;text-align:center;display:none}
+  .score-card.show{display:block;animation:fadeIn 0.4s ease}
+  .score-number{font-size:72px;font-weight:900;background:linear-gradient(135deg,var(--accent),var(--accent5));-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1;margin:16px 0}
+  .score-label{color:var(--text-muted);font-size:15px;margin-bottom:24px}
+  .score-msg{font-size:22px;font-weight:700;margin-bottom:8px}
+  .btn-restart{background:var(--surface2);color:var(--text);border:1px solid var(--border);margin-top:24px}
+  .btn-restart:hover{border-color:var(--accent);color:var(--accent)}
+
+  /* ── FINAL BANNER ── */
+  .final-banner {
+    background: linear-gradient(135deg, #0f1a10 0%, #0f100a 50%, #0a0f18 100%);
+    border: 1px solid rgba(52,211,153,0.3);
+    border-radius: var(--radius);
+    padding: 48px 32px;
+    text-align: center;
+    margin-top: 48px;
+  }
+  .final-banner h2 { font-size: 30px; font-weight: 900; margin-bottom: 12px; }
+  .final-banner h2 span { color: var(--accent5); }
+  .final-banner p { color: var(--text-muted); max-width: 540px; margin: 0 auto 24px; line-height: 1.7; }
+  .cert-badges { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-top: 24px; }
+  .cert-badge { background: var(--surface2); border: 1px solid var(--border); padding: 10px 20px; border-radius: 20px; font-size: 13px; font-weight: 700; color: var(--text-muted); }
+
+  footer{background:var(--surface);border-top:1px solid var(--border);padding:32px 24px;text-align:center;color:var(--text-dim);font-size:13px}
+  footer span{color:var(--accent)}
+  @media(max-width:600px){.container{padding:40px 16px}.hero{padding:60px 16px 40px}.question-card{padding:20px}}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-badge">IBM Machine Learning Professional Certificate — Course 6 of 6 · The Finale</div>
+  <h1>Machine Learning<br><span>Capstone</span></h1>
+  <p class="tagline">Build a real recommender system using every technique from all 5 courses — content-based, collaborative filtering, neural networks, and more.</p>
+  <div class="finish-note">🏁 The final course — everything you've learned comes together here</div>
+  <div class="hero-pills">
+    <span class="pill">🎯 Recommender Systems</span>
+    <span class="pill">📝 Bag of Words</span>
+    <span class="pill">📐 Cosine Similarity</span>
+    <span class="pill">👤 User Profiles</span>
+    <span class="pill">🔵 K-Means Clustering</span>
+    <span class="pill">🤝 Collaborative Filtering</span>
+    <span class="pill">🧮 NMF</span>
+    <span class="pill">🧠 Neural Embeddings</span>
+    <span class="pill">🚀 Streamlit App</span>
+    <span class="pill">✅ Quiz</span>
+  </div>
+</section>
+
+<!-- NAV -->
+<nav class="sticky-nav">
+  <ul>
+    <li><a href="#overview">Overview</a></li>
+    <li><a href="#eda">EDA & Features</a></li>
+    <li><a href="#content">Content-Based</a></li>
+    <li><a href="#collab">Collab Filtering</a></li>
+    <li><a href="#knn-cf">KNN Filtering</a></li>
+    <li><a href="#nmf-cf">NMF Filtering</a></li>
+    <li><a href="#neural">Neural Ratings</a></li>
+    <li><a href="#streamlit">Streamlit</a></li>
+    <li><a href="#capstone-tips">Capstone Tips</a></li>
+    <li><a href="#quiz">Final Quiz</a></li>
+  </ul>
+</nav>
+
+<!-- OVERVIEW -->
+<section id="overview">
+<div class="container">
+  <div class="section-label">Module 0 — The Big Picture</div>
+  <h2 class="section-title">What This Capstone Is About</h2>
+  <p class="section-sub">You've spent 5 courses building skills. Now you apply all of them to one unified project: building a course recommender system — the kind of thing Coursera, Netflix, and Spotify use every day.</p>
+
+  <div class="analogy">
+    <div class="analogy-icon">🎬</div>
+    <div class="analogy-body">
+      <strong>Why Recommender Systems Matter</strong>
+      <p>When Netflix suggests a show you end up loving, or when Spotify auto-generates a playlist that feels like it was made for you — that's a recommender system at work. They are one of the most commercially valuable ML applications in existence. Amazon attributes roughly 35% of its revenue to its recommendation engine. This capstone teaches you to build one from scratch, using five different approaches.</p>
+    </div>
+  </div>
+
+  <div class="grid-3">
+    <div class="card">
+      <h3><span class="icon" style="background:rgba(245,158,11,0.15)">📝</span> Content-Based</h3>
+      <p>Recommend based on what a course <em>is about</em> — its text, genre, and topic. No user behaviour needed.</p>
+    </div>
+    <div class="card">
+      <h3><span class="icon" style="background:rgba(56,189,248,0.15)">👥</span> Collaborative Filtering</h3>
+      <p>Recommend based on what <em>similar users</em> enrolled in. "People like you also took…" approach.</p>
+    </div>
+    <div class="card">
+      <h3><span class="icon" style="background:rgba(167,139,250,0.15)">🔵</span> Clustering-Based</h3>
+      <p>Group users by enrolment patterns using K-Means, then recommend what other cluster members liked.</p>
+    </div>
+    <div class="card">
+      <h3><span class="icon" style="background:rgba(52,211,153,0.15)">🧮</span> NMF-Based</h3>
+      <p>Factorize the user-course rating matrix into latent topics, then predict ratings for unseen courses.</p>
+    </div>
+    <div class="card">
+      <h3><span class="icon" style="background:rgba(245,158,11,0.15)">🧠</span> Neural Embeddings</h3>
+      <p>Train a neural network to learn rich user and course representations, then use them to predict ratings.</p>
+    </div>
+    <div class="card">
+      <h3><span class="icon" style="background:rgba(52,211,153,0.15)">🚀</span> Streamlit App</h3>
+      <p>Deploy all five methods into a single interactive web app anyone can use — your portfolio showcase.</p>
+    </div>
+  </div>
+</div>
+</section>
+
+<div class="divider"></div>
+
+<!-- EDA & FEATURE ENGINEERING -->
+<section id="eda">
+<div class="container">
+  <div class="section-label">Module 1</div>
+  <h2 class="section-title">EDA & Feature Engineering — Understanding the Data</h2>
+  <p class="section-sub">Before building any recommender, you need to understand what data you have. The capstone uses course enrolment logs, course descriptions, genres, and user ratings.</p>
+
+  <div class="grid-2">
+    <div>
+      <div class="cb">
+        <span class="tag tag-gold">The Dataset</span>
+        <h4>What the Data Looks Like</h4>
+        <p>Three key tables drive everything in this project:</p>
+        <ul>
+          <li><strong>Courses table:</strong> course_id, title, description, genre tags</li>
+          <li><strong>Ratings table:</strong> user_id, course_id, rating (0 = audited, 1 = completed)</li>
+          <li><strong>Enrollments table:</strong> user_id and the courses they've taken</li>
+        </ul>
+        <p style="margin-top:10px;">The ratings matrix is very <strong>sparse</strong> — most users have only taken a tiny fraction of available courses, leaving most user-course pairs with no rating at all. This sparsity is the central challenge of recommender systems.</p>
+      </div>
+      <div class="cb blue">
+        <span class="tag tag-blue">Bag of Words (BoW)</span>
+        <h4>Turning Text Into Numbers</h4>
+        <p>A "Bag of Words" treats a text as a collection of word counts, ignoring grammar and order. For each course description, you count how many times each word appears. The result is a vector of word frequencies — one number per word in the vocabulary.</p>
+        <p style="margin-top:8px;">This is the simplest and most widely used text representation in ML. Despite its simplicity ("bag" because it loses word order), it works remarkably well for finding similar documents.</p>
+      </div>
+    </div>
+    <div>
+      <div class="cb purple">
+        <span class="tag tag-purple">Cosine Similarity</span>
+        <h4>Measuring How Similar Two Things Are</h4>
+        <p>Cosine similarity measures the angle between two vectors. If two courses have similar word counts, their BoW vectors point in roughly the same direction — their cosine similarity is close to 1. Totally different courses point in opposite directions — similarity close to 0.</p>
+        <div class="formula">cos(A,B) = (A · B) / (||A|| × ||B||)</div>
+        <p style="margin-top:8px;"><strong>Why not Euclidean distance?</strong> Euclidean is sensitive to the total size of the document (a long course description would seem more different from a short one even if they cover the same topics). Cosine is only sensitive to direction, not magnitude — perfect for text.</p>
+      </div>
+      <div class="cb green">
+        <span class="tag tag-green">Key EDA Questions</span>
+        <h4>What to Explore Before Building</h4>
+        <ul>
+          <li>What are the most popular courses? (high enrolment count)</li>
+          <li>What are the most common genres/topics?</li>
+          <li>How sparse is the ratings matrix? (% of missing ratings)</li>
+          <li>How many courses has the average user taken?</li>
+          <li>What's the distribution of completion vs audit?</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><span class="code-title">eda_and_features.py</span></div>
+    <pre><code><span class="kw">import</span> pandas <span class="kw">as</span> pd
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+<span class="kw">from</span> sklearn.feature_extraction.text <span class="kw">import</span> CountVectorizer
+<span class="kw">from</span> sklearn.metrics.pairwise <span class="kw">import</span> cosine_similarity
+
+<span class="cm"># ── Load data ─────────────────────────────────────────────</span>
+courses = pd.<span class="fn">read_csv</span>(<span class="st">'courses.csv'</span>)    <span class="cm"># course_id, title, description</span>
+ratings = pd.<span class="fn">read_csv</span>(<span class="st">'ratings.csv'</span>)    <span class="cm"># user_id, course_id, rating</span>
+
+<span class="cm"># ── Explore sparsity ──────────────────────────────────────</span>
+n_users   = ratings[<span class="st">'user_id'</span>].<span class="fn">nunique</span>()
+n_courses = ratings[<span class="st">'course_id'</span>].<span class="fn">nunique</span>()
+n_ratings = <span class="fn">len</span>(ratings)
+sparsity  = <span class="nm">1</span> - (n_ratings / (n_users * n_courses))
+<span class="fn">print</span>(<span class="st">f"Users: {n_users}, Courses: {n_courses}, Sparsity: {sparsity:.1%}"</span>)
+
+<span class="cm"># ── Bag of Words from course descriptions ────────────────</span>
+cv = <span class="fn">CountVectorizer</span>(
+    max_features=<span class="nm">2000</span>,        <span class="cm"># keep only top 2000 words</span>
+    stop_words=<span class="st">'english'</span>,    <span class="cm"># remove common words like "the", "is"</span>
+    ngram_range=(<span class="nm">1</span>, <span class="nm">2</span>)        <span class="cm"># include single words AND 2-word phrases</span>
+)
+bow_matrix = cv.<span class="fn">fit_transform</span>(courses[<span class="st">'description'</span>].<span class="fn">fillna</span>(<span class="st">''</span>))
+<span class="fn">print</span>(<span class="st">f"BoW matrix shape: {bow_matrix.shape}"</span>)  <span class="cm"># (n_courses, 2000)</span>
+
+<span class="cm"># ── Cosine Similarity Matrix ──────────────────────────────</span>
+<span class="cm"># Every course pair gets a similarity score</span>
+sim_matrix = <span class="fn">cosine_similarity</span>(bow_matrix)  <span class="cm"># shape: (n_courses, n_courses)</span>
+sim_df = pd.<span class="fn">DataFrame</span>(sim_matrix,
+                       index=courses[<span class="st">'course_id'</span>],
+                       columns=courses[<span class="st">'course_id'</span>])
+
+<span class="cm"># Find top 5 most similar courses to a given course</span>
+<span class="kw">def</span> <span class="fn">get_similar_courses</span>(course_id, top_n=<span class="nm">5</span>):
+    scores = sim_df[course_id].<span class="fn">sort_values</span>(ascending=<span class="nm">False</span>)
+    <span class="kw">return</span> scores.<span class="fn">iloc</span>[<span class="nm">1</span>:top_n+<span class="nm">1</span>]  <span class="cm"># exclude the course itself</span></code></pre>
+  </div>
+</div>
+</section>
+
+<div class="divider"></div>
+
+<!-- CONTENT-BASED RECOMMENDERS -->
+<section id="content">
+<div class="container">
+  <div class="section-label">Module 2</div>
+  <h2 class="section-title">Content-Based Recommender Systems</h2>
+  <p class="section-sub">Recommend courses based on what the courses are about, not who took them. Two flavours: course similarity (based on descriptions) and user profiles (based on genre preferences).</p>
+
+  <div class="analogy">
+    <div class="analogy-icon">📚</div>
+    <div class="analogy-body">
+      <strong>The Librarian Analogy</strong>
+      <p>A great librarian doesn't need to know what other readers thought — they know what books are <em>about</em>. If you loved "The Hitchhiker's Guide to the Galaxy", they'll hand you "Good Omens" because both are British comic science fiction. Content-based recommenders do the same: they look at what the item <em>contains</em> and find other items that contain similar things.</p>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div>
+      <div class="cb">
+        <span class="tag tag-gold">Approach 1: Course Similarity</span>
+        <h4>Find Courses Similar to Ones You've Taken</h4>
+        <p>Given the courses a user has enrolled in, find all other courses with the highest cosine similarity score to those enrolled courses. Average the similarity scores if multiple enrolments exist. Return the top-N highest scoring unseen courses.</p>
+        <div class="formula">score(target) = avg_course_in_history cosine_sim(enrolled, target)</div>
+      </div>
+      <div class="cb blue">
+        <span class="tag tag-blue">Approach 2: User Profile × Genre Matrix</span>
+        <h4>Match User Interests to Course Genres</h4>
+        <p>Each course has a genre vector (e.g., [ML=1, Python=1, Cloud=0, ...]). A user's profile is the weighted sum of all their enrolled course genre vectors (weighted by their ratings).</p>
+        <p style="margin-top:8px;">Interest score for a new course = dot product of user's genre profile and the course's genre vector. Recommend courses where this score is highest — it measures how well the course matches the user's known interests.</p>
+        <div class="formula">interest_score = user_profile · course_genre_vector</div>
+      </div>
+    </div>
+    <div>
+      <div class="cb purple">
+        <span class="tag tag-purple">Advantages</span>
+        <h4>Why Content-Based is Great for Cold Start</h4>
+        <ul>
+          <li><strong>No user history needed for item side:</strong> Works for brand new courses immediately</li>
+          <li><strong>Transparent:</strong> You can explain <em>why</em> something was recommended ("because you took Python ML...")</li>
+          <li><strong>No popularity bias:</strong> Niche courses can still get recommended to the right people</li>
+          <li><strong>Handles new users reasonably:</strong> Just ask for a few genre preferences at signup</li>
+        </ul>
+      </div>
+      <div class="cb red">
+        <span class="tag tag-red">Limitations</span>
+        <h4>What Content-Based Can't Do</h4>
+        <ul>
+          <li><strong>Over-specialisation:</strong> Only recommends things similar to what you already know. Won't introduce you to new genres.</li>
+          <li><strong>Feature quality dependent:</strong> If descriptions are poorly written, similarity is meaningless</li>
+          <li><strong>Can't capture "vibe":</strong> Doesn't know that users who like course A tend to love course B — even if they're in different genres</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><span class="code-title">content_based_recommender.py</span></div>
+    <pre><code><span class="cm"># ── Approach 1: Course Similarity Recommender ─────────────</span>
+<span class="kw">def</span> <span class="fn">course_similarity_recommend</span>(user_id, ratings_df, sim_df, top_n=<span class="nm">10</span>):
+    <span class="cm"># Get courses this user has already taken</span>
+    enrolled = ratings_df[ratings_df[<span class="st">'user_id'</span>] == user_id][<span class="st">'course_id'</span>].<span class="fn">tolist</span>()
+
+    <span class="cm"># For each enrolled course, find similar ones</span>
+    score_map = {}
+    <span class="kw">for</span> c <span class="kw">in</span> enrolled:
+        <span class="kw">if</span> c <span class="kw">in</span> sim_df.columns:
+            sims = sim_df[c].<span class="fn">drop</span>(index=enrolled, errors=<span class="st">'ignore'</span>)
+            <span class="kw">for</span> course_id, score <span class="kw">in</span> sims.<span class="fn">items</span>():
+                score_map[course_id] = score_map.<span class="fn">get</span>(course_id, <span class="nm">0</span>) + score
+
+    recommendations = (pd.<span class="fn">Series</span>(score_map)
+                         .<span class="fn">sort_values</span>(ascending=<span class="nm">False</span>)
+                         .<span class="fn">head</span>(top_n))
+    <span class="kw">return</span> recommendations
+
+<span class="cm"># ── Approach 2: User Profile × Genre Matrix ───────────────</span>
+<span class="kw">def</span> <span class="fn">user_profile_recommend</span>(user_id, ratings_df, course_genres_df, top_n=<span class="nm">10</span>):
+    <span class="cm"># Get user's enrolment history with ratings</span>
+    user_data = ratings_df[ratings_df[<span class="st">'user_id'</span>] == user_id]
+    enrolled  = user_data[<span class="st">'course_id'</span>].<span class="fn">tolist</span>()
+
+    <span class="cm"># Build user genre profile: weighted sum of enrolled course genre vectors</span>
+    user_genres = course_genres_df.<span class="fn">loc</span>[enrolled]  <span class="cm"># genres for enrolled courses</span>
+    weights     = user_data.<span class="fn">set_index</span>(<span class="st">'course_id'</span>)[<span class="st">'rating'</span>]
+
+    <span class="cm"># Weight each genre vector by the rating, then sum</span>
+    weighted = user_genres.<span class="fn">multiply</span>(weights, axis=<span class="nm">0</span>)
+    user_profile = weighted.<span class="fn">sum</span>(axis=<span class="nm">0</span>)  <span class="cm"># 1D genre preference vector</span>
+
+    <span class="cm"># Score all unseen courses</span>
+    unseen = course_genres_df.<span class="fn">drop</span>(index=enrolled, errors=<span class="st">'ignore'</span>)
+    scores = unseen.<span class="fn">dot</span>(user_profile)  <span class="cm"># dot product = interest score</span>
+
+    <span class="kw">return</span> scores.<span class="fn">sort_values</span>(ascending=<span class="nm">False</span>).<span class="fn">head</span>(top_n)</code></pre>
+  </div>
+</div>
+</section>
+
+<div class="divider"></div>
+
+<!-- COLLABORATIVE FILTERING INTRO + CLUSTERING -->
+<section id="collab">
+<div class="container">
+  <div class="section-label">Module 3</div>
+  <h2 class="section-title">Collaborative Filtering & Clustering-Based Recommendations</h2>
+  <p class="section-sub">Instead of looking at what a course is about, collaborative filtering looks at who else enrolled in it and uses their behaviour to make predictions.</p>
+
+  <div class="analogy">
+    <div class="analogy-icon">👫</div>
+    <div class="analogy-body">
+      <strong>The Word-of-Mouth Analogy</strong>
+      <p>You want a restaurant recommendation in a new city. You don't ask what ingredients the restaurants use (content-based). You ask friends who have the same taste as you — people who loved the same restaurants you loved. If your taste-twin raves about a restaurant you haven't tried, you go. That's collaborative filtering: mine the crowd's behaviour, not the item's content.</p>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div>
+      <div class="cb">
+        <span class="tag tag-gold">The Ratings Matrix</span>
+        <h4>The Heart of Collaborative Filtering</h4>
+        <p>Create a matrix where rows = users, columns = courses, and values = ratings (0 for audited, 1 for completed, NaN for not taken). This matrix is extremely sparse — most cells are empty. The goal of collaborative filtering is to fill in the blanks.</p>
+        <div class="formula">R[user, course] = predicted_rating (fill the NaNs)</div>
+      </div>
+      <div class="cb blue">
+        <span class="tag tag-blue">Clustering-Based (K-Means + PCA)</span>
+        <h4>Group Users, Recommend Within Groups</h4>
+        <p>Instead of finding similar individual users, cluster all users based on their enrolment history. Apply PCA first to reduce dimensionality (users × courses is a huge matrix), then K-Means to form groups. For any user, recommend the most popular courses among their cluster-mates that they haven't taken yet.</p>
+        <p style="margin-top:8px;">This is a scalable alternative to pure collaborative filtering — great when user bases are in the millions.</p>
+      </div>
+    </div>
+    <div>
+      <div class="cb purple">
+        <span class="tag tag-purple">Cold Start Problem</span>
+        <h4>The Achilles Heel of Collaborative Filtering</h4>
+        <p>Collaborative filtering completely fails when you have no history:</p>
+        <ul>
+          <li><strong>New user cold start:</strong> No enrolments → can't find similar users → no recommendations</li>
+          <li><strong>New item cold start:</strong> No one has rated the new course → it can never be recommended</li>
+        </ul>
+        <p style="margin-top:8px;"><strong>Solution:</strong> Hybrid systems — use content-based for new items/users, switch to collaborative filtering once enough data exists.</p>
+      </div>
+      <div class="cb green">
+        <span class="tag tag-green">Clustering Pipeline</span>
+        <h4>Step by Step</h4>
+        <div style="margin-top:4px;">
+          <div class="step"><div class="step-num">1</div><div class="step-body"><h4>Build user-course matrix</h4><p>Rows = users, columns = courses, values = ratings (fill NaN with 0)</p></div></div>
+          <div class="step"><div class="step-num">2</div><div class="step-body"><h4>Apply PCA</h4><p>Reduce the wide matrix to ~50 principal components — fights curse of dimensionality</p></div></div>
+          <div class="step"><div class="step-num">3</div><div class="step-body"><h4>K-Means clustering</h4><p>Group users into k clusters based on their PCA-reduced profiles</p></div></div>
+          <div class="step"><div class="step-num">4</div><div class="step-body"><h4>Recommend</h4><p>For target user, find their cluster, get most popular unseen courses in that cluster</p></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><span class="code-title">clustering_recommender.py</span></div>
+    <pre><code><span class="kw">from</span> sklearn.decomposition <span class="kw">import</span> PCA
+<span class="kw">from</span> sklearn.cluster <span class="kw">import</span> KMeans
+<span class="kw">from</span> sklearn.preprocessing <span class="kw">import</span> StandardScaler
+
+<span class="cm"># ── Build user-course matrix ──────────────────────────────</span>
+user_course_matrix = ratings.<span class="fn">pivot_table</span>(
+    index=<span class="st">'user_id'</span>,
+    columns=<span class="st">'course_id'</span>,
+    values=<span class="st">'rating'</span>
+).<span class="fn">fillna</span>(<span class="nm">0</span>)  <span class="cm"># 0 = not taken / no opinion</span>
+
+<span class="cm"># ── Dimensionality reduction ──────────────────────────────</span>
+scaler = <span class="fn">StandardScaler</span>()
+X_scaled = scaler.<span class="fn">fit_transform</span>(user_course_matrix)
+
+pca = <span class="fn">PCA</span>(n_components=<span class="nm">50</span>, random_state=<span class="nm">42</span>)
+X_pca = pca.<span class="fn">fit_transform</span>(X_scaled)
+<span class="fn">print</span>(<span class="st">f"Variance retained: {pca.explained_variance_ratio_.sum():.1%}"</span>)
+
+<span class="cm"># ── K-Means clustering ────────────────────────────────────</span>
+kmeans = <span class="fn">KMeans</span>(n_clusters=<span class="nm">8</span>, init=<span class="st">'k-means++'</span>, n_init=<span class="nm">10</span>, random_state=<span class="nm">42</span>)
+user_course_matrix[<span class="st">'cluster'</span>] = kmeans.<span class="fn">fit_predict</span>(X_pca)
+
+<span class="cm"># ── Recommend for a user ──────────────────────────────────</span>
+<span class="kw">def</span> <span class="fn">cluster_recommend</span>(user_id, user_course_matrix, top_n=<span class="nm">10</span>):
+    user_cluster = user_course_matrix.<span class="fn">loc</span>[user_id, <span class="st">'cluster'</span>]
+    cluster_members = user_course_matrix[
+        user_course_matrix[<span class="st">'cluster'</span>] == user_cluster
+    ].<span class="fn">drop</span>(columns=[<span class="st">'cluster'</span>])
+
+    <span class="cm"># Courses the target user has NOT taken (rating == 0)</span>
+    user_taken = user_course_matrix.<span class="fn">loc</span>[user_id]
+    unseen = user_taken[user_taken == <span class="nm">0</span>].index
+
+    <span class="cm"># Most popular unseen courses within the cluster</span>
+    cluster_popularity = cluster_members[unseen].<span class="fn">sum</span>(axis=<span class="nm">0</span>)
+    <span class="kw">return</span> cluster_popularity.<span class="fn">sort_values</span>(ascending=<span class="nm">False</span>).<span class="fn">head</span>(top_n)</code></pre>
+  </div>
+</div>
+</section>
+
+<div class="divider"></div>
+
+<!-- KNN COLLABORATIVE FILTERING -->
+<section id="knn-cf">
+<div class="container">
+  <div class="section-label">Module 4</div>
+  <h2 class="section-title">KNN-Based Collaborative Filtering</h2>
+  <p class="section-sub">Find the users most similar to you (your nearest neighbours), then recommend what they liked that you haven't seen yet. No machine learning training phase — pure distance calculation.</p>
+
+  <div class="analogy">
+    <div class="analogy-icon">🧩</div>
+    <div class="analogy-body">
+      <strong>Memory-Based vs Model-Based</strong>
+      <p>KNN collaborative filtering is "memory-based" — it stores the entire history and looks up similar users at prediction time (like a human remembering everything). NMF (next module) is "model-based" — it compresses the data into a compact model that can predict without looking up the raw history. Memory-based is simpler and more transparent; model-based scales better to millions of users.</p>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div>
+      <div class="cb">
+        <span class="tag tag-gold">User-Based KNN CF</span>
+        <h4>Find Similar Users, Borrow Their Taste</h4>
+        <p>For a target user, compute their cosine similarity to every other user (based on their rating vectors). Find the k most similar users (neighbours). For each unseen course, average the neighbours' ratings (weighted by similarity). Recommend courses with highest predicted rating.</p>
+        <div class="formula">predicted_rating(u, c) = Σ sim(u, n) × rating(n, c) / Σ sim(u, n)</div>
+      </div>
+      <div class="cb blue">
+        <span class="tag tag-blue">Item-Based KNN CF</span>
+        <h4>Find Similar Items, Leverage Your History</h4>
+        <p>Instead of finding similar users, find courses that behave similarly (i.e., the same group of users tends to enrol in both). For each unseen course, look at how similar it is to courses the user has already taken. The more the unseen course resembles your history, the higher it ranks.</p>
+        <p style="margin-top:8px;"><strong>Item-based CF is generally more stable</strong> than user-based — course preferences are more consistent than individual user preferences, and the item space changes less frequently than the user space.</p>
+      </div>
+    </div>
+    <div>
+      <div class="cb purple">
+        <span class="tag tag-purple">The Surprise Library</span>
+        <h4>The Go-To Library for CF in Python</h4>
+        <p>The <code>surprise</code> library (Simple Python RecommendatIon System Engine) makes building KNN and matrix factorization recommenders easy. It handles train/test splitting, cross-validation, and multiple similarity metrics out of the box.</p>
+        <p style="margin-top:8px;"><strong>Key algorithms in Surprise:</strong> KNNBasic, KNNWithMeans, KNNWithZScore, SVD, NMF, BaselineOnly. Use <code>surprise.SVD</code> for the best performance in most cases.</p>
+      </div>
+      <div class="cb green">
+        <span class="tag tag-green">Evaluation</span>
+        <h4>How to Measure Recommender Quality</h4>
+        <ul>
+          <li><strong>RMSE:</strong> Root Mean Squared Error between predicted and actual ratings. Lower = better.</li>
+          <li><strong>MAE:</strong> Mean Absolute Error. More interpretable than RMSE.</li>
+          <li><strong>Precision@K:</strong> Of the top K recommendations, what fraction are relevant?</li>
+          <li><strong>Recall@K:</strong> Of all relevant items, what fraction appear in the top K?</li>
+          <li><strong>Cross-validation:</strong> Always use k-fold CV with the Surprise library to get reliable estimates.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><span class="code-title">knn_collaborative_filtering.py</span></div>
+    <pre><code><span class="kw">from</span> surprise <span class="kw">import</span> Dataset, Reader, KNNBasic, SVD
+<span class="kw">from</span> surprise.model_selection <span class="kw">import</span> cross_validate, train_test_split
+<span class="kw">from</span> surprise <span class="kw">import</span> accuracy
+
+<span class="cm"># ── Load data into Surprise format ────────────────────────</span>
+reader = <span class="fn">Reader</span>(rating_scale=(<span class="nm">0</span>, <span class="nm">3</span>))  <span class="cm"># 0=not taken, 1=audit, 2=completed</span>
+data   = Dataset.<span class="fn">load_from_df</span>(
+    ratings[[<span class="st">'user_id'</span>, <span class="st">'course_id'</span>, <span class="st">'rating'</span>]], reader
+)
+
+<span class="cm"># ── KNN-Based Collaborative Filtering ────────────────────</span>
+knn_model = <span class="fn">KNNBasic</span>(
+    k=<span class="nm">20</span>,                        <span class="cm"># number of neighbours</span>
+    sim_options={
+        <span class="st">'name'</span>: <span class="st">'cosine'</span>,         <span class="cm"># 'pearson', 'msd' also available</span>
+        <span class="st">'user_based'</span>: <span class="nm">True</span>         <span class="cm"># False = item-based</span>
+    }
+)
+
+<span class="cm"># ── Cross-validation ──────────────────────────────────────</span>
+cv_results = <span class="fn">cross_validate</span>(knn_model, data, measures=[<span class="st">'RMSE'</span>, <span class="st">'MAE'</span>],
+                              cv=<span class="nm">5</span>, verbose=<span class="nm">True</span>)
+
+<span class="cm"># ── Train and predict ─────────────────────────────────────</span>
+trainset, testset = <span class="fn">train_test_split</span>(data, test_size=<span class="nm">0.25</span>)
+knn_model.<span class="fn">fit</span>(trainset)
+predictions = knn_model.<span class="fn">test</span>(testset)
+<span class="fn">print</span>(<span class="st">f"RMSE: {accuracy.rmse(predictions):.4f}"</span>)
+
+<span class="cm"># ── Predict a specific rating ─────────────────────────────</span>
+pred = knn_model.<span class="fn">predict</span>(uid=<span class="st">'user_42'</span>, iid=<span class="st">'course_101'</span>)
+<span class="fn">print</span>(<span class="st">f"Predicted rating: {pred.est:.2f}"</span>)
+
+<span class="cm"># ── Get top-N recommendations for a user ─────────────────</span>
+all_courses = ratings[<span class="st">'course_id'</span>].<span class="fn">unique</span>()
+taken       = ratings[ratings[<span class="st">'user_id'</span>]==<span class="st">'user_42'</span>][<span class="st">'course_id'</span>].<span class="fn">tolist</span>()
+unseen      = [c <span class="kw">for</span> c <span class="kw">in</span> all_courses <span class="kw">if</span> c <span class="kw">not in</span> taken]
+
+preds = [(c, knn_model.<span class="fn">predict</span>(<span class="st">'user_42'</span>, c).est) <span class="kw">for</span> c <span class="kw">in</span> unseen]
+top10 = <span class="fn">sorted</span>(preds, key=<span class="kw">lambda</span> x: x[<span class="nm">1</span>], reverse=<span class="nm">True</span>)[:<span class="nm">10</span>]</code></pre>
+  </div>
+</div>
+</section>
+
+<div class="divider"></div>
+
+<!-- NMF COLLABORATIVE FILTERING -->
+<section id="nmf-cf">
+<div class="container">
+  <div class="section-label">Module 5</div>
+  <h2 class="section-title">NMF-Based Collaborative Filtering</h2>
+  <p class="section-sub">Non-Negative Matrix Factorization decomposes the sparse ratings matrix into two smaller matrices representing hidden "topics" — like discovering that users who like Python and ML courses also tend to like data visualisation, even if you never explicitly told the model that.</p>
+
+  <div class="analogy">
+    <div class="analogy-icon">🧩</div>
+    <div class="analogy-body">
+      <strong>The Hidden Taste Analogy</strong>
+      <p>Imagine you don't know what genres of music exist. You only have a table of which users bought which songs. NMF would automatically discover that certain users all buy similar songs — and label that cluster "pop fans" or "jazz fans" without you ever defining those genres. It discovers the hidden structure (latent factors) from the data alone. For courses, these latent factors might be "data science enthusiasts", "cloud architects", or "frontend developers".</p>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div>
+      <div class="cb">
+        <span class="tag tag-gold">How NMF CF Works</span>
+        <h4>Factorize the Ratings Matrix</h4>
+        <p>The ratings matrix R (users × courses) is approximated as the product of two smaller matrices:</p>
+        <div class="formula">R ≈ W × H<br><span style="font-size:11px;color:#7a90b8">W: users × latent factors &nbsp;|&nbsp; H: latent factors × courses</span></div>
+        <p style="margin-top:8px;">W tells you how much each user is associated with each latent factor (e.g., "this user is 80% data science, 20% cloud"). H tells you how much each course belongs to each latent factor. Multiply a user's W row by H to get predicted ratings for every course — including ones they haven't taken.</p>
+      </div>
+      <div class="cb blue">
+        <span class="tag tag-blue">Number of Latent Factors</span>
+        <h4>Choosing k (Number of Topics)</h4>
+        <p>This is your main hyperparameter. Too few factors: the model is too general and misses nuances. Too many: the model overfits to individual users.</p>
+        <p style="margin-top:8px;"><strong>Practical approach:</strong> Start with k = 10–50. Use RMSE on a held-out validation set to find the optimal k. In the IBM capstone, k values between 10 and 20 typically work well for the course dataset.</p>
+      </div>
+    </div>
+    <div>
+      <div class="cb purple">
+        <span class="tag tag-purple">NMF vs KNN CF</span>
+        <h4>When to Use Each</h4>
+        <ul>
+          <li><strong>KNN CF:</strong> More interpretable (you can say "these 20 users are your neighbours"). Works well on smaller datasets. No training needed — just distance calculation at prediction time. Slow at scale.</li>
+          <li><strong>NMF CF:</strong> Better at scaling to millions of users. Captures latent patterns (hidden topics). Training is required but prediction is fast. Less interpretable — latent factors are abstract.</li>
+        </ul>
+        <p style="margin-top:8px;">In practice: use NMF (or SVD) for production systems, KNN for prototyping or when interpretability matters.</p>
+      </div>
+      <div class="cb green">
+        <span class="tag tag-green">Handling Sparse Data</span>
+        <h4>The Key Challenge</h4>
+        <p>Real ratings matrices are 99%+ empty. Most users have only rated a handful of courses. NMF fills in the blanks by learning the latent structure from the ratings that DO exist. This is why the approach is called "matrix completion" — you're completing the sparse matrix by learning the underlying patterns.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><span class="code-title">nmf_collaborative_filtering.py</span></div>
+    <pre><code><span class="kw">from</span> surprise <span class="kw">import</span> NMF
+<span class="kw">from</span> surprise.model_selection <span class="kw">import</span> cross_validate
+
+<span class="cm"># ── NMF via Surprise ──────────────────────────────────────</span>
+nmf_model = <span class="fn">NMF</span>(
+    n_factors=<span class="nm">15</span>,     <span class="cm"># number of latent topics</span>
+    n_epochs=<span class="nm">50</span>,      <span class="cm"># training iterations</span>
+    random_state=<span class="nm">42</span>
+)
+
+cv_results = <span class="fn">cross_validate</span>(nmf_model, data, measures=[<span class="st">'RMSE'</span>, <span class="st">'MAE'</span>],
+                              cv=<span class="nm">5</span>, verbose=<span class="nm">True</span>)
+
+<span class="cm"># ── NMF via sklearn (gives access to W and H matrices) ────</span>
+<span class="kw">from</span> sklearn.decomposition <span class="kw">import</span> NMF <span class="kw">as</span> SklearnNMF
+
+user_course_matrix = ratings.<span class="fn">pivot_table</span>(
+    index=<span class="st">'user_id'</span>, columns=<span class="st">'course_id'</span>, values=<span class="st">'rating'</span>
+).<span class="fn">fillna</span>(<span class="nm">0</span>)
+
+nmf = <span class="fn">SklearnNMF</span>(n_components=<span class="nm">15</span>, init=<span class="st">'nndsvd'</span>, random_state=<span class="nm">42</span>)
+W = nmf.<span class="fn">fit_transform</span>(user_course_matrix)  <span class="cm"># users × latent_factors</span>
+H = nmf.components_                          <span class="cm"># latent_factors × courses</span>
+
+<span class="cm"># Reconstruct full predicted ratings matrix</span>
+predicted_ratings = pd.<span class="fn">DataFrame</span>(
+    W @ H,
+    index=user_course_matrix.index,
+    columns=user_course_matrix.columns
+)
+
+<span class="cm"># Get top-N recommendations for a user</span>
+<span class="kw">def</span> <span class="fn">nmf_recommend</span>(user_id, predicted_ratings, user_course_matrix, top_n=<span class="nm">10</span>):
+    user_pred    = predicted_ratings.<span class="fn">loc</span>[user_id]
+    already_taken = user_course_matrix.<span class="fn">loc</span>[user_id]
+    unseen_pred  = user_pred[already_taken == <span class="nm">0</span>]
+    <span class="kw">return</span> unseen_pred.<span class="fn">sort_values</span>(ascending=<span class="nm">False</span>).<span class="fn">head</span>(top_n)</code></pre>
+  </div>
+</div>
+</section>
+
+<div class="divider"></div>
+
+<!-- NEURAL NETWORK RATING PREDICTION -->
+<section id="neural">
+<div class="container">
+  <div class="section-label">Module 6</div>
+  <h2 class="section-title">Neural Network-Based Rating Prediction</h2>
+  <p class="section-sub">Use deep learning to learn rich vector representations (embeddings) for each user and course, then predict ratings by combining those embeddings. This is the same technique behind Spotify, YouTube, and TikTok's recommendation engines.</p>
+
+  <div class="analogy">
+    <div class="analogy-icon">🗺️</div>
+    <div class="analogy-body">
+      <strong>Embeddings as a Map</strong>
+      <p>Imagine plotting every user and every course as points on a 2D map. Similar users cluster together. Similar courses cluster together. Users who'd love a course live close to that course on the map. An embedding network learns to create this map automatically — so that predicting a rating is as simple as measuring the distance between a user point and a course point on the map. The network learns the entire map from the rating history.</p>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div>
+      <div class="cb">
+        <span class="tag tag-gold">Embedding Layers</span>
+        <h4>What Are Embeddings?</h4>
+        <p>An Embedding layer converts a discrete ID (like user_42 or course_101) into a dense vector of real numbers (e.g., a 32-dimensional vector). These vectors are learned during training — they capture the "essence" of each user or course in a compact numerical form.</p>
+        <p style="margin-top:8px;">Think of it as a lookup table: each ID gets its own row of numbers, and those numbers are adjusted by backpropagation to best predict ratings.</p>
+      </div>
+      <div class="cb blue">
+        <span class="tag tag-blue">Interaction Features</span>
+        <h4>Combining User + Course Embeddings</h4>
+        <p>Once you have user embedding <strong>u</strong> and item embedding <strong>c</strong>, combine them to predict the rating. Common approaches:</p>
+        <ul>
+          <li><strong>Dot product:</strong> Simple inner product u·c. Fast but limited expressive power</li>
+          <li><strong>Concatenate + Dense:</strong> Stack [u, c] into one vector, pass through Dense layers. More expressive.</li>
+          <li><strong>Element-wise multiply:</strong> u ⊙ c, then Dense layers. Interaction features.</li>
+        </ul>
+        <p style="margin-top:8px;">The IBM capstone uses the concatenation approach — extract user and item embedding vectors and use them as input features for downstream regression or classification models.</p>
+      </div>
+    </div>
+    <div>
+      <div class="cb purple">
+        <span class="tag tag-purple">Regression vs Classification</span>
+        <h4>Two Ways to Predict Ratings</h4>
+        <p><strong>Regression approach:</strong> Predict the exact rating score (a continuous number). Use MSE as the loss. Output: a single number predicting how much the user will like the course.<br><br>
+        <strong>Classification approach:</strong> Predict the rating mode — did the user audit (0) or complete (1) the course? Use binary cross-entropy. Output: probability of completion.<br><br>
+        In practice: try both and compare. The classification framing often works better when ratings are discrete and imbalanced.</p>
+      </div>
+      <div class="cb green">
+        <span class="tag tag-green">Why Neural Embeddings Win at Scale</span>
+        <h4>The Key Advantages</h4>
+        <ul>
+          <li>Learns non-linear interactions between user and course features</li>
+          <li>Can incorporate additional features (course difficulty, user demographics)</li>
+          <li>Scales to billions of users and items</li>
+          <li>The learned embeddings can be reused across many downstream tasks</li>
+          <li>State of the art for large recommendation systems (YouTube, Netflix, Spotify)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><span class="code-title">neural_embedding_recommender.py</span></div>
+    <pre><code><span class="kw">import</span> tensorflow <span class="kw">as</span> tf
+<span class="kw">from</span> tensorflow.keras <span class="kw">import</span> layers, Model, Input
+
+<span class="cm"># ── Encode user and course IDs as integers ─────────────────</span>
+<span class="kw">from</span> sklearn.preprocessing <span class="kw">import</span> LabelEncoder
+user_enc   = <span class="fn">LabelEncoder</span>()
+course_enc = <span class="fn">LabelEncoder</span>()
+ratings[<span class="st">'user_idx'</span>]   = user_enc.<span class="fn">fit_transform</span>(ratings[<span class="st">'user_id'</span>])
+ratings[<span class="st">'course_idx'</span>] = course_enc.<span class="fn">fit_transform</span>(ratings[<span class="st">'course_id'</span>])
+
+n_users   = ratings[<span class="st">'user_idx'</span>].<span class="fn">nunique</span>()
+n_courses = ratings[<span class="st">'course_idx'</span>].<span class="fn">nunique</span>()
+EMBED_DIM = <span class="nm">32</span>  <span class="cm"># size of each embedding vector</span>
+
+<span class="cm"># ── Build Neural CF Model ─────────────────────────────────</span>
+user_input   = <span class="fn">Input</span>(shape=(<span class="nm">1</span>,), name=<span class="st">'user_input'</span>)
+course_input = <span class="fn">Input</span>(shape=(<span class="nm">1</span>,), name=<span class="st">'course_input'</span>)
+
+<span class="cm"># Embedding lookup: ID integer → dense vector</span>
+user_emb   = layers.<span class="fn">Embedding</span>(n_users,   EMBED_DIM)(user_input)
+course_emb = layers.<span class="fn">Embedding</span>(n_courses, EMBED_DIM)(course_input)
+
+<span class="cm"># Flatten and concatenate user + course embeddings</span>
+user_vec   = layers.<span class="fn">Flatten</span>()(user_emb)
+course_vec = layers.<span class="fn">Flatten</span>()(course_emb)
+combined   = layers.<span class="fn">Concatenate</span>()([user_vec, course_vec])  <span class="cm"># shape: (64,)</span>
+
+<span class="cm"># Dense layers to learn interaction patterns</span>
+x = layers.<span class="fn">Dense</span>(<span class="nm">128</span>, activation=<span class="st">'relu'</span>)(combined)
+x = layers.<span class="fn">Dropout</span>(<span class="nm">0.3</span>)(x)
+x = layers.<span class="fn">Dense</span>(<span class="nm">64</span>,  activation=<span class="st">'relu'</span>)(x)
+x = layers.<span class="fn">Dropout</span>(<span class="nm">0.2</span>)(x)
+
+<span class="cm"># Regression output: predict rating score</span>
+output = layers.<span class="fn">Dense</span>(<span class="nm">1</span>, activation=<span class="st">'linear'</span>)(x)
+
+model = <span class="fn">Model</span>([user_input, course_input], output)
+model.<span class="fn">compile</span>(optimizer=<span class="st">'adam'</span>, loss=<span class="st">'mse'</span>, metrics=[<span class="st">'mae'</span>])
+
+<span class="cm"># ── Train ─────────────────────────────────────────────────</span>
+model.<span class="fn">fit</span>(
+    [ratings[<span class="st">'user_idx'</span>], ratings[<span class="st">'course_idx'</span>]],
+    ratings[<span class="st">'rating'</span>],
+    epochs=<span class="nm">30</span>, batch_size=<span class="nm">256</span>, validation_split=<span class="nm">0.2</span>
+)
+
+<span class="cm"># ── Extract embeddings for downstream use ─────────────────</span>
+user_embedding_model = <span class="fn">Model</span>(user_input, user_vec)
+user_embeddings = user_embedding_model.<span class="fn">predict</span>(all_user_ids)</code></pre>
+  </div>
+</div>
+</section>
+
+<div class="divider"></div>
+
+<!-- STREAMLIT -->
+<section id="streamlit">
+<div class="container">
+  <div class="section-label">Module 7</div>
+  <h2 class="section-title">Deploying With Streamlit</h2>
+  <p class="section-sub">Streamlit lets you turn a Python script into a shareable web app in minutes — no HTML, CSS, or JavaScript required. For the capstone, you build an interactive dashboard that lets anyone try all five recommender methods.</p>
+
+  <div class="analogy">
+    <div class="analogy-icon">🚀</div>
+    <div class="analogy-body">
+      <strong>Why Streamlit Changed Everything for Data Scientists</strong>
+      <p>Before Streamlit, deploying an ML model as a web app required learning Flask, Docker, JavaScript, and cloud platforms — a multi-day project for a non-software-engineer. Streamlit reduced it to: write Python, run one command, get a web app. That's genuinely revolutionary. Your capstone Streamlit app demonstrates to employers that you can take an ML model all the way from research notebook to deployed product.</p>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div>
+      <div class="cb">
+        <span class="tag tag-gold">Core Streamlit Concepts</span>
+        <h4>The Building Blocks You Need</h4>
+        <ul>
+          <li><strong>st.title / st.header:</strong> Text and headings</li>
+          <li><strong>st.selectbox / st.multiselect:</strong> Dropdown menus for user input</li>
+          <li><strong>st.slider:</strong> Numeric input with a slider</li>
+          <li><strong>st.button:</strong> Trigger model training or prediction</li>
+          <li><strong>st.dataframe / st.table:</strong> Display pandas DataFrames</li>
+          <li><strong>st.cache_data / st.cache_resource:</strong> Cache slow operations (loading data, training models)</li>
+          <li><strong>st.sidebar:</strong> Put controls in a collapsible sidebar</li>
+        </ul>
+      </div>
+      <div class="cb blue">
+        <span class="tag tag-blue">App Architecture</span>
+        <h4>How to Structure the Capstone App</h4>
+        <div style="margin-top:4px;">
+          <div class="step"><div class="step-num">1</div><div class="step-body"><h4>Sidebar: Pick your recommender</h4><p>Dropdown to select model type (Course Similarity, User Profile, Clustering, KNN CF, NMF CF)</p></div></div>
+          <div class="step"><div class="step-num">2</div><div class="step-body"><h4>Sidebar: Configure parameters</h4><p>Sliders for top_n, k clusters, number of neighbours etc.</p></div></div>
+          <div class="step"><div class="step-num">3</div><div class="step-body"><h4>Main: User selects their courses</h4><p>Multiselect widget to pick courses they've already taken</p></div></div>
+          <div class="step"><div class="step-num">4</div><div class="step-body"><h4>Main: Show recommendations</h4><p>Button triggers model, results display as a styled DataFrame</p></div></div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="cb purple">
+        <span class="tag tag-purple">Performance Tips</span>
+        <h4>Making the App Fast</h4>
+        <ul>
+          <li>Use <code>@st.cache_data</code> on data loading functions — runs only once, cached for subsequent interactions</li>
+          <li>Use <code>@st.cache_resource</code> for model objects (neural networks, trained KNN models) — saves re-training on every button click</li>
+          <li>Pre-compute the similarity matrix and store as a CSV — don't recompute on every request</li>
+          <li>For neural network models: save weights with <code>model.save()</code> and load on startup</li>
+        </ul>
+      </div>
+      <div class="cb green">
+        <span class="tag tag-green">Deployment Options</span>
+        <h4>Sharing Your App with the World</h4>
+        <ul>
+          <li><strong>Streamlit Community Cloud:</strong> Free hosting, push to GitHub → app goes live automatically. Perfect for capstone showcase.</li>
+          <li><strong>Heroku:</strong> More control, free tier available. Requires a Procfile.</li>
+          <li><strong>AWS/GCP/Azure:</strong> Production scale. For after you get the job.</li>
+          <li><strong>HuggingFace Spaces:</strong> Free hosting for ML demos, supports Streamlit natively.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><span class="code-title">app.py — Streamlit Capstone App Skeleton</span></div>
+    <pre><code><span class="kw">import</span> streamlit <span class="kw">as</span> st
+<span class="kw">import</span> pandas <span class="kw">as</span> pd
+<span class="kw">from</span> recommenders <span class="kw">import</span> (course_similarity_recommend, user_profile_recommend,
+                          cluster_recommend, knn_cf_recommend, nmf_recommend)
+
+<span class="cm"># ── Page config ───────────────────────────────────────────</span>
+st.<span class="fn">set_page_config</span>(page_title=<span class="st">"Course Recommender"</span>, layout=<span class="st">"wide"</span>)
+st.<span class="fn">title</span>(<span class="st">"🎓 AI Course Recommender System"</span>)
+
+<span class="cm"># ── Load data (cached so it only loads once) ──────────────</span>
+<span class="kw">@st.cache_data</span>
+<span class="kw">def</span> <span class="fn">load_data</span>():
+    courses  = pd.<span class="fn">read_csv</span>(<span class="st">'courses.csv'</span>)
+    ratings  = pd.<span class="fn">read_csv</span>(<span class="st">'ratings.csv'</span>)
+    sim_df   = pd.<span class="fn">read_csv</span>(<span class="st">'similarity_matrix.csv'</span>, index_col=<span class="nm">0</span>)
+    <span class="kw">return</span> courses, ratings, sim_df
+
+courses, ratings, sim_df = <span class="fn">load_data</span>()
+
+<span class="cm"># ── Sidebar: model selection ──────────────────────────────</span>
+st.sidebar.<span class="fn">header</span>(<span class="st">"⚙️ Recommender Settings"</span>)
+model_type = st.sidebar.<span class="fn">selectbox</span>(
+    <span class="st">"Choose a Recommender Model"</span>,
+    [<span class="st">"Course Similarity"</span>, <span class="st">"User Profile"</span>, <span class="st">"Clustering"</span>, <span class="st">"KNN CF"</span>, <span class="st">"NMF CF"</span>]
+)
+top_n = st.sidebar.<span class="fn">slider</span>(<span class="st">"Number of Recommendations"</span>, <span class="nm">5</span>, <span class="nm">20</span>, <span class="nm">10</span>)
+
+<span class="cm"># ── Main: user input ──────────────────────────────────────</span>
+st.<span class="fn">subheader</span>(<span class="st">"📚 Select courses you have already taken"</span>)
+all_course_names = courses[<span class="st">'title'</span>].<span class="fn">tolist</span>()
+selected_courses = st.<span class="fn">multiselect</span>(<span class="st">"Your course history:"</span>, all_course_names)
+
+<span class="cm"># ── Generate recommendations ──────────────────────────────</span>
+<span class="kw">if</span> st.<span class="fn">button</span>(<span class="st">"🎯 Get Recommendations"</span>) <span class="kw">and</span> selected_courses:
+    <span class="kw">with</span> st.<span class="fn">spinner</span>(<span class="st">"Finding best courses for you..."</span>):
+        <span class="cm"># Route to appropriate recommender</span>
+        <span class="kw">if</span> model_type == <span class="st">"Course Similarity"</span>:
+            recs = <span class="fn">course_similarity_recommend</span>(selected_courses, sim_df, top_n)
+        <span class="kw">elif</span> model_type == <span class="st">"NMF CF"</span>:
+            recs = <span class="fn">nmf_recommend</span>(selected_courses, top_n)
+        <span class="cm"># ... other models ...</span>
+
+    st.<span class="fn">success</span>(<span class="st">f"Top {top_n} recommendations using {model_type}:"</span>)
+    st.<span class="fn">dataframe</span>(recs, use_container_width=<span class="nm">True</span>)</code></pre>
+  </div>
+</div>
+</section>
+
+<div class="divider"></div>
+
+<!-- CAPSTONE TIPS -->
+<section id="capstone-tips">
+<div class="container">
+  <div class="section-label">Capstone Survival Guide</div>
+  <h2 class="section-title">Tips for Acing the Capstone Project</h2>
+  <p class="section-sub">The capstone is a peer-reviewed project. Here's what separates a great submission from a good one.</p>
+
+  <div class="bp-card">
+    <div class="bp-num">1</div>
+    <div class="bp-content">
+      <h4>Tell a Story in Your Report</h4>
+      <p>Don't just paste code outputs — explain what every result means in plain English. "The cosine similarity between Course A and B is 0.87, indicating they cover very similar topics" is far more compelling than just printing the number. Reviewers grade on insight, not just code.</p>
+    </div>
+  </div>
+  <div class="bp-card">
+    <div class="bp-num">2</div>
+    <div class="bp-content">
+      <h4>Always Compare Your Models</h4>
+      <p>Create a comparison table showing RMSE, MAE, and any other metrics across all five recommender approaches. Include a paragraph explaining which model you'd recommend for production use and why — this shows you understand the trade-offs, not just the mechanics.</p>
+    </div>
+  </div>
+  <div class="bp-card">
+    <div class="bp-num">3</div>
+    <div class="bp-content">
+      <h4>Include EDA Insights, Not Just Charts</h4>
+      <p>The EDA section should answer real questions: How sparse is the data? Are certain genres underrepresented? Is there a popularity bias (a few courses get almost all enrolments)? These insights justify your modelling choices — e.g., heavy sparsity explains why NMF outperforms pure KNN.</p>
+    </div>
+  </div>
+  <div class="bp-card">
+    <div class="bp-num">4</div>
+    <div class="bp-content">
+      <h4>Make Your Streamlit App Actually Work</h4>
+      <p>Many submissions have apps that crash or require manual setup. Make sure: all data files are in the repo, <code>requirements.txt</code> is complete, all models are pre-trained and saved (no 10-minute training wait on startup), and the interface is intuitive to someone who has never seen your code.</p>
+    </div>
+  </div>
+  <div class="bp-card">
+    <div class="bp-num">5</div>
+    <div class="bp-content">
+      <h4>Address the Cold Start Problem</h4>
+      <p>In your report, explicitly discuss how you handle new users (no history) and new courses (no ratings). Even a simple hybrid strategy in your app (fallback to content-based for new users) shows sophisticated thinking that stands out in peer review.</p>
+    </div>
+  </div>
+  <div class="bp-card">
+    <div class="bp-num">6</div>
+    <div class="bp-content">
+      <h4>Use This as a Portfolio Piece</h4>
+      <p>Deploy your Streamlit app to Streamlit Community Cloud and include the link in your LinkedIn profile and CV. Add the GitHub repo link in your projects section. A live, working recommender system demo is dramatically more impressive to ML hiring managers than a certificate alone.</p>
+    </div>
+  </div>
+
+  <div class="callout">
+    <span class="callout-icon">🏆</span>
+    <div class="callout-body"><strong>The comparison table that wins peer review:</strong> Include a table with columns [Model, RMSE, MAE, Training Time, Prediction Speed, Cold Start Handling, Interpretability] and mark each approach. This shows holistic understanding — you're not just coding, you're making engineering decisions.</div>
+  </div>
+
+  <h3 style="font-size:16px;font-weight:700;margin:32px 0 16px;">Common Questions</h3>
+  <details>
+    <summary>Why does cosine similarity work better than Euclidean for text and ratings?</summary>
+    <div class="details-body">Cosine similarity measures the angle between two vectors, ignoring their magnitude. For text (Bag of Words), a long document and a short document about the same topic will have different magnitudes but similar directions — cosine correctly identifies them as similar. For ratings, a user who rated 10 courses all as "2" and a user who rated 10 courses all as "1" might have similar preferences — cosine captures this (same direction) while Euclidean would say they're far apart. Euclidean is better for raw coordinates in physical space; cosine is better for high-dimensional feature spaces like text and ratings.</div>
+  </details>
+  <details>
+    <summary>What's the difference between content-based and collaborative filtering in simple terms?</summary>
+    <div class="details-body">Content-based: "Here are things similar to what you've liked based on what the ITEMS are." (Like a librarian recommending books by genre.) Collaborative filtering: "Here are things similar to what you've liked based on what PEOPLE LIKE YOU have liked." (Like asking taste-twin friends.) Content-based needs good item descriptions but no user history. Collaborative filtering needs rich interaction history but no item descriptions. Hybrid systems use both — content-based for cold start, collaborative filtering once enough data exists.</div>
+  </details>
+  <details>
+    <summary>My RMSE is lower with NMF than KNN. Should I always prefer NMF?</summary>
+    <div class="details-body">Lower RMSE is better but not the only consideration. NMF requires training time and may be harder to update when new users or courses appear (requires re-training). KNN requires no training but is slow at prediction time (computes all pairwise similarities). SVD (matrix factorisation via singular value decomposition) typically achieves the best RMSE in practice and is used in production systems. For the capstone: use all methods, report all metrics, explain the trade-offs, and recommend one for production with clear reasoning. That analysis is what gets you the best peer review score.</div>
+  </details>
+  <details>
+    <summary>The neural network model predicts ratings worse than NMF on the small capstone dataset. Is that expected?</summary>
+    <div class="details-body">Yes, completely expected. Neural networks require large amounts of data to learn useful representations. On the small IBM capstone dataset (a few thousand users and courses), simple methods like NMF and SVD almost always outperform neural approaches. Neural collaborative filtering (NCF) truly shines at the scale of Netflix or Spotify — hundreds of millions of users and items. Acknowledging this in your report shows mature understanding and will impress reviewers.</div>
+  </details>
+</div>
+</section>
+
+<div class="divider"></div>
+
+<!-- QUIZ -->
+<section id="quiz">
+<div class="container">
+  <div class="section-label">Final Quiz — Test Everything</div>
+  <h2 class="section-title">Course 6 Quiz</h2>
+  <p class="section-sub">20 questions covering every technique in the capstone — from Bag of Words to neural embeddings. The last quiz of the series — make it count.</p>
+
+  <div class="quiz-progress">
+    <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    <span class="quiz-counter" id="quizCounter">0 / 20</span>
+  </div>
+
+  <div id="quizContainer">
+
+    <div class="question-card active" data-q="0">
+      <div class="q-meta"><span class="q-num">Q01</span><span class="q-topic">Recommender Systems</span></div>
+      <div class="q-text">What is the fundamental difference between content-based and collaborative filtering recommender systems?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>Content-based uses machine learning; collaborative filtering uses only statistics</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>Content-based recommends based on what items are (their features/descriptions); collaborative filtering recommends based on what similar users liked (behaviour patterns)</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>Content-based works for movies; collaborative filtering works for courses and books</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>Content-based requires neural networks; collaborative filtering works without any ML</button>
+      </div>
+      <div class="explanation">✅ <strong>Features vs Behaviour.</strong> Content-based: "You liked this course about Python ML, here are other Python ML courses." Uses item features (descriptions, genres). Collaborative: "Users with similar histories to you also enrolled in these courses." Uses user-item interaction patterns. The distinction matters enormously in practice because they fail in completely different ways and have different cold start vulnerabilities.</div>
+    </div>
+
+    <div class="question-card" data-q="1">
+      <div class="q-meta"><span class="q-num">Q02</span><span class="q-topic">Bag of Words</span></div>
+      <div class="q-text">What does a "Bag of Words" representation actually capture — and what important information does it deliberately discard?</div>
+      <div class="options">
+        <button class="option" data-correct="true"><span class="opt-letter">A</span>It captures word frequencies (how many times each word appears) but discards word order and grammar — hence "bag" (unordered collection)</button>
+        <button class="option" data-correct="false"><span class="opt-letter">B</span>It captures word meaning and context but discards rare words below a frequency threshold</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>It captures the order and position of every word but discards punctuation</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>It captures sentence structure but discards words with fewer than 3 characters</button>
+      </div>
+      <div class="explanation">✅ <strong>Word counts, no order.</strong> BoW creates a vector where each position represents a word and the value is how many times that word appeared. "The dog bit the cat" and "the cat bit the dog" produce identical BoW vectors — order is completely lost. Despite this simplicity, BoW is surprisingly effective for finding topically similar documents because the presence and frequency of specific words strongly predicts topic. For capturing meaning more richly, TF-IDF (penalises common words) and Word2Vec/BERT (captures context) are more sophisticated alternatives.</div>
+    </div>
+
+    <div class="question-card" data-q="2">
+      <div class="q-meta"><span class="q-num">Q03</span><span class="q-topic">Cosine Similarity</span></div>
+      <div class="q-text">Two courses have a cosine similarity of 0.95. A third course has a cosine similarity of 0.3 with the first course. What does this mean?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>The first two courses are 95% identical in content; the third course shares 30% of words</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>The first two courses point in nearly the same direction in feature space (very similar topics); the third course's feature vector points in a much more different direction (quite dissimilar topics)</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>95% of users who took the first course also took the second; 30% took the third</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>The first two courses have 95% word overlap; the third has 30% word overlap</button>
+      </div>
+      <div class="explanation">✅ <strong>Cosine = direction similarity, not overlap percentage.</strong> Cosine similarity of 0.95 means the angle between the two BoW vectors is about 18° — they're nearly parallel in feature space, meaning they discuss very similar topics with similar word distributions. Score of 0.3 means a ~72° angle — substantially different topics. A score of 1.0 = identical direction (same topics), 0 = perpendicular (completely unrelated), −1 = opposite (theoretical extreme). Cosine doesn't measure the percentage of identical words — it measures how similarly the words are distributed.</div>
+    </div>
+
+    <div class="question-card" data-q="3">
+      <div class="q-meta"><span class="q-num">Q04</span><span class="q-topic">Cold Start</span></div>
+      <div class="q-text">A brand new user signs up with no enrolment history. Which recommender will completely fail, and which will still work?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>Both content-based and collaborative filtering will fail for new users</button>
+        <button class="option" data-correct="false"><span class="opt-letter">B</span>Collaborative filtering works fine for new users; content-based fails because it needs course descriptions</button>
+        <button class="option" data-correct="true"><span class="opt-letter">C</span>Collaborative filtering fails (needs enrolment history to find similar users); content-based still works if we ask the user for a few genre preferences at signup</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>Neither fails — both systems just recommend the globally most popular courses by default</button>
+      </div>
+      <div class="explanation">✅ <strong>Cold start is collaborative filtering's weakness.</strong> CF needs to compare the new user's history to other users' histories — with zero history, there's nothing to compare. Content-based can still work if you ask for initial preferences ("What topics interest you?") since it only needs to match user interests to course descriptions. This is why real-world systems like Netflix show genre preference surveys at signup — they're bootstrapping a content-based profile until they have enough click history for collaborative filtering to kick in.</div>
+    </div>
+
+    <div class="question-card" data-q="4">
+      <div class="q-meta"><span class="q-num">Q05</span><span class="q-topic">User Profile</span></div>
+      <div class="q-text">How is a user's genre profile computed in the content-based user profile recommender?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>By averaging the cosine similarities between all pairs of courses the user has taken</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>By computing a weighted sum of the enrolled courses' genre vectors, where the weights are the user's ratings for each course</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>By running K-Means on the user's course list and using the cluster centroid as the profile</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>By taking the max value across all enrolled course genre vectors for each genre dimension</button>
+      </div>
+      <div class="explanation">✅ <strong>Weighted sum of enrolled course genre vectors.</strong> Each course has a genre vector (e.g., [ML=1, Python=1, Cloud=0, Frontend=0]). The user's profile = Σ (rating × genre_vector) for each enrolled course. Higher-rated courses contribute more to the profile. The result is a vector representing the user's genre interests. Dot-producting this with any course's genre vector gives an "interest score" — how well the course matches the user's taste. This is interpretable and computationally fast.</div>
+    </div>
+
+    <div class="question-card" data-q="5">
+      <div class="q-meta"><span class="q-num">Q06</span><span class="q-topic">Clustering</span></div>
+      <div class="q-text">Why is PCA applied to the user-course matrix BEFORE K-Means clustering in the clustering-based recommender?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>PCA converts the user-course matrix into a ratings matrix for collaborative filtering</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>The user-course matrix has thousands of dimensions (one per course), which causes the curse of dimensionality — PCA reduces it to ~50 meaningful components where distance-based K-Means works properly</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>PCA normalises the rating values to [0,1] so K-Means can compare them fairly</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>PCA is required to remove users with no enrolment history before clustering</button>
+      </div>
+      <div class="explanation">✅ <strong>Curse of dimensionality strikes again.</strong> If there are 500 courses, the user-course matrix has 500 dimensions. In 500D, all pairwise distances converge — K-Means can't find meaningful clusters. PCA compresses the 500 dimensions to ~50 principal components that capture most of the variance, making distances meaningful again. This follows the standard best-practice pipeline: StandardScaler → PCA → KMeans. The capstone dataset has hundreds of courses, so PCA is essential before clustering.</div>
+    </div>
+
+    <div class="question-card" data-q="6">
+      <div class="q-meta"><span class="q-num">Q07</span><span class="q-topic">KNN CF</span></div>
+      <div class="q-text">In KNN collaborative filtering, what is the difference between user-based and item-based approaches?</div>
+      <div class="options">
+        <button class="option" data-correct="true"><span class="opt-letter">A</span>User-based: finds similar users and borrows their ratings. Item-based: finds similar items to ones the user has rated and uses those item similarities to predict</button>
+        <button class="option" data-correct="false"><span class="opt-letter">B</span>User-based uses demographic data; item-based uses content descriptions</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>User-based predicts completions; item-based predicts audits</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>User-based is for classification; item-based is for regression</button>
+      </div>
+      <div class="explanation">✅ <strong>Users vs Items as the axis of similarity.</strong> User-based: "Users who rated courses similarly to you also rated this course highly." Item-based: "This course is rated similarly by the same group of users who rated your enrolled courses." Item-based CF tends to be more stable because item popularity changes less frequently than user preferences, and the number of items is often smaller than the number of users (making the item-item similarity matrix more tractable). In practice, item-based CF is used more commonly in production systems like Amazon.</div>
+    </div>
+
+    <div class="question-card" data-q="7">
+      <div class="q-meta"><span class="q-num">Q08</span><span class="q-topic">NMF CF</span></div>
+      <div class="q-text">In NMF-based collaborative filtering, what do the latent factors actually represent?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>They represent explicit genre tags that were manually assigned to each course</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>They represent hidden, automatically discovered "topics" or "interest patterns" — abstract groupings of courses that users tend to take together, even if those groupings were never explicitly defined</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>They represent principal components of the similarity matrix in feature space</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>They represent individual user clusters, similar to K-Means centroids</button>
+      </div>
+      <div class="explanation">✅ <strong>Latent factors = discovered hidden structure.</strong> NMF doesn't know that "data science" or "cloud computing" exist as categories — it discovers from the raw ratings that certain courses are consistently taken together. These clusters of co-enrolment become the latent factors. Factor 1 might strongly represent "Python data science courses", Factor 2 "cloud certifications" — but NMF assigned these without labels. This is why NMF is powerful: it discovers structure you never told it about, and can find patterns that explicit genre tags would miss.</div>
+    </div>
+
+    <div class="question-card" data-q="8">
+      <div class="q-meta"><span class="q-num">Q09</span><span class="q-topic">Surprise Library</span></div>
+      <div class="q-text">Why is the Surprise library's cross_validate function preferred over a simple train/test split for evaluating recommender systems?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>Cross-validation is faster than a single train/test split</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>A single split gives an estimate with high variance (the result could be lucky or unlucky). Cross-validation averages over multiple different splits giving a more reliable, lower-variance estimate of model performance</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>The Surprise library can't do a simple train/test split, only cross-validation</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>Cross-validation prevents data leakage by ensuring the test set is never exposed to the model</button>
+      </div>
+      <div class="explanation">✅ <strong>Lower variance estimates.</strong> With a single 80/20 split, the RMSE you get depends heavily on which 20% happened to be in the test set. If easy-to-predict users ended up in the test set, RMSE looks great. If hard cases did, it looks bad. k-fold cross-validation splits the data k different ways, trains and evaluates k times, and averages the results — giving a much more reliable estimate of how the model will perform on truly unseen data. This is critical before reporting performance in your capstone report.</div>
+    </div>
+
+    <div class="question-card" data-q="9">
+      <div class="q-meta"><span class="q-num">Q10</span><span class="q-topic">Neural Embeddings</span></div>
+      <div class="q-text">What does an Embedding layer do in a neural network recommender, and why is it better than one-hot encoding for user and item IDs?</div>
+      <div class="options">
+        <button class="option" data-correct="true"><span class="opt-letter">A</span>An Embedding converts each ID into a dense, low-dimensional learned vector. Unlike one-hot (sparse, no relationships), embeddings capture semantic similarity — similar users/courses get similar vectors, and the relationships are learned from rating data</button>
+        <button class="option" data-correct="false"><span class="opt-letter">B</span>An Embedding compresses images into vectors for visual similarity matching</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>An Embedding is the same as one-hot encoding but stored more efficiently as sparse matrices</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>An Embedding layer applies PCA to the user-course matrix before training</button>
+      </div>
+      <div class="explanation">✅ <strong>Dense + learned = far more expressive than one-hot.</strong> With 10,000 users, one-hot encoding needs a 10,000-dimensional binary vector per user — it's sparse and treats all users as completely unrelated. An embedding maps each user to a 32-dimensional dense vector learned from the data. Similar users (who rate things similarly) end up with similar embedding vectors. This dense representation is what's passed to the Dense layers, allowing the network to discover complex interaction patterns. Embedding layers are standard in every serious recommendation engine.</div>
+    </div>
+
+    <div class="question-card" data-q="10">
+      <div class="q-meta"><span class="q-num">Q11</span><span class="q-topic">Evaluation</span></div>
+      <div class="q-text">What does RMSE measure in the context of rating prediction, and what would RMSE = 0.5 vs RMSE = 1.5 mean?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>RMSE measures how many users were correctly matched to their cluster; 0.5 means 50% correct</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>RMSE is the square root of the average squared error between predicted and actual ratings. RMSE = 0.5 means predictions are on average 0.5 rating units off (good); RMSE = 1.5 means they're off by 1.5 units on average (poor)</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>RMSE measures recall — 0.5 means 50% of relevant courses appeared in recommendations</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>RMSE = 0.5 means the model is right 50% of the time; RMSE = 1.5 means it's wrong 1.5 times per prediction</button>
+      </div>
+      <div class="explanation">✅ <strong>RMSE = average prediction error in the same units as the ratings.</strong> If ratings are on a 0–3 scale, RMSE = 0.5 means predictions are typically half a point off — quite good. RMSE = 1.5 means predictions are typically 1.5 points off — worse than random guessing for a 0–3 scale. RMSE penalises large errors more than MAE (because it squares the errors before averaging). Use RMSE when large errors are especially bad; use MAE when all error sizes are equally concerning.</div>
+    </div>
+
+    <div class="question-card" data-q="11">
+      <div class="q-meta"><span class="q-num">Q12</span><span class="q-topic">Streamlit</span></div>
+      <div class="q-text">Why should you use @st.cache_data and @st.cache_resource in your Streamlit app, and what's the difference between them?</div>
+      <div class="options">
+        <button class="option" data-correct="true"><span class="opt-letter">A</span>Both prevent re-running expensive operations on every interaction. cache_data is for data (DataFrames, numpy arrays — creates a new copy); cache_resource is for shared objects like trained models (reuses the same object — more memory efficient for large models)</button>
+        <button class="option" data-correct="false"><span class="opt-letter">B</span>cache_data stores results in a database; cache_resource saves them to local files</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>They're identical — both work the same way for all object types</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>cache_data caches function inputs; cache_resource caches function outputs</button>
+      </div>
+      <div class="explanation">✅ <strong>Caching is essential for a usable app.</strong> Without caching, every time a user changes a slider, Streamlit re-runs the entire script — reloading data from disk, retraining models, recomputing similarity matrices. With @st.cache_data, data-returning functions only run once (or when inputs change). @st.cache_resource is designed for ML models, database connections, and other global resources that should be shared across users and sessions — it avoids creating a new copy for each Streamlit session, saving memory for large models.</div>
+    </div>
+
+    <div class="question-card" data-q="12">
+      <div class="q-meta"><span class="q-num">Q13</span><span class="q-topic">Hybrid Systems</span></div>
+      <div class="q-text">What is a "hybrid recommender system" and when would you build one?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>A system that uses both Python and R to build two separate models and averages their outputs</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>A system that combines content-based and collaborative filtering — e.g., using content-based for new users/items (cold start), then switching to or blending with collaborative filtering once enough interaction data exists</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>A hybrid between supervised and unsupervised learning in the same model</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>A recommender that works across multiple platforms simultaneously (web, mobile, email)</button>
+      </div>
+      <div class="explanation">✅ <strong>Best of both worlds.</strong> Every major production recommender is hybrid. Netflix: content-based for cold start, collaborative for established users. Spotify: content analysis for new songs (no ratings yet), collaborative for established ones. A pure collaborative system can't recommend new items. A pure content-based system can't surface hidden connections between genres. Hybrid systems use each approach where it's strongest — content when there's no history, collaborative when there's enough data, often blending both for established user-item pairs.</div>
+    </div>
+
+    <div class="question-card" data-q="13">
+      <div class="q-meta"><span class="q-num">Q14</span><span class="q-topic">Neural Networks in Rec Systems</span></div>
+      <div class="q-text">The neural network model performs worse than NMF on the IBM capstone dataset. Is this a bug or expected behaviour?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>It's a bug — neural networks always outperform matrix factorisation methods</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>It's completely expected — neural networks require very large datasets to learn useful representations. On the small capstone dataset, simpler methods like NMF and SVD typically outperform neural approaches</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>The model needs more epochs — neural networks always converge to a better solution with enough training</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>Neural networks can't handle sparse rating matrices, which is why NMF wins</button>
+      </div>
+      <div class="explanation">✅ <strong>Neural networks shine at scale — not on small datasets.</strong> The capstone dataset has thousands of users and courses. Netflix-scale recommenders have hundreds of millions of users and millions of items — that's where neural collaborative filtering (NCF) earns its keep by learning rich non-linear interaction patterns. On smaller datasets, the simpler matrix factorisation methods (NMF, SVD) are less prone to overfitting and often produce better results. Acknowledging this trade-off in your capstone report demonstrates the kind of practical judgement that ML hiring managers value.</div>
+    </div>
+
+    <div class="question-card" data-q="14">
+      <div class="q-meta"><span class="q-num">Q15</span><span class="q-topic">Matrix Sparsity</span></div>
+      <div class="q-text">The user-course ratings matrix is 99.5% empty. Why does this extreme sparsity make recommendation harder, and how does NMF help?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>Sparsity means most users have identical profiles, making it impossible to distinguish them</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>With 99.5% missing data, you can't directly compute meaningful similarities between users or items — there are too few overlap points. NMF fills in the blanks by discovering the underlying latent structure from the sparse data that does exist</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>Sparse matrices can't be processed by Python without special libraries like scipy.sparse</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>Sparsity causes division by zero errors in cosine similarity calculations</button>
+      </div>
+      <div class="explanation">✅ <strong>Sparsity = overlap problem.</strong> To say "User A and User B are similar", you need them to have rated many of the same courses. If User A has taken 5 courses and User B has taken 6, and they share 0 in common, you can't compare them at all. NMF bypasses this by compressing all users to the same low-dimensional latent factor space — even two users with no overlap are placed in this space, and their latent representations can be compared. This is the whole point of matrix completion: learn a representation that lets you compare users even when they've taken completely different courses.</div>
+    </div>
+
+    <div class="question-card" data-q="15">
+      <div class="q-meta"><span class="q-num">Q16</span><span class="q-topic">TF-IDF vs BoW</span></div>
+      <div class="q-text">TF-IDF is often better than plain Bag of Words for text similarity. What does TF-IDF do differently?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>TF-IDF preserves word order while BoW doesn't</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>TF-IDF down-weights words that appear in many documents (common but uninformative like "the", "learning") and up-weights rare words that are highly specific to individual documents — making similarity based on truly distinctive terms</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>TF-IDF uses word meanings from a dictionary; BoW just counts raw characters</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>TF-IDF works on longer documents; BoW works only on short texts</button>
+      </div>
+      <div class="explanation">✅ <strong>TF-IDF = Term Frequency × Inverse Document Frequency.</strong> TF: how often a word appears in THIS document. IDF: how rare the word is across ALL documents (log of n_docs / n_docs_containing_word). Words like "machine" and "learning" appear in almost every ML course — they have low IDF, so their high TF barely matters. But "backpropagation" appears rarely across all courses — high IDF. If two courses both mention backpropagation frequently, that's a strong signal they're similar. TF-IDF makes similarity driven by distinctive, meaningful terms rather than universal filler words.</div>
+    </div>
+
+    <div class="question-card" data-q="16">
+      <div class="q-meta"><span class="q-num">Q17</span><span class="q-topic">Precision@K</span></div>
+      <div class="q-text">Your recommender returns 10 courses for a user. Only 3 of those are ones the user actually went on to enrol in. What is the Precision@10?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>0.10 — 10% accuracy across all possible courses</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>0.30 — 3 out of 10 recommended courses were relevant (actually enrolled)</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>3.0 — the raw count of correct recommendations</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>0.03 — 3 correct out of ~100 possible courses in the catalogue</button>
+      </div>
+      <div class="explanation">✅ <strong>Precision@K = relevant items in top K / K.</strong> 3 relevant courses out of 10 recommended = 3/10 = 0.30 or 30%. This is a "ranking quality" metric that asks: "Of the K recommendations I made, how many were actually wanted?" Recall@K asks the complementary question: "Of all the courses the user would have liked, how many did I put in my top K?" Both matter — high precision but low recall means you're selective but missing many relevant items; high recall but low precision means you're casting a wide net full of irrelevant items.</div>
+    </div>
+
+    <div class="question-card" data-q="17">
+      <div class="q-meta"><span class="q-num">Q18</span><span class="q-topic">Whole Capstone</span></div>
+      <div class="q-text">Which combination correctly describes what each model uses as its primary signal?</div>
+      <div class="options">
+        <button class="option" data-correct="true"><span class="opt-letter">A</span>Content-based → item features (text/genres). Collaborative filtering → user-item interaction history. Neural embeddings → learned dense representations of both users and items jointly</button>
+        <button class="option" data-correct="false"><span class="opt-letter">B</span>Content-based → user demographics. Collaborative filtering → item descriptions. Neural embeddings → image features</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>All three models use the same user-course ratings matrix, just with different algorithms</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>Content-based → social connections. Collaborative filtering → item popularity. Neural embeddings → item metadata</button>
+      </div>
+      <div class="explanation">✅ <strong>The three signal types define the three paradigms.</strong> Content-based: "What is this item?" (descriptions, genres, keywords). Collaborative filtering: "Who else took this?" (interaction history). Neural embeddings: "What learned vector best explains this user's and item's latent properties simultaneously?" (jointly trained on interaction data). Hybrid systems combine all three. Understanding which signal each approach uses tells you exactly when each will succeed and fail — and that is the core intellectual framework of the whole capstone.</div>
+    </div>
+
+    <div class="question-card" data-q="18">
+      <div class="q-meta"><span class="q-num">Q19</span><span class="q-topic">Capstone Strategy</span></div>
+      <div class="q-text">What is the single most important thing that distinguishes an excellent capstone submission from a mediocre one?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>Using the most complex model available (neural networks always score higher)</button>
+        <button class="option" data-correct="false"><span class="opt-letter">B</span>Achieving the lowest possible RMSE on the training set</button>
+        <button class="option" data-correct="true"><span class="opt-letter">C</span>Providing clear analytical commentary — explaining what each result means, comparing model trade-offs, and making a justified recommendation for production use. Insight, not just code output</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>Implementing the most visually impressive Streamlit app</button>
+      </div>
+      <div class="explanation">✅ <strong>Insight separates engineers from analysts.</strong> Anyone can run the provided lab notebooks and copy the outputs. What makes a submission stand out is treating results like a data scientist, not a student: "NMF (RMSE=0.82) outperformed KNN CF (RMSE=1.04) because the dataset's extreme sparsity (99.5%) means most user pairs have zero overlap for KNN, while NMF successfully discovers latent structure despite the sparsity. For production, I recommend an NMF-content hybrid..." That one paragraph demonstrates more ML maturity than 20 charts.</div>
+    </div>
+
+    <div class="question-card" data-q="19">
+      <div class="q-meta"><span class="q-num">Q20</span><span class="q-topic">Full Certificate Review</span></div>
+      <div class="q-text">Across all 6 IBM ML courses, which statement best describes the overall learning journey you completed?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>Courses 1–3 are theory; Courses 4–6 are all practical implementation with no new concepts</button>
+        <button class="option" data-correct="false"><span class="opt-letter">B</span>Each course is independent — you can take them in any order</button>
+        <button class="option" data-correct="true"><span class="opt-letter">C</span>Course 1 built data foundations; Courses 2–3 introduced supervised learning; Course 4 covered unsupervised; Course 5 introduced deep learning; Course 6 integrates all techniques into a real-world recommender system project</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>Courses 1–5 are theory-only; only Course 6 involves any coding</button>
+      </div>
+      <div class="explanation">✅ <strong>A deliberate, cumulative progression.</strong> Course 1: EDA, cleaning, feature engineering, hypothesis testing. Course 2: Regression. Course 3: Classification. Course 4: Unsupervised (clustering, PCA, NMF). Course 5: Deep learning and reinforcement learning. Course 6: Capstone — intentionally uses EDA (Course 1), similarity metrics (Course 1 again), K-Means + PCA (Course 4), NMF (Course 4), KNN concepts (Course 3), and neural networks (Course 5) all in one project. The capstone is the integrative test of the entire certificate. Completing it means you've genuinely touched every major area of modern machine learning.</div>
+    </div>
+
+  </div>
+
+  <div class="score-card" id="scoreCard">
+    <div class="section-label">Final Results</div>
+    <div class="score-msg" id="scoreMsg">—</div>
+    <div class="score-number" id="scoreNumber">0/20</div>
+    <div class="score-label" id="scoreLabel">Review the explanations above.</div>
+    <button class="btn btn-restart" onclick="restartQuiz()">↺ Retake Quiz</button>
+  </div>
+
+  <div class="quiz-actions">
+    <button class="btn btn-primary" id="nextBtn" onclick="nextQuestion()" disabled>Next Question →</button>
+  </div>
+
+</div>
+</section>
+
+<!-- FINAL CELEBRATION BANNER -->
+<div class="container">
+  <div class="final-banner">
+    <h2>🎓 <span>You've Completed All 6 Courses</span></h2>
+    <p>From EDA and feature engineering all the way to building and deploying a live recommender system — you've covered the full stack of modern machine learning. That's a serious achievement. Now go build something with it.</p>
+    <div class="cert-badges">
+      <span class="cert-badge">✅ Course 1 — EDA</span>
+      <span class="cert-badge">✅ Course 2 — Regression</span>
+      <span class="cert-badge">✅ Course 3 — Classification</span>
+      <span class="cert-badge">✅ Course 4 — Unsupervised ML</span>
+      <span class="cert-badge">✅ Course 5 — Deep Learning & RL</span>
+      <span class="cert-badge">🏆 Course 6 — Capstone</span>
+    </div>
+  </div>
+</div>
+
+<footer>
+  Built for <span>IBM ML Course 6</span> · Machine Learning Capstone · Recommender Systems · Cosine Similarity · Collaborative Filtering · NMF · Neural Embeddings · Streamlit
+</footer>
+
+<script>
+  const questions    = document.querySelectorAll('.question-card');
+  const progressFill = document.getElementById('progressFill');
+  const quizCounter  = document.getElementById('quizCounter');
+  const nextBtn      = document.getElementById('nextBtn');
+  const scoreCard    = document.getElementById('scoreCard');
+  let current = 0, score = 0, answered = false;
+
+  function updateProgress() {
+    progressFill.style.width = (current / questions.length * 100) + '%';
+    quizCounter.textContent  = current + ' / ' + questions.length;
+  }
+
+  document.querySelectorAll('.option').forEach(btn => {
+    btn.addEventListener('click', function () {
+      if (answered) return;
+      answered = true;
+      const card = this.closest('.question-card');
+      card.querySelectorAll('.option').forEach(o => {
+        o.classList.add('disabled');
+        if (o.dataset.correct === 'true') o.classList.add('correct');
+      });
+      if (this.dataset.correct !== 'true') this.classList.add('wrong');
+      else score++;
+      card.querySelector('.explanation').classList.add('show');
+      nextBtn.disabled = false;
+    });
+  });
+
+  function nextQuestion() {
+    if (current >= questions.length - 1) { showScore(); return; }
+    questions[current].classList.remove('active');
+    current++;
+    questions[current].classList.add('active');
+    answered = false;
+    nextBtn.disabled = true;
+    updateProgress();
+    if (current === questions.length - 1) nextBtn.textContent = 'See Final Results →';
+  }
+
+  function showScore() {
+    document.getElementById('quizContainer').style.display = 'none';
+    nextBtn.style.display = 'none';
+    scoreCard.classList.add('show');
+    const pct = Math.round(score / questions.length * 100);
+    document.getElementById('scoreNumber').textContent = score + '/' + questions.length;
+    const rows = [
+      [90, '🏆 Certificate Mastered',     'Outstanding. You\'re ready to build production systems.'],
+      [75, '🔥 Strong Capstone Grasp',     'Solid understanding — a few nuances to revisit.'],
+      [60, '📘 Good Progress',             'Review the modules and retry — you\'re close.'],
+      [0,  '🔄 Keep Studying',            'Revisit the explanations and come back — you\'ve got this.']
+    ];
+    const r = rows.find(r => pct >= r[0]);
+    document.getElementById('scoreMsg').textContent   = r[1];
+    document.getElementById('scoreLabel').textContent = r[2];
+    progressFill.style.width = '100%';
+    quizCounter.textContent  = questions.length + ' / ' + questions.length;
+  }
+
+  function restartQuiz() {
+    current = 0; score = 0; answered = false;
+    scoreCard.classList.remove('show');
+    document.getElementById('quizContainer').style.display = 'block';
+    nextBtn.style.display   = 'flex';
+    nextBtn.disabled        = true;
+    nextBtn.textContent     = 'Next Question →';
+    questions.forEach((q, i) => {
+      q.classList.toggle('active', i === 0);
+      q.querySelectorAll('.option').forEach(o => o.classList.remove('correct','wrong','disabled'));
+      q.querySelector('.explanation').classList.remove('show');
+    });
+    updateProgress();
+  }
+
+  updateProgress();
+</script>
+</body>
+</html>
