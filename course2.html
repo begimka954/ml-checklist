@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IBM ML Course 2 — Supervised Machine Learning: Regression</title>
+<link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #08100f;
+    --surface: #0d1a18;
+    --surface2: #132220;
+    --border: #1a3030;
+    --accent: #2dd4bf;
+    --accent2: #0d9488;
+    --accent3: #818cf8;
+    --accent4: #fb923c;
+    --accent5: #f472b6;
+    --text: #e2f0ee;
+    --text-muted: #6b9e98;
+    --text-dim: #2a4540;
+    --code-bg: #040a09;
+    --correct: #2dd4bf;
+    --wrong: #f87171;
+    --radius: 13px;
+    --radius-sm: 8px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'Lato', sans-serif; background: var(--bg); color: var(--text); line-height: 1.75; font-size: 16px; }
+
+  .hero { background: linear-gradient(135deg, #08100f 0%, #0c1a18 45%, #080e14 100%); padding: 80px 24px 60px; text-align: center; position: relative; overflow: hidden; }
+  .hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 70% 50% at 50% 0%, rgba(45,212,191,0.10) 0%, transparent 70%); pointer-events: none; }
+  .hero-badge { display: inline-block; background: rgba(45,212,191,0.10); border: 1px solid rgba(45,212,191,0.30); color: var(--accent); font-size: 11px; font-weight: 700; letter-spacing: 2.5px; text-transform: uppercase; padding: 6px 16px; border-radius: 20px; margin-bottom: 20px; }
+  .hero h1 { font-size: clamp(28px,5vw,52px); font-weight: 900; line-height: 1.08; margin-bottom: 16px; letter-spacing: -1px; }
+  .hero h1 span { color: var(--accent); }
+  .hero .tagline { font-size: 18px; color: var(--text-muted); max-width: 640px; margin: 0 auto 12px; font-weight: 300; }
+  .hero .newbie-note { display: inline-block; background: rgba(251,146,60,0.10); border: 1px solid rgba(251,146,60,0.25); color: var(--accent4); font-size: 13px; font-weight: 700; padding: 8px 20px; border-radius: 20px; margin-bottom: 32px; }
+  .hero-pills { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+  .pill { background: var(--surface2); border: 1px solid var(--border); color: var(--text-muted); font-size: 13px; font-weight: 700; padding: 7px 16px; border-radius: 20px; }
+
+  .sticky-nav { position: sticky; top: 0; z-index: 100; background: rgba(8,16,15,0.96); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); padding: 0 24px; overflow-x: auto; white-space: nowrap; }
+  .sticky-nav ul { display: flex; list-style: none; max-width: 1200px; margin: 0 auto; }
+  .sticky-nav a { display: block; padding: 15px 14px; color: var(--text-muted); text-decoration: none; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; transition: color 0.2s; border-bottom: 2px solid transparent; }
+  .sticky-nav a:hover { color: var(--accent); border-bottom-color: var(--accent); }
+
+  .container { max-width: 1140px; margin: 0 auto; padding: 60px 24px; }
+  .section-label { font-size: 11px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: var(--accent); margin-bottom: 10px; }
+  .section-title { font-size: clamp(22px,3vw,34px); font-weight: 900; margin-bottom: 10px; letter-spacing: -0.5px; }
+  .section-sub { color: var(--text-muted); font-size: 15px; margin-bottom: 40px; font-weight: 300; line-height: 1.7; max-width: 760px; }
+
+  .analogy { display: flex; gap: 18px; background: rgba(251,146,60,0.06); border: 1px solid rgba(251,146,60,0.22); border-radius: var(--radius-sm); padding: 18px 22px; margin: 18px 0; }
+  .analogy-icon { font-size: 26px; flex-shrink: 0; line-height: 1; margin-top: 2px; }
+  .analogy-body strong { color: var(--accent4); font-size: 12px; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 5px; font-weight: 900; }
+  .analogy-body p { color: var(--text-muted); font-size: 14px; line-height: 1.7; }
+
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 26px; margin-bottom: 20px; transition: border-color 0.2s; }
+  .card:hover { border-color: rgba(45,212,191,0.3); }
+  .card h3 { font-size: 16px; font-weight: 700; margin-bottom: 10px; display: flex; align-items: center; gap: 10px; }
+  .card .icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
+  .card p, .card ul { color: var(--text-muted); font-size: 14px; line-height: 1.7; }
+  .card ul { padding-left: 20px; }
+  .card ul li { margin-bottom: 5px; }
+  .grid-2 { display: grid; grid-template-columns: repeat(auto-fit,minmax(300px,1fr)); gap: 20px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap: 18px; }
+
+  .tag { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; padding: 3px 10px; border-radius: 4px; margin-bottom: 12px; }
+  .tag-teal   { background: rgba(45,212,191,0.14);  color: var(--accent); }
+  .tag-indigo { background: rgba(129,140,248,0.14); color: var(--accent3); }
+  .tag-orange { background: rgba(251,146,60,0.14);  color: var(--accent4); }
+  .tag-pink   { background: rgba(244,114,182,0.14); color: var(--accent5); }
+  .tag-red    { background: rgba(248,113,113,0.14); color: #f87171; }
+
+  .cb { background: var(--surface); border-left: 3px solid var(--accent); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; padding: 20px 24px; margin-bottom: 16px; }
+  .cb.indigo { border-left-color: var(--accent3); }
+  .cb.orange { border-left-color: var(--accent4); }
+  .cb.pink   { border-left-color: var(--accent5); }
+  .cb.red    { border-left-color: #f87171; }
+  .cb h4 { font-size: 15px; font-weight: 700; margin-bottom: 8px; }
+  .cb p  { color: var(--text-muted); font-size: 14px; line-height: 1.7; }
+  .cb ul { color: var(--text-muted); font-size: 14px; padding-left: 18px; line-height: 1.8; }
+
+  .formula { background: var(--code-bg); border: 1px solid #1a3030; border-radius: var(--radius-sm); padding: 12px 18px; font-family: 'Space Mono',monospace; font-size: 13px; color: #5eead4; margin: 12px 0; text-align: center; }
+
+  .callout { display: flex; gap: 16px; background: rgba(45,212,191,0.05); border: 1px solid rgba(45,212,191,0.2); border-radius: var(--radius-sm); padding: 16px 20px; margin: 20px 0; }
+  .callout.warn   { background: rgba(251,146,60,0.05); border-color: rgba(251,146,60,0.2); }
+  .callout.pink   { background: rgba(244,114,182,0.05); border-color: rgba(244,114,182,0.2); }
+  .callout.indigo { background: rgba(129,140,248,0.05); border-color: rgba(129,140,248,0.2); }
+  .callout-icon { font-size: 22px; flex-shrink: 0; }
+  .callout-body { font-size: 14px; color: var(--text-muted); line-height: 1.7; }
+  .callout-body strong { color: var(--text); }
+
+  .code-block { background: var(--code-bg); border: 1px solid #1a3030; border-radius: var(--radius); overflow: hidden; margin: 20px 0; }
+  .code-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 18px; background: #0a1412; border-bottom: 1px solid #1a3030; }
+  .code-title { font-family: 'Space Mono',monospace; font-size: 12px; color: var(--accent); }
+  .code-dots { display: flex; gap: 6px; }
+  .code-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .code-dot:nth-child(1){background:#ff5f57} .code-dot:nth-child(2){background:#febc2e} .code-dot:nth-child(3){background:#28c840}
+  .code-block pre { padding: 20px 18px; overflow-x: auto; font-family: 'Space Mono',monospace; font-size: 13px; line-height: 1.75; }
+  .code-block code { color: #ccede8; }
+  .kw{color:#f472b6} .fn{color:#7dd3fc} .st{color:#86efac} .cm{color:#2a4540;font-style:italic} .nm{color:#fbbf24} .va{color:#fb923c}
+
+  .table-wrap { overflow-x: auto; margin: 20px 0; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th { background: var(--surface2); color: var(--accent); font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--border); }
+  td { padding: 12px 16px; border-bottom: 1px solid rgba(26,48,48,0.5); color: var(--text-muted); vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(45,212,191,0.03); }
+  td strong { color: var(--text); }
+
+  details { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 10px; overflow: hidden; }
+  summary { padding: 16px 20px; font-weight: 700; font-size: 15px; cursor: pointer; list-style: none; display: flex; align-items: center; justify-content: space-between; transition: background 0.2s; }
+  summary:hover { background: var(--surface2); }
+  summary::after { content: '+'; font-size: 20px; color: var(--accent); font-weight: 300; }
+  details[open] summary::after { content: '−'; }
+  details[open] summary { border-bottom: 1px solid var(--border); }
+  .details-body { padding: 20px; color: var(--text-muted); font-size: 14px; line-height: 1.8; }
+
+  .step { display: flex; gap: 18px; margin-bottom: 18px; align-items: flex-start; }
+  .step-num { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), var(--accent2)); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 900; flex-shrink: 0; color: #08100f; }
+  .step-body h4 { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+  .step-body p  { font-size: 13px; color: var(--text-muted); line-height: 1.65; }
+
+  .bp-card { display: flex; gap: 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 18px 20px; margin-bottom: 12px; align-items: flex-start; }
+  .bp-num { width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), var(--accent2)); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 900; flex-shrink: 0; color: #08100f; }
+  .bp-content h4 { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+  .bp-content p  { font-size: 13px; color: var(--text-muted); }
+
+  .divider { height: 1px; background: linear-gradient(90deg, transparent, var(--border), transparent); }
+
+  #quiz { background: linear-gradient(180deg, var(--bg) 0%, #040808 100%); }
+  .quiz-progress { display: flex; align-items: center; gap: 16px; margin-bottom: 32px; }
+  .progress-bar { flex: 1; height: 4px; background: var(--surface2); border-radius: 2px; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent3)); border-radius: 2px; transition: width 0.4s ease; }
+  .quiz-counter { font-size: 13px; color: var(--text-muted); font-weight: 700; white-space: nowrap; }
+  .question-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 32px; margin-bottom: 24px; display: none; animation: fadeIn 0.3s ease; }
+  .question-card.active { display: block; }
+  @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+  .q-meta { display: flex; gap: 10px; align-items: center; margin-bottom: 20px; }
+  .q-num  { font-family:'Space Mono',monospace; font-size:11px; color:var(--accent); background:rgba(45,212,191,0.1); padding:3px 10px; border-radius:4px; }
+  .q-topic { font-size:11px; color:var(--text-dim); font-weight:700; text-transform:uppercase; letter-spacing:1px; }
+  .q-text  { font-size:16px; font-weight:700; margin-bottom:24px; line-height:1.55; }
+  .options { display: flex; flex-direction: column; gap: 10px; }
+  .option { background:var(--surface2); border:1px solid var(--border); border-radius:var(--radius-sm); padding:14px 18px; cursor:pointer; font-size:14px; transition:all 0.2s; display:flex; align-items:flex-start; gap:12px; text-align:left; color:var(--text); }
+  .option:hover:not(.disabled){border-color:var(--accent);background:rgba(45,212,191,0.07)}
+  .option.correct{border-color:var(--correct);background:rgba(45,212,191,0.08)}
+  .option.wrong{border-color:var(--wrong);background:rgba(248,113,113,0.08)}
+  .option.disabled{cursor:default}
+  .opt-letter{width:24px;height:24px;border-radius:6px;background:var(--border);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;font-family:'Space Mono',monospace}
+  .option.correct .opt-letter{background:var(--correct);color:#000}
+  .option.wrong   .opt-letter{background:var(--wrong);color:#fff}
+  .explanation{margin-top:16px;padding:16px;background:rgba(45,212,191,0.05);border:1px solid rgba(45,212,191,0.2);border-radius:var(--radius-sm);font-size:14px;color:var(--text-muted);display:none;line-height:1.7}
+  .explanation strong{color:var(--accent)}
+  .explanation.show{display:block}
+  .quiz-actions{display:flex;justify-content:flex-end;margin-top:20px}
+  .btn{padding:11px 28px;border-radius:var(--radius-sm);font-size:14px;font-weight:700;font-family:'Lato',sans-serif;cursor:pointer;border:none;transition:all 0.2s;letter-spacing:0.5px}
+  .btn-primary{background:var(--accent);color:#08100f}
+  .btn-primary:hover{background:#99f6e4;transform:translateY(-1px)}
+  .btn-primary:disabled{opacity:0.4;cursor:not-allowed;transform:none}
+  .score-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:48px 32px;text-align:center;display:none}
+  .score-card.show{display:block;animation:fadeIn 0.4s ease}
+  .score-number{font-size:72px;font-weight:900;background:linear-gradient(135deg,var(--accent),var(--accent3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1;margin:16px 0}
+  .score-label{color:var(--text-muted);font-size:15px;margin-bottom:24px}
+  .score-msg{font-size:22px;font-weight:700;margin-bottom:8px}
+  .btn-restart{background:var(--surface2);color:var(--text);border:1px solid var(--border);margin-top:24px}
+  .btn-restart:hover{border-color:var(--accent);color:var(--accent)}
+
+  footer{background:var(--surface);border-top:1px solid var(--border);padding:32px 24px;text-align:center;color:var(--text-dim);font-size:13px}
+  footer span{color:var(--accent)}
+  @media(max-width:600px){.container{padding:40px 16px}.hero{padding:60px 16px 40px}.question-card{padding:20px}}
+</style>
+</head>
+<body>
+
+<section class="hero">
+  <div class="hero-badge">IBM Machine Learning Professional Certificate — Course 2 of 6</div>
+  <h1>Supervised ML:<br><span>Regression</span></h1>
+  <p class="tagline">Predict continuous numbers — house prices, temperatures, salaries. Every regression technique from simple linear to regularised models, explained from scratch.</p>
+  <div class="newbie-note">🧑‍🏫 Beginner-friendly — every concept explained with plain English analogies first</div>
+  <div class="hero-pills">
+    <span class="pill">📈 Linear Regression</span>
+    <span class="pill">🔢 Multiple Regression</span>
+    <span class="pill">〰️ Polynomial Regression</span>
+    <span class="pill">📉 Error Metrics</span>
+    <span class="pill">⚖️ Bias–Variance</span>
+    <span class="pill">✂️ Cross-Validation</span>
+    <span class="pill">🏔️ Ridge</span>
+    <span class="pill">🪢 Lasso</span>
+    <span class="pill">🕸️ Elastic Net</span>
+    <span class="pill">✅ Quiz</span>
+  </div>
+</section>
+
+<nav class="sticky-nav">
+  <ul>
+    <li><a href="#overview">Overview</a></li>
+    <li><a href="#linear">Linear Regression</a></li>
+    <li><a href="#multiple">Multiple & Poly</a></li>
+    <li><a href="#metrics">Error Metrics</a></li>
+    <li><a href="#bias-variance">Bias–Variance</a></li>
+    <li><a href="#cv">Cross-Validation</a></li>
+    <li><a href="#regularization">Regularization</a></li>
+    <li><a href="#best-practices">Best Practices</a></li>
+    <li><a href="#quiz">Quiz</a></li>
+  </ul>
+</nav>
+
+<!-- OVERVIEW -->
+<section id="overview">
+<div class="container">
+  <div class="section-label">Module 0</div>
+  <h2 class="section-title">Regression: The Big Idea</h2>
+  <p class="section-sub">Regression answers one question: given what I know, what <em>number</em> should I predict? The number could be a house price, a customer's lifetime value, tomorrow's temperature, or a patient's blood glucose level.</p>
+
+  <div class="analogy">
+    <div class="analogy-icon">🏠</div>
+    <div class="analogy-body">
+      <strong>The Estate Agent Analogy</strong>
+      <p>An experienced estate agent can look at a house — its size, location, number of bedrooms, age — and give you a price estimate. They've seen hundreds of houses and learned the relationship between those features and selling price. Regression teaches a computer to do the same: find the mathematical relationship between input features and a continuous output, then use that relationship to predict new values.</p>
+    </div>
+  </div>
+
+  <div class="grid-3">
+    <div class="card">
+      <h3><span class="icon" style="background:rgba(45,212,191,0.15)">📈</span> Linear Regression</h3>
+      <p>Fit a straight line through your data. Simple, interpretable, and always your first baseline model.</p>
+    </div>
+    <div class="card">
+      <h3><span class="icon" style="background:rgba(129,140,248,0.15)">🔢</span> Multiple Regression</h3>
+      <p>Use many features at once. Price = f(size, bedrooms, location, age...). Still linear, just in higher dimensions.</p>
+    </div>
+    <div class="card">
+      <h3><span class="icon" style="background:rgba(251,146,60,0.15)">〰️</span> Polynomial Regression</h3>
+      <p>Fit curves, not just lines. Add x², x³ as features — the model is still "linear" in its coefficients.</p>
+    </div>
+    <div class="card">
+      <h3><span class="icon" style="background:rgba(244,114,182,0.15)">🏔️</span> Ridge (L2)</h3>
+      <p>Penalise large coefficients. Shrinks all weights toward zero. Prevents overfitting without removing features.</p>
+    </div>
+    <div class="card">
+      <h3><span class="icon" style="background:rgba(45,212,191,0.15)">🪢</span> Lasso (L1)</h3>
+      <p>Drives some coefficients to exactly zero. Automatic feature selection — removes irrelevant features entirely.</p>
+    </div>
+    <div class="card">
+      <h3><span class="icon" style="background:rgba(129,140,248,0.15)">🕸️</span> Elastic Net</h3>
+      <p>Combines Ridge + Lasso. Best when many features are correlated with each other.</p>
+    </div>
+  </div>
+</div>
+</section>
+
+<div class="divider"></div>
+
+<!-- LINEAR REGRESSION -->
+<section id="linear">
+<div class="container">
+  <div class="section-label">Module 1</div>
+  <h2 class="section-title">Simple Linear Regression</h2>
+  <p class="section-sub">The most fundamental model in all of statistics and ML. One input, one output, one straight line. Everything else builds from this.</p>
+
+  <div class="analogy">
+    <div class="analogy-icon">📏</div>
+    <div class="analogy-body">
+      <strong>The Best-Fit Line</strong>
+      <p>Plot your data points on a graph. Now imagine stretching a rubber band into a straight line and letting it settle where it minimises the total distance from every data point. That line is your linear regression model. Its slope tells you "for every extra square foot, price increases by £X." Its intercept is the baseline when the input is zero. The whole model is just two numbers: slope <strong>w</strong> and intercept <strong>b</strong>.</p>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div>
+      <div class="cb">
+        <span class="tag tag-teal">The Equation</span>
+        <h4>What the Model Computes</h4>
+        <div class="formula">ŷ = w · x + b</div>
+        <p><strong>ŷ:</strong> The predicted value &nbsp;|&nbsp; <strong>w:</strong> Slope — how much ŷ changes per unit increase in x &nbsp;|&nbsp; <strong>b:</strong> Intercept — value of ŷ when x = 0. The goal: find w and b that minimise prediction errors across all training examples.</p>
+      </div>
+      <div class="cb orange">
+        <span class="tag tag-orange">Least Squares (OLS)</span>
+        <h4>How Parameters Are Found</h4>
+        <p>Ordinary Least Squares finds w and b that minimise the <strong>Residual Sum of Squares</strong> — the total squared distance between each actual value and predicted value. Squaring means positive and negative errors don't cancel, and large errors are penalised more heavily.</p>
+        <div class="formula">RSS = Σ (yᵢ − ŷᵢ)²</div>
+      </div>
+      <div class="cb">
+        <span class="tag tag-teal">Residuals</span>
+        <h4>Always Plot Your Residuals</h4>
+        <p>Residual = actual − predicted. Residuals should be randomly scattered around zero — no pattern. A curved residual plot means you need polynomial features. A fan-shaped plot means your errors are not constant (heteroscedasticity) — try log-transforming the target.</p>
+        <div class="formula">Residual eᵢ = yᵢ − ŷᵢ</div>
+      </div>
+    </div>
+    <div>
+      <div class="cb indigo">
+        <span class="tag tag-indigo">Assumptions</span>
+        <h4>When Linear Regression Works Well</h4>
+        <ul>
+          <li><strong>Linearity:</strong> The relationship between x and y is approximately linear</li>
+          <li><strong>Independence:</strong> Each observation is independent</li>
+          <li><strong>Constant variance:</strong> Errors have similar spread across all x values</li>
+          <li><strong>Normal errors:</strong> Residuals are approximately normally distributed</li>
+          <li><strong>No multicollinearity:</strong> Features are not highly correlated with each other</li>
+        </ul>
+        <p style="margin-top:8px;">In practice, linear regression is surprisingly robust to mild violations of these assumptions.</p>
+      </div>
+      <div class="cb pink">
+        <span class="tag tag-pink">Interpreting Coefficients</span>
+        <h4>What Each Weight Means</h4>
+        <p>In multiple regression, each coefficient tells you: <em>"holding all other features constant, how much does the prediction change when this feature increases by 1?"</em></p>
+        <p style="margin-top:8px;">This interpretability is why linear models remain widely used in banking and healthcare where predictions must be explainable to regulators and patients.</p>
+        <p style="margin-top:8px;"><strong>⚠️ Scaling matters for comparison:</strong> Raw coefficient magnitudes are only comparable if features are on the same scale. Use StandardScaler first.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><span class="code-title">linear_regression.py</span></div>
+    <pre><code><span class="kw">import</span> numpy <span class="kw">as</span> np
+<span class="kw">import</span> matplotlib.pyplot <span class="kw">as</span> plt
+<span class="kw">from</span> sklearn.linear_model <span class="kw">import</span> LinearRegression
+<span class="kw">from</span> sklearn.model_selection <span class="kw">import</span> train_test_split
+<span class="kw">from</span> sklearn.metrics <span class="kw">import</span> mean_squared_error, r2_score
+
+<span class="cm"># ── ALWAYS split before anything else ─────────────────────</span>
+X_train, X_test, y_train, y_test = <span class="fn">train_test_split</span>(
+    X, y, test_size=<span class="nm">0.2</span>, random_state=<span class="nm">42</span>
+)
+
+<span class="cm"># ── Fit simple linear regression ──────────────────────────</span>
+lr = <span class="fn">LinearRegression</span>()
+lr.<span class="fn">fit</span>(X_train[[<span class="st">'size_sqft'</span>]], y_train)
+
+<span class="fn">print</span>(<span class="st">f"Slope (w):     </span><span class="va">{lr.coef_[0]:.2f}</span><span class="st">"</span>)     <span class="cm"># price per sqft</span>
+<span class="fn">print</span>(<span class="st">f"Intercept (b): </span><span class="va">{lr.intercept_:.2f}</span><span class="st">"</span>)
+
+<span class="cm"># ── Evaluate ──────────────────────────────────────────────</span>
+y_pred = lr.<span class="fn">predict</span>(X_test[[<span class="st">'size_sqft'</span>]])
+rmse   = np.<span class="fn">sqrt</span>(<span class="fn">mean_squared_error</span>(y_test, y_pred))
+r2     = <span class="fn">r2_score</span>(y_test, y_pred)
+<span class="fn">print</span>(<span class="st">f"RMSE: </span><span class="va">{rmse:.2f}</span><span class="st">,  R²: </span><span class="va">{r2:.3f}</span><span class="st">"</span>)
+
+<span class="cm"># ── Residual plot — critical diagnostic ──────────────────</span>
+residuals = y_test - y_pred
+plt.<span class="fn">scatter</span>(y_pred, residuals, alpha=<span class="nm">0.6</span>)
+plt.<span class="fn">axhline</span>(<span class="nm">0</span>, color=<span class="st">'red'</span>, linestyle=<span class="st">'--'</span>)
+plt.<span class="fn">xlabel</span>(<span class="st">'Predicted'</span>); plt.<span class="fn">ylabel</span>(<span class="st">'Residual'</span>)
+plt.<span class="fn">title</span>(<span class="st">'Should be random scatter around zero'</span>); plt.<span class="fn">show</span>()</code></pre>
+  </div>
+</div>
+</section>
+
+<div class="divider"></div>
+
+<!-- MULTIPLE & POLYNOMIAL -->
+<section id="multiple">
+<div class="container">
+  <div class="section-label">Module 2</div>
+  <h2 class="section-title">Multiple & Polynomial Regression</h2>
+  <p class="section-sub">Real problems have many features and curved relationships. Multiple regression handles many inputs simultaneously; polynomial regression bends the line into a curve.</p>
+
+  <div class="grid-2">
+    <div>
+      <div class="cb">
+        <span class="tag tag-teal">Multiple Regression</span>
+        <h4>Many Features, One Equation</h4>
+        <p>Each feature gets its own weight. The model is a hyperplane in n-dimensional space.</p>
+        <div class="formula">ŷ = w₁x₁ + w₂x₂ + ... + wₙxₙ + b</div>
+        <p style="margin-top:8px;">Each coefficient is a <strong>partial effect</strong>: the expected change in ŷ when that feature increases by 1, holding all others constant. This makes multiple regression powerful for understanding which features drive the outcome.</p>
+      </div>
+      <div class="cb orange">
+        <span class="tag tag-orange">Polynomial Regression</span>
+        <h4>Curves, Not Just Lines</h4>
+        <p>Add polynomial features (x², x³) to capture curved relationships. Despite looking non-linear, this is still a "linear model" because the relationship between ŷ and the <em>weights</em> is linear — only the features themselves are non-linear.</p>
+        <div class="formula">ŷ = w₁x + w₂x² + w₃x³ + b</div>
+        <p style="margin-top:8px;"><strong>Higher degree → more complex curve → risk of overfitting.</strong> Always check with cross-validation.</p>
+      </div>
+    </div>
+    <div>
+      <div class="cb indigo">
+        <span class="tag tag-indigo">Overfitting Warning</span>
+        <h4>Too Many Degrees = Memorisation</h4>
+        <p>A degree-10 polynomial can pass through every training point perfectly — but it'll fail completely on new data. It's memorised noise, not learned patterns.</p>
+        <p style="margin-top:8px;"><strong>What to look for:</strong> As you increase degree, training error keeps dropping but validation error eventually starts rising. The point where they diverge is where overfitting begins.</p>
+      </div>
+      <div class="cb pink">
+        <span class="tag tag-pink">Pipeline Best Practice</span>
+        <h4>Always Use sklearn Pipelines</h4>
+        <p>Chain StandardScaler → PolynomialFeatures → LinearRegression in one Pipeline. This ensures the scaler is fitted on training data only (no leakage), makes cross-validation trivially safe, and makes the whole model saveable and deployable as a single object.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><span class="code-title">multiple_polynomial_regression.py</span></div>
+    <pre><code><span class="kw">from</span> sklearn.linear_model <span class="kw">import</span> LinearRegression
+<span class="kw">from</span> sklearn.preprocessing <span class="kw">import</span> PolynomialFeatures, StandardScaler
+<span class="kw">from</span> sklearn.pipeline <span class="kw">import</span> Pipeline
+<span class="kw">from</span> sklearn.metrics <span class="kw">import</span> mean_squared_error
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+
+<span class="cm"># ── Multiple Regression ───────────────────────────────────</span>
+features = [<span class="st">'size_sqft'</span>, <span class="st">'bedrooms'</span>, <span class="st">'age'</span>, <span class="st">'distance_to_centre'</span>]
+lr_multi = <span class="fn">LinearRegression</span>()
+lr_multi.<span class="fn">fit</span>(X_train[features], y_train)
+
+<span class="cm"># ── Compare polynomial degrees via pipeline ───────────────</span>
+<span class="kw">for</span> degree <span class="kw">in</span> [<span class="nm">1</span>, <span class="nm">2</span>, <span class="nm">3</span>, <span class="nm">5</span>]:
+    pipe = <span class="fn">Pipeline</span>([
+        (<span class="st">'scaler'</span>, <span class="fn">StandardScaler</span>()),
+        (<span class="st">'poly'</span>,   <span class="fn">PolynomialFeatures</span>(degree=degree, include_bias=<span class="nm">False</span>)),
+        (<span class="st">'model'</span>,  <span class="fn">LinearRegression</span>())
+    ])
+    pipe.<span class="fn">fit</span>(X_train[features], y_train)
+    train_rmse = np.<span class="fn">sqrt</span>(<span class="fn">mean_squared_error</span>(y_train, pipe.<span class="fn">predict</span>(X_train[features])))
+    test_rmse  = np.<span class="fn">sqrt</span>(<span class="fn">mean_squared_error</span>(y_test,  pipe.<span class="fn">predict</span>(X_test[features])))
+    <span class="fn">print</span>(<span class="st">f"Degree {degree}: Train={train_rmse:.0f}, Test={test_rmse:.0f}"</span>)
+    <span class="cm"># Degree 1: both might be high (underfitting)</span>
+    <span class="cm"># Degree 2/3: sweet spot — low test error</span>
+    <span class="cm"># Degree 5+: train ↓↓ but test ↑↑ (overfitting)</span></code></pre>
+  </div>
+</div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ERROR METRICS -->
+<section id="metrics">
+<div class="container">
+  <div class="section-label">Module 3</div>
+  <h2 class="section-title">Error Metrics</h2>
+  <p class="section-sub">Knowing your model is wrong is easy — every model is wrong. The question is <em>how</em> wrong and in what ways. Different metrics capture different aspects of error.</p>
+
+  <div class="analogy">
+    <div class="analogy-icon">🎯</div>
+    <div class="analogy-body">
+      <strong>Why Multiple Metrics?</strong>
+      <p>Two models can have the same average error but very different behaviour. Model A: off by £10,000 on every house consistently. Model B: perfect on 90% of houses but catastrophically wrong on 10% (off by £100,000+). MAE treats both equally; RMSE penalises the catastrophic errors in Model B much harder. Choose based on whether large misses are especially bad in your use case.</p>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Metric</th><th>Formula</th><th>Units</th><th>Use When</th><th>Weakness</th></tr></thead>
+      <tbody>
+        <tr><td><strong>MSE</strong></td><td>Σ(y − ŷ)² / n</td><td>Squared units</td><td>Optimisation objective; penalises large errors heavily</td><td>Not interpretable (squared)</td></tr>
+        <tr><td><strong>RMSE</strong></td><td>√MSE</td><td>Same as y</td><td>Most common; interpretable; large errors matter more</td><td>Sensitive to outliers</td></tr>
+        <tr><td><strong>MAE</strong></td><td>Σ|y − ŷ| / n</td><td>Same as y</td><td>All errors equally bad; robust to outliers</td><td>Less differentiable</td></tr>
+        <tr><td><strong>R²</strong></td><td>1 − RSS/TSS</td><td>Unitless [0,1]</td><td>Proportion of variance explained; model comparison</td><td>Always increases when features added</td></tr>
+        <tr><td><strong>Adjusted R²</strong></td><td>1 − (1−R²)(n−1)/(n−p−1)</td><td>Unitless</td><td>Compare models with different feature counts</td><td>More complex formula</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout">
+    <span class="callout-icon">💡</span>
+    <div class="callout-body"><strong>Golden Rule:</strong> Decide your metric <em>before</em> training. If large errors are catastrophic (medical dosing, bridge load), use RMSE. If all errors are roughly equally bad (demand forecasting), use MAE. Never pick the metric that makes your model look best after the fact — that's cherry-picking.</div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><span class="code-title">error_metrics.py</span></div>
+    <pre><code><span class="kw">from</span> sklearn.metrics <span class="kw">import</span> mean_squared_error, mean_absolute_error, r2_score
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+
+y_pred = model.<span class="fn">predict</span>(X_test)
+
+rmse = np.<span class="fn">sqrt</span>(<span class="fn">mean_squared_error</span>(y_test, y_pred))
+mae  = <span class="fn">mean_absolute_error</span>(y_test, y_pred)
+r2   = <span class="fn">r2_score</span>(y_test, y_pred)
+
+<span class="fn">print</span>(<span class="st">f"RMSE:  </span><span class="va">{rmse:,.0f}</span><span class="st">  ← same units as target"</span>)
+<span class="fn">print</span>(<span class="st">f"MAE:   </span><span class="va">{mae:,.0f}</span><span class="st">  ← average absolute error"</span>)
+<span class="fn">print</span>(<span class="st">f"R²:    </span><span class="va">{r2:.3f}</span><span class="st">   ← explains </span><span class="va">{r2*100:.1f}</span><span class="st">% of variance"</span>)
+
+<span class="cm"># Adjusted R² — use when comparing models with different feature counts</span>
+n = X_test.<span class="fn">shape</span>[<span class="nm">0</span>]
+p = X_test.<span class="fn">shape</span>[<span class="nm">1</span>]
+adj_r2 = <span class="nm">1</span> - (<span class="nm">1</span> - r2) * (n - <span class="nm">1</span>) / (n - p - <span class="nm">1</span>)
+<span class="fn">print</span>(<span class="st">f"Adj R²: </span><span class="va">{adj_r2:.3f}</span><span class="st">"</span>)</code></pre>
+  </div>
+</div>
+</section>
+
+<div class="divider"></div>
+
+<!-- BIAS-VARIANCE -->
+<section id="bias-variance">
+<div class="container">
+  <div class="section-label">Module 4</div>
+  <h2 class="section-title">The Bias–Variance Tradeoff</h2>
+  <p class="section-sub">Every model makes two kinds of mistakes. Understanding which kind you're making tells you exactly what to fix. This is the most important concept in all of machine learning.</p>
+
+  <div class="analogy">
+    <div class="analogy-icon">🎳</div>
+    <div class="analogy-body">
+      <strong>The Archery Target Analogy</strong>
+      <p><strong>High bias</strong> = your darts consistently hit the same <em>wrong</em> spot (you're aiming wrong — systematically off). <strong>High variance</strong> = your darts are all over the place (unpredictable). You want darts clustered tightly around the bullseye — low bias AND low variance. In ML: a too-simple model has high bias (underfits). A too-complex model has high variance (overfits). Regularisation and cross-validation help you find the sweet spot.</p>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div>
+      <div class="cb">
+        <span class="tag tag-teal">High Bias = Underfitting</span>
+        <h4>Model Too Simple for the Pattern</h4>
+        <p>The model makes systematic errors because its assumptions are too restrictive. A straight line predicting a curved relationship has high bias — no matter how much data you give it, it will always miss the curve.</p>
+        <p style="margin-top:8px;"><strong>Symptom:</strong> High training error AND high test error, both roughly equal.<br>
+        <strong>Fix:</strong> More complex model, polynomial features, reduce regularisation.</p>
+      </div>
+      <div class="cb orange">
+        <span class="tag tag-orange">High Variance = Overfitting</span>
+        <h4>Model Too Sensitive to Training Noise</h4>
+        <p>The model memorises training examples instead of learning the underlying pattern. A degree-15 polynomial that passes through every training point has high variance — it learned the noise, not the signal.</p>
+        <p style="margin-top:8px;"><strong>Symptom:</strong> Very low training error, much higher test error. A big gap between the two.<br>
+        <strong>Fix:</strong> Simpler model, regularisation (Ridge/Lasso), more training data.</p>
+      </div>
+    </div>
+    <div>
+      <div class="cb pink">
+        <span class="tag tag-pink">The Tradeoff</span>
+        <h4>As Complexity Increases...</h4>
+        <ul>
+          <li>Bias decreases — model gets better at fitting the true pattern</li>
+          <li>Variance increases — model becomes more sensitive to noise</li>
+          <li>Total Error = <strong>Bias² + Variance + Irreducible Error</strong></li>
+        </ul>
+        <p style="margin-top:8px;">There is a sweet spot — some optimal level of complexity where total error is minimised. Cross-validation (next module) is how you find it empirically.</p>
+        <div class="formula">Total Error = Bias² + Variance + ε²</div>
+      </div>
+      <div class="cb indigo">
+        <span class="tag tag-indigo">Learning Curves</span>
+        <h4>Diagnose the Problem Visually</h4>
+        <ul>
+          <li><strong>Both curves converge at high error:</strong> High bias (underfitting) — add complexity, more data won't help</li>
+          <li><strong>Large gap between train and validation:</strong> High variance (overfitting) — regularise or gather more data</li>
+          <li><strong>Both curves converge at low error:</strong> Great generalisation — keep what you have</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><span class="code-title">learning_curves.py</span></div>
+    <pre><code><span class="kw">from</span> sklearn.model_selection <span class="kw">import</span> learning_curve
+<span class="kw">import</span> matplotlib.pyplot <span class="kw">as</span> plt
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+
+<span class="kw">def</span> <span class="fn">plot_learning_curve</span>(model, X, y, title=<span class="st">""</span>):
+    sizes, train_sc, val_sc = <span class="fn">learning_curve</span>(
+        model, X, y,
+        train_sizes=np.<span class="fn">linspace</span>(<span class="nm">0.1</span>, <span class="nm">1.0</span>, <span class="nm">10</span>),
+        cv=<span class="nm">5</span>, scoring=<span class="st">'neg_root_mean_squared_error'</span>
+    )
+    plt.<span class="fn">plot</span>(sizes, -train_sc.<span class="fn">mean</span>(axis=<span class="nm">1</span>), label=<span class="st">'Train RMSE'</span>)
+    plt.<span class="fn">plot</span>(sizes, -val_sc.<span class="fn">mean</span>(axis=<span class="nm">1</span>),   label=<span class="st">'Validation RMSE'</span>)
+    plt.<span class="fn">xlabel</span>(<span class="st">'Training samples'</span>); plt.<span class="fn">ylabel</span>(<span class="st">'RMSE'</span>)
+    plt.<span class="fn">title</span>(title); plt.<span class="fn">legend</span>(); plt.<span class="fn">show</span>()
+
+<span class="cm"># Diagnose underfitting vs overfitting visually</span>
+<span class="fn">plot_learning_curve</span>(<span class="fn">LinearRegression</span>(), X_train, y_train,
+                    <span class="st">"Linear (both curves high? → underfitting)"</span>)
+<span class="fn">plot_learning_curve</span>(
+    <span class="fn">Pipeline</span>([(<span class="st">'p'</span>, <span class="fn">PolynomialFeatures</span>(<span class="nm">8</span>)), (<span class="st">'m'</span>, <span class="fn">LinearRegression</span>())]),
+    X_train, y_train,
+    <span class="st">"Degree 8 (big gap? → overfitting)"</span>
+)</code></pre>
+  </div>
+</div>
+</section>
+
+<div class="divider"></div>
+
+<!-- CROSS-VALIDATION -->
+<section id="cv">
+<div class="container">
+  <div class="section-label">Module 5</div>
+  <h2 class="section-title">Cross-Validation</h2>
+  <p class="section-sub">A single train/test split gives you one number that could be lucky or unlucky. Cross-validation gives you a reliable estimate by testing on multiple different splits of the same data.</p>
+
+  <div class="analogy">
+    <div class="analogy-icon">🔄</div>
+    <div class="analogy-body">
+      <strong>The Exam Rotation Analogy</strong>
+      <p>A teacher wants to know if students truly understand the material — not just specific practice questions. Instead of one fixed exam, the class is divided into 5 groups. Each group sits a different exam while studying on the others. After all 5 rounds, every student has been both examiner and student. The average grade across all 5 rounds is far more reliable than one single exam. That's 5-fold cross-validation.</p>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div>
+      <div class="cb">
+        <span class="tag tag-teal">K-Fold CV — How It Works</span>
+        <h4>Rotate Through k Different Splits</h4>
+        <div class="step"><div class="step-num">1</div><div class="step-body"><h4>Divide training data into k equal folds</h4><p>Typically k = 5 or 10. Never touch the test set during this process.</p></div></div>
+        <div class="step"><div class="step-num">2</div><div class="step-body"><h4>For each fold i:</h4><p>Train on all folds except fold i. Evaluate on fold i. Record the score.</p></div></div>
+        <div class="step"><div class="step-num">3</div><div class="step-body"><h4>Average the k scores</h4><p>Report mean ± std. The std tells you how stable the model is.</p></div></div>
+        <div class="step"><div class="step-num">4</div><div class="step-body"><h4>Retrain on ALL training data</h4><p>CV was for evaluation only. The final model is trained on 100% of training data with the best found hyperparameters.</p></div></div>
+      </div>
+    </div>
+    <div>
+      <div class="cb indigo">
+        <span class="tag tag-indigo">Finding Best Alpha With CV</span>
+        <h4>GridSearchCV in Practice</h4>
+        <p>Cross-validation's primary job in this course is finding the best regularisation strength alpha (λ). Try multiple alpha values. For each, run 5-fold CV. Pick the alpha with the lowest average validation RMSE. This is exactly what <code>GridSearchCV</code> automates.</p>
+        <div class="formula">Best α = argmin CV_RMSE(α)</div>
+      </div>
+      <div class="cb orange">
+        <span class="tag tag-orange">Why Not Just One Split?</span>
+        <h4>The Variance Problem</h4>
+        <p>With one 80/20 split, your RMSE depends entirely on which examples randomly ended up in the test set. An unlucky split could include all the hardest-to-predict cases. With 5-fold CV, you average over 5 different 20% slices — a much more stable and trustworthy estimate of real-world performance.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><span class="code-title">cross_validation.py</span></div>
+    <pre><code><span class="kw">from</span> sklearn.model_selection <span class="kw">import</span> cross_val_score, KFold, GridSearchCV
+<span class="kw">from</span> sklearn.linear_model <span class="kw">import</span> Ridge
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+
+<span class="cm"># ── 5-fold cross-validation on training set ───────────────</span>
+kf = <span class="fn">KFold</span>(n_splits=<span class="nm">5</span>, shuffle=<span class="nm">True</span>, random_state=<span class="nm">42</span>)
+cv_scores = <span class="fn">cross_val_score</span>(
+    <span class="fn">LinearRegression</span>(), X_train, y_train,
+    cv=kf, scoring=<span class="st">'neg_root_mean_squared_error'</span>
+)
+<span class="fn">print</span>(<span class="st">f"CV RMSE: {(-cv_scores).mean():.0f} ± {(-cv_scores).std():.0f}"</span>)
+
+<span class="cm"># ── GridSearchCV: tune regularisation alpha ───────────────</span>
+param_grid = {<span class="st">'model__alpha'</span>: [<span class="nm">0.001</span>, <span class="nm">0.01</span>, <span class="nm">0.1</span>, <span class="nm">1</span>, <span class="nm">10</span>, <span class="nm">100</span>, <span class="nm">1000</span>]}
+pipe = <span class="fn">Pipeline</span>([
+    (<span class="st">'scaler'</span>, <span class="fn">StandardScaler</span>()),
+    (<span class="st">'model'</span>,  <span class="fn">Ridge</span>())
+])
+grid = <span class="fn">GridSearchCV</span>(pipe, param_grid, cv=<span class="nm">5</span>,
+                    scoring=<span class="st">'neg_root_mean_squared_error'</span>)
+grid.<span class="fn">fit</span>(X_train, y_train)
+<span class="fn">print</span>(<span class="st">f"Best alpha: </span><span class="va">{grid.best_params_}</span><span class="st">"</span>)
+<span class="fn">print</span>(<span class="st">f"Best CV RMSE: </span><span class="va">{-grid.best_score_:.0f}</span><span class="st">"</span>)
+
+<span class="cm"># ── Final evaluation on test set (open once at the very end)</span>
+test_rmse = np.<span class="fn">sqrt</span>(
+    <span class="fn">mean_squared_error</span>(y_test, grid.<span class="fn">predict</span>(X_test))
+)
+<span class="fn">print</span>(<span class="st">f"Final Test RMSE: </span><span class="va">{test_rmse:.0f}</span><span class="st">"</span>)</code></pre>
+  </div>
+</div>
+</section>
+
+<div class="divider"></div>
+
+<!-- REGULARIZATION -->
+<section id="regularization">
+<div class="container">
+  <div class="section-label">Module 6</div>
+  <h2 class="section-title">Regularization: Ridge, Lasso & Elastic Net</h2>
+  <p class="section-sub">Regularization adds a penalty to the loss function that punishes large coefficients — the primary cause of overfitting in linear models. Three flavours, each with a different character.</p>
+
+  <div class="analogy">
+    <div class="analogy-icon">🏋️</div>
+    <div class="analogy-body">
+      <strong>The Weight Room Analogy</strong>
+      <p>Without regularisation, the model can load the barbell with as many heavy plates (large coefficients) as it wants — some become enormous, memorising noise. Regularisation is a gym rule: "the total weight on the bar must stay below X." The model can still lift, but has to choose carefully — it automatically learns which features are truly important and how much weight each deserves.</p>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div>
+      <div class="cb">
+        <span class="tag tag-teal">Ridge (L2)</span>
+        <h4>Shrinks All Coefficients Toward Zero</h4>
+        <p>Adds the sum of <em>squared</em> coefficients as a penalty. Large coefficients are penalised heavily. All coefficients shrink toward zero, but <strong>none reach exactly zero</strong> — all features are kept.</p>
+        <div class="formula">Loss = RSS + α · Σ wᵢ²</div>
+        <p style="margin-top:8px;"><strong>α = 0</strong> → plain linear regression. <strong>α → ∞</strong> → all coefficients → 0.<br>
+        <strong>Best for:</strong> Many features that all genuinely contribute — you want to keep them all but reduce their individual dominance.</p>
+      </div>
+      <div class="cb orange">
+        <span class="tag tag-orange">Lasso (L1)</span>
+        <h4>Drives Some Coefficients to Exactly Zero</h4>
+        <p>Adds the sum of <em>absolute values</em> of coefficients as penalty. The L1 penalty creates a sharp geometric corner in the optimisation that forces irrelevant features to be eliminated completely.</p>
+        <div class="formula">Loss = RSS + α · Σ |wᵢ|</div>
+        <p style="margin-top:8px;"><strong>Key difference from Ridge:</strong> Automatic feature selection — unimportant features are literally removed.<br>
+        <strong>Best for:</strong> You believe most features are irrelevant and want a sparse, interpretable model.</p>
+      </div>
+    </div>
+    <div>
+      <div class="cb indigo">
+        <span class="tag tag-indigo">Elastic Net</span>
+        <h4>L1 + L2 Combined</h4>
+        <p>Blends both penalties. <code>l1_ratio</code> controls the mix: 0 = pure Ridge, 1 = pure Lasso, 0.5 = equal blend.</p>
+        <div class="formula">Loss = RSS + α[l1·Σ|wᵢ| + (1−l1)·Σwᵢ²]</div>
+        <p style="margin-top:8px;"><strong>Best for:</strong> Correlated features. Lasso picks one feature from a correlated group arbitrarily. Elastic Net handles groups more gracefully — it tends to select or drop them together.</p>
+      </div>
+      <div class="cb pink">
+        <span class="tag tag-pink">Decision Guide</span>
+        <h4>Which One Should You Use?</h4>
+        <ul>
+          <li>All features probably relevant → <strong>Ridge</strong></li>
+          <li>Many features probably irrelevant → <strong>Lasso</strong></li>
+          <li>Correlated feature groups → <strong>Elastic Net</strong></li>
+          <li>Unsure → try all three with cross-validation and compare</li>
+          <li><strong>Always scale features first</strong> — penalty applies equally regardless of scale, so unscaled features are treated unfairly</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><span class="code-title">ridge_lasso_elasticnet.py</span></div>
+    <pre><code><span class="kw">from</span> sklearn.linear_model <span class="kw">import</span> Ridge, Lasso, ElasticNet
+<span class="kw">from</span> sklearn.preprocessing <span class="kw">import</span> StandardScaler
+<span class="kw">from</span> sklearn.pipeline <span class="kw">import</span> Pipeline
+<span class="kw">from</span> sklearn.model_selection <span class="kw">import</span> cross_val_score
+<span class="kw">import</span> pandas <span class="kw">as</span> pd
+
+<span class="cm"># ── Ridge ─────────────────────────────────────────────────</span>
+ridge = <span class="fn">Pipeline</span>([
+    (<span class="st">'scaler'</span>, <span class="fn">StandardScaler</span>()),   <span class="cm"># MUST scale first!</span>
+    (<span class="st">'model'</span>,  <span class="fn">Ridge</span>(alpha=<span class="nm">10.0</span>))
+])
+
+<span class="cm"># ── Lasso — check which features were zeroed out ──────────</span>
+lasso = <span class="fn">Pipeline</span>([
+    (<span class="st">'scaler'</span>, <span class="fn">StandardScaler</span>()),
+    (<span class="st">'model'</span>,  <span class="fn">Lasso</span>(alpha=<span class="nm">0.1</span>, max_iter=<span class="nm">10000</span>))
+])
+lasso.<span class="fn">fit</span>(X_train, y_train)
+coefs = pd.<span class="fn">Series</span>(lasso.<span class="fn">named_steps</span>[<span class="st">'model'</span>].coef_, index=X.<span class="fn">columns</span>)
+<span class="fn">print</span>(<span class="st">"Features removed by Lasso:"</span>, coefs[coefs==<span class="nm">0</span>].<span class="fn">index</span>.<span class="fn">tolist</span>())
+
+<span class="cm"># ── Elastic Net ───────────────────────────────────────────</span>
+enet = <span class="fn">Pipeline</span>([
+    (<span class="st">'scaler'</span>, <span class="fn">StandardScaler</span>()),
+    (<span class="st">'model'</span>,  <span class="fn">ElasticNet</span>(alpha=<span class="nm">0.1</span>, l1_ratio=<span class="nm">0.5</span>, max_iter=<span class="nm">10000</span>))
+])
+
+<span class="cm"># ── Compare all methods via cross-validation ──────────────</span>
+models = {
+    <span class="st">'Linear'</span>:      <span class="fn">Pipeline</span>([(<span class="st">'s'</span>, <span class="fn">StandardScaler</span>()), (<span class="st">'m'</span>, <span class="fn">LinearRegression</span>())]),
+    <span class="st">'Ridge'</span>:       ridge,
+    <span class="st">'Lasso'</span>:       lasso,
+    <span class="st">'Elastic Net'</span>: enet,
+}
+<span class="kw">for</span> name, m <span class="kw">in</span> models.<span class="fn">items</span>():
+    scores = -<span class="fn">cross_val_score</span>(m, X_train, y_train, cv=<span class="nm">5</span>,
+                              scoring=<span class="st">'neg_root_mean_squared_error'</span>)
+    <span class="fn">print</span>(<span class="st">f"{name:12s}: CV RMSE = {scores.mean():.0f} ± {scores.std():.0f}"</span>)</code></pre>
+  </div>
+</div>
+</section>
+
+<div class="divider"></div>
+
+<!-- BEST PRACTICES -->
+<section id="best-practices">
+<div class="container">
+  <div class="section-label">State-of-the-Art 2025</div>
+  <h2 class="section-title">Best Practices</h2>
+  <p class="section-sub">What professional ML engineers do differently from beginners when building regression models.</p>
+
+  <div class="bp-card">
+    <div class="bp-num">1</div>
+    <div class="bp-content">
+      <h4>Always Start With a Baseline</h4>
+      <p>What RMSE do you get by predicting the mean of y for every sample? That's your floor. Any model that can't clearly beat it is broken. Simple linear regression is your next baseline. Complex models only make sense if they outperform simpler ones.</p>
+    </div>
+  </div>
+  <div class="bp-card">
+    <div class="bp-num">2</div>
+    <div class="bp-content">
+      <h4>The Golden Rule: Split → Pipeline → Tune → Evaluate</h4>
+      <p>Train/test split first. Build everything (scaling, polynomial features, model) inside a Pipeline. Tune hyperparameters with GridSearchCV + cross-validation on training data only. Evaluate the final model on the test set exactly once at the end. The test set is a sealed vault — open it only once.</p>
+    </div>
+  </div>
+  <div class="bp-card">
+    <div class="bp-num">3</div>
+    <div class="bp-content">
+      <h4>Plot Residuals After Every Model</h4>
+      <p>A residual plot takes 3 lines of code and reveals everything: is there a pattern? If yes, your model is missing something. Curved pattern → add polynomial features. Fan shape → transform y (log). Cluster of outliers → investigate those specific data points.</p>
+    </div>
+  </div>
+  <div class="bp-card">
+    <div class="bp-num">4</div>
+    <div class="bp-content">
+      <h4>Log-Transform Skewed Targets</h4>
+      <p>House prices, salaries, and revenue are right-skewed. Linear regression assumes symmetric errors. Predicting log(price) instead of price, then exponentiating the output, often dramatically reduces RMSE. Check your target distribution with a histogram before fitting anything.</p>
+    </div>
+  </div>
+  <div class="bp-card">
+    <div class="bp-num">5</div>
+    <div class="bp-content">
+      <h4>Use Adjusted R² for Feature Selection</h4>
+      <p>Plain R² always increases when you add features — even useless noise features. Use Adjusted R² when comparing models with different feature counts. Even better: use cross-validation RMSE as your model selection criterion, not R² at all.</p>
+    </div>
+  </div>
+
+  <details>
+    <summary>When does Ridge outperform Lasso, and vice versa?</summary>
+    <div class="details-body">Ridge wins when: many features are genuinely relevant (keeping them all, just shrunk, is better than zeroing some out). Data has multicollinearity — Ridge handles correlated features more stably than Lasso. Lasso wins when: you believe only a few features truly matter and want a sparse, interpretable model. You want automatic feature selection to simplify downstream deployment. In practice: try both with cross-validation. The one with lower CV RMSE wins.</div>
+  </details>
+  <details>
+    <summary>Why does adding polynomial features require scaling even more urgently?</summary>
+    <div class="details-body">With raw features in the thousands (e.g., square footage = 2,000), x² = 4,000,000 and x³ = 8,000,000,000. Without scaling, x³ would dominate all other features by many orders of magnitude, and the regularisation penalty (which treats all coefficients equally) would be meaningless. StandardScaler makes x, x², and x³ comparable in magnitude, allowing fair regularisation. This is why StandardScaler must come BEFORE PolynomialFeatures in your Pipeline.</div>
+  </details>
+  <details>
+    <summary>Is RMSE always better than MAE for comparing models?</summary>
+    <div class="details-body">No. Choose based on your business objective. RMSE is better when large errors are disproportionately bad (e.g., over-ordering for a restaurant means throwing away expensive ingredients — a 100× error isn't just 100× worse, it can sink the business). MAE is better when errors are equally costly regardless of size (e.g., predicting commute time — being off by 20 minutes is twice as bad as 10 minutes, nothing more). For exploratory comparison of models on the same problem, RMSE is more common because it's more sensitive to large errors, which is usually what you care about most.</div>
+  </details>
+</div>
+</section>
+
+<div class="divider"></div>
+
+<!-- QUIZ -->
+<section id="quiz">
+<div class="container">
+  <div class="section-label">Test Your Knowledge</div>
+  <h2 class="section-title">Course 2 Quiz</h2>
+  <p class="section-sub">20 questions covering every module — from simple linear regression to regularisation. Read every explanation even when you get it right.</p>
+
+  <div class="quiz-progress">
+    <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    <span class="quiz-counter" id="quizCounter">0 / 20</span>
+  </div>
+
+  <div id="quizContainer">
+
+    <div class="question-card active" data-q="0">
+      <div class="q-meta"><span class="q-num">Q01</span><span class="q-topic">Regression vs Classification</span></div>
+      <div class="q-text">What is the core difference between regression and classification?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>Regression uses more data; classification uses less</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>Regression predicts a continuous number (price, temperature). Classification predicts a discrete category (spam/not spam, cat/dog)</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>Regression is unsupervised; classification is supervised</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>Regression works on text data; classification works on numbers</button>
+      </div>
+      <div class="explanation">✅ <strong>Output type is the defining difference.</strong> If the answer can be any real number (house price = £283,750), it's regression. If the answer is one of a fixed set of categories (will this customer churn: yes or no?), it's classification. Importantly — "logistic regression" is confusingly named. Despite the word "regression" it is a classification algorithm that outputs probabilities, not a continuous number.</div>
+    </div>
+
+    <div class="question-card" data-q="1">
+      <div class="q-meta"><span class="q-num">Q02</span><span class="q-topic">Linear Regression</span></div>
+      <div class="q-text">A linear model has slope w = 250 and intercept b = 50,000 predicting house price from size in sqft. What does the slope mean?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>A house with zero square feet costs £250</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>Each additional square foot adds £250 to the predicted price</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>The model's accuracy is 250 out of 50,000</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>The training set contains 250 houses</button>
+      </div>
+      <div class="explanation">✅ <strong>Slope = rate of change.</strong> ŷ = 250×size + 50,000. For every 1 sqft increase in size, the predicted price increases by £250. The intercept (b = 50,000) is the predicted price when size = 0 — not physically meaningful here, but mathematically necessary. A 1,000 sqft house predicts: 250 × 1000 + 50,000 = £300,000.</div>
+    </div>
+
+    <div class="question-card" data-q="2">
+      <div class="q-meta"><span class="q-num">Q03</span><span class="q-topic">Residuals</span></div>
+      <div class="q-text">Your residual plot shows a clear U-shaped curve — residuals are high at both ends and low in the middle. What does this tell you?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>The model is overfitting — reduce model complexity</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>The relationship is non-linear — a straight line is missing a curve. Add polynomial features (x²).</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>U-shaped residuals are expected — the model is working correctly</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>There are outliers at both ends that should be removed</button>
+      </div>
+      <div class="explanation">✅ <strong>Pattern in residuals = the model is missing a pattern in the data.</strong> Random scatter around zero is what you want. A U-shape means the data has a quadratic (curved) component that a straight line can't capture. It's systematically under-predicting in the middle and over-predicting at extremes. Fix: add x² as a feature (PolynomialFeatures(degree=2)). A fan shape → heteroscedasticity (try log-transforming y). A diagonal trend → you're missing an important feature.</div>
+    </div>
+
+    <div class="question-card" data-q="3">
+      <div class="q-meta"><span class="q-num">Q04</span><span class="q-topic">Error Metrics</span></div>
+      <div class="q-text">Model A: MAE=£500, RMSE=£1,200. Model B: MAE=£600, RMSE=£650. For predicting medical costs where catastrophic errors are dangerous, which is better?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>Model A — lower MAE means more accurate overall</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>Model B — RMSE ≈ MAE means errors are consistent. Model A's large RMSE/MAE gap signals some very large errors, which are dangerous in a medical context</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>Both are equal — the metrics contradict each other</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>Model B is always better regardless of context</button>
+      </div>
+      <div class="explanation">✅ <strong>RMSE much larger than MAE = some predictions are very wrong.</strong> Model A has typical errors of £500 (MAE) but RMSE=£1,200 — the squaring in RMSE reveals that some predictions are hugely off. In medical cost prediction, a wildly wrong prediction (underestimating a £50k surgery as £500) could harm patients. Model B's consistent errors (RMSE ≈ MAE) are more predictable and safer. The choice between RMSE and MAE should always be driven by what large errors mean in your specific domain.</div>
+    </div>
+
+    <div class="question-card" data-q="4">
+      <div class="q-meta"><span class="q-num">Q05</span><span class="q-topic">R-Squared</span></div>
+      <div class="q-text">Your model achieves R² = 0.80 on training data but only R² = 0.42 on test data. What's wrong?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>Underfitting — add more features</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>Overfitting — the large gap between train and test R² means the model memorised training data instead of learning generalisable patterns</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>R² of 0.80 is too high for a linear model — something is wrong with the scale</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>R² of 0.42 on test is normal and acceptable</button>
+      </div>
+      <div class="explanation">✅ <strong>38-point R² gap = severe overfitting.</strong> The model explains 80% of training variance but only 42% of test variance — it learned noise from the training set. Fixes: add Ridge or Lasso regularisation, reduce polynomial degree, remove irrelevant features, gather more training data. Target: train and test R² should be similar and both high. A small gap (e.g., 0.78 vs 0.74) is normal; a 38-point gap is not.</div>
+    </div>
+
+    <div class="question-card" data-q="5">
+      <div class="q-meta"><span class="q-num">Q06</span><span class="q-topic">Bias-Variance</span></div>
+      <div class="q-text">In plain English, what does "high bias" mean?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>The model is prejudiced against certain types of data points</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>The model is too simple — it makes systematic errors regardless of how much training data you give it (underfitting)</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>The model performs inconsistently on different training sets</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>The model's training error is much lower than its test error</button>
+      </div>
+      <div class="explanation">✅ <strong>Bias = systematic error from being too simple.</strong> A high-bias model has "wrong assumptions baked in." No matter how much data you give it, it will always miss the true pattern in the same systematic way. Symptom: BOTH training error and test error are high and roughly equal. Mnemonic: <strong>B</strong>ias = <strong>U</strong>nderfitting. <strong>V</strong>ariance = <strong>O</strong>verfitting. The fix for high bias is a more complex model. The fix for high variance is simpler model or regularisation.</div>
+    </div>
+
+    <div class="question-card" data-q="6">
+      <div class="q-meta"><span class="q-num">Q07</span><span class="q-topic">Bias-Variance</span></div>
+      <div class="q-text">Total error in a model equals Bias² + Variance + something. What is that "something" and can you ever reduce it?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>Feature noise — removable with better feature engineering</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>Irreducible error (ε²) — the inherent randomness in the data itself that no model can ever capture, no matter how sophisticated</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>Regularisation penalty — removable by setting alpha to zero</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>Sampling error — removable with more training data</button>
+      </div>
+      <div class="explanation">✅ <strong>Irreducible error is the noise floor you can never beat.</strong> Some targets are inherently noisy — stock prices on a given day depend on factors that no model could capture (news events, sentiment, random trades). Total Error = Bias² + Variance + ε². Even a perfect model (zero bias, zero variance) would still have ε² error. This is why RMSE = 0 is impossible for noisy real-world data and why you should set your performance targets relative to domain knowledge about how predictable the target actually is.</div>
+    </div>
+
+    <div class="question-card" data-q="7">
+      <div class="q-meta"><span class="q-num">Q08</span><span class="q-topic">Cross-Validation</span></div>
+      <div class="q-text">After GridSearchCV finds the best alpha using 5-fold cross-validation, what should you do next?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>Use the model from the best fold as your final model</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>Retrain the model on ALL of the training data using the best alpha, then evaluate once on the held-out test set</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>Run cross-validation again on the test set to confirm the result</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>The GridSearchCV model is already fully trained — deploy it directly</button>
+      </div>
+      <div class="explanation">✅ <strong>CV is for selection, not final training.</strong> During CV, each fold only trains on 80% of the training data. The best final model should use all of the training data. sklearn's GridSearchCV does this automatically via its <code>refit=True</code> parameter (default) — after finding the best hyperparameters, it refits on the full training set. Then you call <code>grid.score(X_test, y_test)</code> exactly once to get your final honest performance estimate. This test set evaluation must happen only once — never go back to tune further after seeing it.</div>
+    </div>
+
+    <div class="question-card" data-q="8">
+      <div class="q-meta"><span class="q-num">Q09</span><span class="q-topic">Ridge</span></div>
+      <div class="q-text">What is the fundamental difference between how Ridge (L2) and Lasso (L1) handle coefficients as alpha increases?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>Both shrink coefficients to exactly zero at high alpha — they're identical in behaviour</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>Ridge shrinks all coefficients toward zero but never exactly reaches zero. Lasso drives some coefficients to exactly zero (feature selection) while keeping others non-zero</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>Ridge removes features; Lasso keeps all features</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>Ridge uses gradient descent; Lasso uses closed-form solution</button>
+      </div>
+      <div class="explanation">✅ <strong>The key distinction: Ridge → continuous shrinkage; Lasso → sparsity.</strong> This comes from the shape of the penalty. L2 (Ridge) adds a circular/spherical constraint — the optimal solution sits on the surface of a sphere, where no coordinate is exactly zero. L1 (Lasso) adds a diamond-shaped constraint — the optimal solution tends to land at the sharp corners of the diamond, where one or more coordinates are exactly zero. This geometric property of L1 is what makes Lasso a feature selector.</div>
+    </div>
+
+    <div class="question-card" data-q="9">
+      <div class="q-meta"><span class="q-num">Q10</span><span class="q-topic">Polynomial Regression</span></div>
+      <div class="q-text">Why is polynomial regression still called a "linear model" even when it fits curves?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>Because the plotted line must always be straight on a standard 2D graph</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>"Linear" refers to the relationship between the model and its coefficients — the model is a linear combination of features (including x², x³). The relationship between ŷ and x is curved; the relationship between ŷ and the weight vector is still linear</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>Because it uses OLS which can only fit linear equations</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>Because the polynomial features are linearised through a log transformation</button>
+      </div>
+      <div class="explanation">✅ <strong>Linear in the parameters, non-linear in x.</strong> ŷ = w₁x + w₂x² + w₃x³ + b — this is linear in the weights (w₁, w₂, w₃, b). You can still use OLS (matrix inversion) to find the exact optimal weights. The key is that x², x³ are just new features computed from x. Once you create those columns (via PolynomialFeatures), sklearn's LinearRegression treats them as any other features. The output is a curve in x-space, but the mathematics are entirely linear algebra.</div>
+    </div>
+
+    <div class="question-card" data-q="10">
+      <div class="q-meta"><span class="q-num">Q11</span><span class="q-topic">Data Leakage</span></div>
+      <div class="q-text">You fit StandardScaler on your full dataset (train + test), then split. What problem does this create?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>Nothing — using more data gives a better scaler</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>Data leakage — the scaler learned the test set's mean and std, so the training data is scaled using test set information, artificially inflating measured performance</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>It causes underfitting by over-normalising the features</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>StandardScaler should be applied after train/test splitting as long as the same parameters are used</button>
+      </div>
+      <div class="explanation">✅ <strong>The Golden Rule: Split BEFORE scaling.</strong> When you compute mean and std on the full dataset, those statistics are influenced by test examples. During training, the model sees data that was scaled using test set distribution properties — it's indirectly "peeking" at the test set. This inflates your reported metrics and creates an unrealistically optimistic view of model performance. Always: split → fit scaler on X_train only → transform both using training stats. Use Pipelines to enforce this automatically and safely.</div>
+    </div>
+
+    <div class="question-card" data-q="11">
+      <div class="q-meta"><span class="q-num">Q12</span><span class="q-topic">Elastic Net</span></div>
+      <div class="q-text">You have 3 features that are all measuring the same thing slightly differently (e.g., size in sqft, size in m², size category). Which regulariser handles this situation best?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>Lasso — it will zero out two of the three features automatically</button>
+        <button class="option" data-correct="false"><span class="opt-letter">B</span>Ridge — it distributes weight evenly among correlated features</button>
+        <button class="option" data-correct="true"><span class="opt-letter">C</span>Elastic Net — it tends to select or drop correlated feature groups together, rather than Lasso's arbitrary single selection</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>No regularisation — correlated features help each other</button>
+      </div>
+      <div class="explanation">✅ <strong>Elastic Net handles correlated groups gracefully.</strong> When features are highly correlated, Lasso arbitrarily picks one and zeros out the others — which one it picks changes with slightly different training data (unstable). Ridge keeps all three with similar weights, potentially diluting the signal. Elastic Net's blend of L1+L2 tends to either keep the whole group or drop the whole group — more stable and consistent behaviour. This is exactly the scenario Elastic Net was designed for.</div>
+    </div>
+
+    <div class="question-card" data-q="12">
+      <div class="q-meta"><span class="q-num">Q13</span><span class="q-topic">Learning Curves</span></div>
+      <div class="q-text">Your learning curve shows training error and validation error both plateau at a high value regardless of how much training data you add. What do you do?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>Collect more training data — the curves will eventually separate</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>Increase model complexity — high bias means more data won't help. Add polynomial features, more features, or a more expressive model</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>Add regularisation — the curves are plateauing because of overfitting</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>The model is fine — convergence is the goal</button>
+      </div>
+      <div class="explanation">✅ <strong>Both curves plateau at high error = high bias = underfitting.</strong> The model has hit its capacity ceiling. It simply can't capture the true relationship regardless of data volume. More data is useless here — the model is fundamentally too simple. Fix: switch to polynomial regression, engineer better features, or use a non-linear model family (trees, etc.). More data is only useful for high-variance (overfitting) problems where the large train/test gap would close with more examples.</div>
+    </div>
+
+    <div class="question-card" data-q="13">
+      <div class="q-meta"><span class="q-num">Q14</span><span class="q-topic">OLS</span></div>
+      <div class="q-text">Why does Ordinary Least Squares square the residuals rather than just taking their absolute values?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>Squaring is computationally faster than taking absolute values</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>Squaring makes all residuals positive (so positive and negative errors don't cancel), penalises large errors much more than small ones, and is differentiable everywhere — enabling closed-form matrix solutions</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>Squaring is a convention from the 1800s with no mathematical justification</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>Squaring makes the loss function convex so gradient descent converges faster</button>
+      </div>
+      <div class="explanation">✅ <strong>Squaring serves three purposes: sign, weighting, and differentiability.</strong> (1) Positive/negative errors don't cancel each other out. (2) A £200 error is penalised 4× more than a £100 error (not 2×) — large errors matter more. (3) The squared loss function is differentiable everywhere, which enables a clean closed-form analytical solution (w = (XᵀX)⁻¹Xᵀy) — you can solve exactly without iteration. Absolute value is not differentiable at zero, which complicates the mathematics (though methods like LAD regression handle it).</div>
+    </div>
+
+    <div class="question-card" data-q="14">
+      <div class="q-meta"><span class="q-num">Q15</span><span class="q-topic">Adjusted R²</span></div>
+      <div class="q-text">You add a random noise column (unrelated to the target) to your features. R² increases slightly. Does Adjusted R² also increase?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>Yes — both always increase when you add features</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>No — Adjusted R² penalises for the additional parameter. Adding noise features that don't genuinely improve fit causes Adjusted R² to fall</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>Adjusted R² doesn't depend on the number of features</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>It depends on how correlated the noise is with existing features</button>
+      </div>
+      <div class="explanation">✅ <strong>Adjusted R² is the noise-resistant version of R².</strong> Formula: 1 − (1−R²)(n−1)/(n−p−1). Adding any feature increases p (number of features). If the feature doesn't increase R² enough to offset the penalty for the extra parameter, Adjusted R² falls. This makes it the right metric for feature selection — plain R² always rewards adding features regardless of usefulness, while Adjusted R² only rewards features that genuinely improve fit relative to their cost in model complexity.</div>
+    </div>
+
+    <div class="question-card" data-q="15">
+      <div class="q-meta"><span class="q-num">Q16</span><span class="q-topic">Multiple Regression</span></div>
+      <div class="q-text">Why should you use StandardScaler before comparing Ridge coefficients to understand feature importance?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>StandardScaler makes Ridge converge faster during gradient descent</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>Without scaling, coefficient magnitude reflects feature scale as much as feature importance. After scaling, features are on the same scale so larger |coefficient| genuinely means more important</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>Ridge doesn't work correctly without StandardScaler</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>StandardScaler removes correlated features before Ridge can see them</button>
+      </div>
+      <div class="explanation">✅ <strong>Scale confounds importance.</strong> If salary ranges 0–200,000 and age 18–80, the salary coefficient might be 0.0001 and the age coefficient might be 500 — not because age is more important, but because the units differ by 2,500×. After StandardScaler, both features have mean=0 and std=1. Now larger absolute coefficients genuinely mean stronger relationships with the target, regardless of original units. Also, the Ridge penalty (Σw²) treats all coefficients equally — without scaling, large-scale features face a disproportionately small effective penalty.</div>
+    </div>
+
+    <div class="question-card" data-q="16">
+      <div class="q-meta"><span class="q-num">Q17</span><span class="q-topic">Cross-Validation</span></div>
+      <div class="q-text">GridSearchCV finds best alpha = 0.001 (essentially no regularisation). What does this suggest?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>The dataset is too small to benefit from regularisation</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>The model probably isn't overfitting significantly — regularisation isn't helping. The data is sufficient for the model complexity, or features are genuinely informative</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>You need to test smaller alpha values — alpha=0.001 means the grid was wrong</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>Ridge is the wrong model — switch to Lasso</button>
+      </div>
+      <div class="explanation">✅ <strong>Very small alpha = regularisation isn't improving generalisation.</strong> When CV picks near-zero regularisation, it means shrinking coefficients doesn't reduce validation error — the model already generalises well as-is. This is good news: your linear model is appropriate for the data. If alpha=10,000 were optimal, that would signal severe overfitting. If your CV grid only includes large alphas and the best is always the smallest one in your grid, that's a signal to extend the grid downward — try alpha values like [0.0001, 0.001, ...].</div>
+    </div>
+
+    <div class="question-card" data-q="17">
+      <div class="q-meta"><span class="q-num">Q18</span><span class="q-topic">Pipeline</span></div>
+      <div class="q-text">Why is using a sklearn Pipeline the "correct" way to combine StandardScaler with Ridge, rather than manually scaling then fitting?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>Pipelines are faster because they parallelise the scaling and model fitting</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>Pipelines prevent data leakage during cross-validation — the scaler is fitted only on the training fold of each CV split, not on the validation fold. Manual scaling before CV would leak validation data into scaling</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>Pipelines automatically select the best model from a list of options</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>Pipelines add regularisation automatically when Ridge is included</button>
+      </div>
+      <div class="explanation">✅ <strong>Pipelines make cross-validation leakage-proof.</strong> If you manually scale X_train before running cross-validation, the scaler has already "seen" the validation folds (since you scaled the whole training set). Inside cross_val_score or GridSearchCV, a Pipeline reruns the scaler fit on each training fold separately — validation folds are transformed using only training fold statistics. This is the most subtle and common form of data leakage, and the Pipeline pattern is specifically designed to prevent it.</div>
+    </div>
+
+    <div class="question-card" data-q="18">
+      <div class="q-meta"><span class="q-num">Q19</span><span class="q-topic">Log Transform</span></div>
+      <div class="q-text">House prices have a strongly right-skewed distribution. Why might predicting log(price) instead of price improve your linear regression model?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>Log transformation makes the features linear, which is required for linear regression</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>Linear regression assumes symmetric, constant-variance errors. Log-transforming the target makes its distribution more symmetric, meaning the OLS assumptions are better satisfied and RMSE on log-price is more meaningful</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>Log transformation reduces the target to a [0,1] range, making optimisation easier</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>Log transformation eliminates outliers in the target variable</button>
+      </div>
+      <div class="explanation">✅ <strong>Log makes skewed targets more symmetric.</strong> OLS minimises squared errors and implicitly assumes errors are constant across all prediction levels. With raw prices: a £50,000 error on a £100k house is very different from a £50,000 error on a £5M house (50% vs 1%). After log transform, the percentage errors are treated equally. You predict log(price), then exponentiate to get the price: exp(log_price_prediction). Most practitioners who work with price/revenue data use log-targets almost reflexively.</div>
+    </div>
+
+    <div class="question-card" data-q="19">
+      <div class="q-meta"><span class="q-num">Q20</span><span class="q-topic">All Topics</span></div>
+      <div class="q-text">Which statement about regression is FALSE?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>Lasso can produce sparse models by setting some coefficients to exactly zero</button>
+        <button class="option" data-correct="false"><span class="opt-letter">B</span>Polynomial regression is still a linear model because it is linear in the coefficients</button>
+        <button class="option" data-correct="true"><span class="opt-letter">C</span>R² always increases when you add more features, so maximising R² is a valid model selection strategy</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>RMSE and MAE are both expressed in the same units as the target variable</button>
+      </div>
+      <div class="explanation">✅ <strong>C is FALSE.</strong> R² always increases (or stays the same) when adding features — even pure noise. This makes optimising raw R² a deeply flawed strategy that leads straight to overfitting. Instead: use Adjusted R² (penalises for feature count), or cross-validation RMSE (the gold standard for model selection). A, B, and D are all true: Lasso zeros out coefficients via L1 penalty (A), polynomial regression is linear in its weights (B), and both RMSE and MAE are measured in the same units as your target variable (D).</div>
+    </div>
+
+  </div>
+
+  <div class="score-card" id="scoreCard">
+    <div class="section-label">Results</div>
+    <div class="score-msg" id="scoreMsg">—</div>
+    <div class="score-number" id="scoreNumber">0/20</div>
+    <div class="score-label" id="scoreLabel">Review the explanations above.</div>
+    <button class="btn btn-restart" onclick="restartQuiz()">↺ Restart Quiz</button>
+  </div>
+
+  <div class="quiz-actions">
+    <button class="btn btn-primary" id="nextBtn" onclick="nextQuestion()" disabled>Next Question →</button>
+  </div>
+</div>
+</section>
+
+<footer>
+  Built for <span>IBM ML Course 2</span> · Supervised ML: Regression · Linear · Multiple · Polynomial · Error Metrics · Bias–Variance · Cross-Validation · Ridge · Lasso · Elastic Net
+</footer>
+
+<script>
+  const questions=document.querySelectorAll('.question-card');
+  const progressFill=document.getElementById('progressFill');
+  const quizCounter=document.getElementById('quizCounter');
+  const nextBtn=document.getElementById('nextBtn');
+  const scoreCard=document.getElementById('scoreCard');
+  let current=0,score=0,answered=false;
+  function updateProgress(){progressFill.style.width=(current/questions.length*100)+'%';quizCounter.textContent=current+' / '+questions.length;}
+  document.querySelectorAll('.option').forEach(btn=>{
+    btn.addEventListener('click',function(){
+      if(answered)return;answered=true;
+      const card=this.closest('.question-card');
+      card.querySelectorAll('.option').forEach(o=>{o.classList.add('disabled');if(o.dataset.correct==='true')o.classList.add('correct');});
+      if(this.dataset.correct!=='true')this.classList.add('wrong');else score++;
+      card.querySelector('.explanation').classList.add('show');
+      nextBtn.disabled=false;
+    });
+  });
+  function nextQuestion(){
+    if(current>=questions.length-1){showScore();return;}
+    questions[current].classList.remove('active');current++;
+    questions[current].classList.add('active');
+    answered=false;nextBtn.disabled=true;updateProgress();
+    if(current===questions.length-1)nextBtn.textContent='See Results →';
+  }
+  function showScore(){
+    document.getElementById('quizContainer').style.display='none';
+    nextBtn.style.display='none';scoreCard.classList.add('show');
+    const pct=Math.round(score/questions.length*100);
+    document.getElementById('scoreNumber').textContent=score+'/'+questions.length;
+    const rows=[[90,'🔥 Regression Mastered','You know this cold. On to Course 3.'],[75,'💪 Strong Performance','Solid — a couple of concepts to revisit.'],[60,'📘 Good Progress','Review the modules and come back.'],[0,'🔄 Keep Studying','Revisit the analogies and retry.']];
+    const r=rows.find(r=>pct>=r[0]);
+    document.getElementById('scoreMsg').textContent=r[1];
+    document.getElementById('scoreLabel').textContent=r[2];
+    progressFill.style.width='100%';quizCounter.textContent=questions.length+' / '+questions.length;
+  }
+  function restartQuiz(){
+    current=0;score=0;answered=false;
+    scoreCard.classList.remove('show');document.getElementById('quizContainer').style.display='block';
+    nextBtn.style.display='flex';nextBtn.disabled=true;nextBtn.textContent='Next Question →';
+    questions.forEach((q,i)=>{q.classList.toggle('active',i===0);q.querySelectorAll('.option').forEach(o=>o.classList.remove('correct','wrong','disabled'));q.querySelector('.explanation').classList.remove('show');});
+    updateProgress();
+  }
+  updateProgress();
+</script>
+</body>
+</html>
