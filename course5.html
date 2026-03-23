@@ -1,0 +1,1358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IBM ML Course 5 — Deep Learning & Reinforcement Learning</title>
+<link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #07080f;
+    --surface: #0e1020;
+    --surface2: #151828;
+    --border: #1e2540;
+    --accent: #38bdf8;
+    --accent2: #0284c7;
+    --accent3: #f472b6;
+    --accent4: #fbbf24;
+    --accent5: #34d399;
+    --text: #e2eaf8;
+    --text-muted: #7a90b8;
+    --text-dim: #374060;
+    --code-bg: #04050a;
+    --correct: #34d399;
+    --wrong: #f87171;
+    --radius: 14px;
+    --radius-sm: 9px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'Lato', sans-serif; background: var(--bg); color: var(--text); line-height: 1.75; font-size: 16px; }
+
+  /* ── HERO ── */
+  .hero {
+    background: linear-gradient(135deg, #07080f 0%, #0d1225 50%, #0a1020 100%);
+    padding: 80px 24px 64px; text-align: center; position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(ellipse 80% 55% at 50% 0%, rgba(56,189,248,0.11) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-badge { display: inline-block; background: rgba(56,189,248,0.1); border: 1px solid rgba(56,189,248,0.3); color: var(--accent); font-size: 11px; font-weight: 700; letter-spacing: 2.5px; text-transform: uppercase; padding: 6px 16px; border-radius: 20px; margin-bottom: 20px; }
+  .hero h1 { font-size: clamp(28px,5vw,54px); font-weight: 900; line-height: 1.08; margin-bottom: 16px; letter-spacing: -1px; }
+  .hero h1 span { color: var(--accent); }
+  .hero .tagline { font-size: 19px; color: var(--text-muted); max-width: 640px; margin: 0 auto 12px; font-weight: 300; }
+  .hero .newbie-note { display: inline-block; background: rgba(251,191,36,0.1); border: 1px solid rgba(251,191,36,0.25); color: var(--accent4); font-size: 13px; font-weight: 700; padding: 8px 20px; border-radius: 20px; margin-bottom: 32px; }
+  .hero-pills { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+  .pill { background: var(--surface2); border: 1px solid var(--border); color: var(--text-muted); font-size: 13px; font-weight: 700; padding: 7px 16px; border-radius: 20px; }
+
+  /* ── NAV ── */
+  .sticky-nav { position: sticky; top: 0; z-index: 100; background: rgba(7,8,15,0.96); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); padding: 0 24px; overflow-x: auto; white-space: nowrap; }
+  .sticky-nav ul { display: flex; list-style: none; max-width: 1200px; margin: 0 auto; }
+  .sticky-nav a { display: block; padding: 15px 14px; color: var(--text-muted); text-decoration: none; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; transition: color 0.2s; border-bottom: 2px solid transparent; }
+  .sticky-nav a:hover { color: var(--accent); border-bottom-color: var(--accent); }
+
+  /* ── LAYOUT ── */
+  .container { max-width: 1140px; margin: 0 auto; padding: 64px 24px; }
+  .section-label { font-size: 11px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: var(--accent); margin-bottom: 10px; }
+  .section-title { font-size: clamp(22px,3vw,34px); font-weight: 900; margin-bottom: 10px; letter-spacing: -0.5px; }
+  .section-sub { color: var(--text-muted); font-size: 15px; margin-bottom: 40px; font-weight: 300; line-height: 1.6; max-width: 760px; }
+
+  /* ── ANALOGY BOX ── */
+  .analogy { display: flex; gap: 18px; background: rgba(251,191,36,0.06); border: 1px solid rgba(251,191,36,0.22); border-radius: var(--radius-sm); padding: 18px 22px; margin: 18px 0; }
+  .analogy-icon { font-size: 26px; flex-shrink: 0; line-height: 1; margin-top: 2px; }
+  .analogy-body { font-size: 14px; line-height: 1.7; }
+  .analogy-body strong { color: var(--accent4); font-size: 13px; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 4px; }
+  .analogy-body p { color: var(--text-muted); }
+
+  /* ── CARDS ── */
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 26px; margin-bottom: 20px; transition: border-color 0.2s; }
+  .card:hover { border-color: rgba(56,189,248,0.3); }
+  .card h3 { font-size: 16px; font-weight: 700; margin-bottom: 10px; display: flex; align-items: center; gap: 10px; }
+  .card .icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
+  .card p, .card ul { color: var(--text-muted); font-size: 14px; line-height: 1.7; }
+  .card ul { padding-left: 20px; }
+  .card ul li { margin-bottom: 5px; }
+  .grid-2 { display: grid; grid-template-columns: repeat(auto-fit,minmax(300px,1fr)); gap: 20px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap: 16px; }
+
+  /* ── TAGS ── */
+  .tag { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; padding: 3px 10px; border-radius: 4px; margin-bottom: 12px; }
+  .tag-blue   { background: rgba(56,189,248,0.14);  color: var(--accent); }
+  .tag-pink   { background: rgba(244,114,182,0.14); color: var(--accent3); }
+  .tag-yellow { background: rgba(251,191,36,0.14);  color: var(--accent4); }
+  .tag-green  { background: rgba(52,211,153,0.14);  color: var(--accent5); }
+  .tag-red    { background: rgba(248,113,113,0.14); color: #f87171; }
+
+  /* ── CONCEPT BLOCKS ── */
+  .cb { background: var(--surface); border-left: 3px solid var(--accent); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; padding: 20px 24px; margin-bottom: 16px; }
+  .cb.pink   { border-left-color: var(--accent3); }
+  .cb.yellow { border-left-color: var(--accent4); }
+  .cb.green  { border-left-color: var(--accent5); }
+  .cb.red    { border-left-color: #f87171; }
+  .cb h4 { font-size: 15px; font-weight: 700; margin-bottom: 8px; }
+  .cb p  { color: var(--text-muted); font-size: 14px; line-height: 1.7; }
+  .cb ul { color: var(--text-muted); font-size: 14px; padding-left: 18px; line-height: 1.8; }
+
+  /* ── FORMULA ── */
+  .formula { background: var(--code-bg); border: 1px solid #151a30; border-radius: var(--radius-sm); padding: 12px 18px; font-family: 'Space Mono',monospace; font-size: 13px; color: #7dd3fc; margin: 12px 0; text-align: center; }
+
+  /* ── CALLOUT ── */
+  .callout { display: flex; gap: 16px; background: rgba(56,189,248,0.05); border: 1px solid rgba(56,189,248,0.2); border-radius: var(--radius-sm); padding: 16px 20px; margin: 20px 0; }
+  .callout.warn  { background: rgba(251,191,36,0.05); border-color: rgba(251,191,36,0.2); }
+  .callout.green { background: rgba(52,211,153,0.05); border-color: rgba(52,211,153,0.2); }
+  .callout.pink  { background: rgba(244,114,182,0.05); border-color: rgba(244,114,182,0.2); }
+  .callout-icon  { font-size: 22px; flex-shrink: 0; }
+  .callout-body  { font-size: 14px; color: var(--text-muted); line-height: 1.7; }
+  .callout-body strong { color: var(--text); }
+
+  /* ── CODE ── */
+  .code-block { background: var(--code-bg); border: 1px solid #151a30; border-radius: var(--radius); overflow: hidden; margin: 20px 0; }
+  .code-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 18px; background: #0a0d1a; border-bottom: 1px solid #151a30; }
+  .code-title  { font-family: 'Space Mono',monospace; font-size: 12px; color: var(--accent); }
+  .code-dots   { display: flex; gap: 6px; }
+  .code-dot    { width: 10px; height: 10px; border-radius: 50%; }
+  .code-dot:nth-child(1){background:#ff5f57} .code-dot:nth-child(2){background:#febc2e} .code-dot:nth-child(3){background:#28c840}
+  .code-block pre { padding: 20px 18px; overflow-x: auto; font-family: 'Space Mono',monospace; font-size: 13px; line-height: 1.75; }
+  .code-block code { color: #c7d9f5; }
+  .kw{color:#f472b6} .fn{color:#93c5fd} .st{color:#86efac} .cm{color:#374060;font-style:italic} .nm{color:#fbbf24} .va{color:#fb923c}
+
+  /* ── TABLE ── */
+  .table-wrap { overflow-x: auto; margin: 20px 0; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th { background: var(--surface2); color: var(--accent); font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--border); }
+  td { padding: 12px 16px; border-bottom: 1px solid rgba(30,37,64,0.5); color: var(--text-muted); vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(56,189,248,0.03); }
+  td strong { color: var(--text); }
+
+  /* ── ACCORDION ── */
+  details { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 10px; overflow: hidden; }
+  summary { padding: 16px 20px; font-weight: 700; font-size: 15px; cursor: pointer; list-style: none; display: flex; align-items: center; justify-content: space-between; transition: background 0.2s; }
+  summary:hover { background: var(--surface2); }
+  summary::after { content: '+'; font-size: 20px; color: var(--accent); font-weight: 300; }
+  details[open] summary::after { content: '−'; }
+  details[open] summary { border-bottom: 1px solid var(--border); }
+  .details-body { padding: 20px; color: var(--text-muted); font-size: 14px; line-height: 1.8; }
+
+  /* ── STEP FLOW ── */
+  .steps { counter-reset: step-counter; }
+  .step { display: flex; gap: 18px; margin-bottom: 18px; align-items: flex-start; }
+  .step-num { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), var(--accent2)); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 900; flex-shrink: 0; color: #07080f; }
+  .step-body h4 { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+  .step-body p  { font-size: 13px; color: var(--text-muted); line-height: 1.65; }
+
+  /* ── DIVIDER ── */
+  .divider { height: 1px; background: linear-gradient(90deg, transparent, var(--border), transparent); }
+
+  /* ── QUIZ ── */
+  #quiz { background: linear-gradient(180deg, var(--bg) 0%, #050508 100%); }
+  .quiz-progress { display: flex; align-items: center; gap: 16px; margin-bottom: 32px; }
+  .progress-bar { flex: 1; height: 4px; background: var(--surface2); border-radius: 2px; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent3)); border-radius: 2px; transition: width 0.4s ease; }
+  .quiz-counter { font-size: 13px; color: var(--text-muted); font-weight: 700; white-space: nowrap; }
+  .question-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 32px; margin-bottom: 24px; display: none; animation: fadeIn 0.3s ease; }
+  .question-card.active { display: block; }
+  @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+  .q-meta { display: flex; gap: 10px; align-items: center; margin-bottom: 20px; }
+  .q-num  { font-family:'Space Mono',monospace; font-size:11px; color:var(--accent); background:rgba(56,189,248,0.1); padding:3px 10px; border-radius:4px; }
+  .q-topic { font-size:11px; color:var(--text-dim); font-weight:700; text-transform:uppercase; letter-spacing:1px; }
+  .q-text  { font-size:16px; font-weight:700; margin-bottom:24px; line-height:1.55; }
+  .options { display: flex; flex-direction: column; gap: 10px; }
+  .option { background:var(--surface2); border:1px solid var(--border); border-radius:var(--radius-sm); padding:14px 18px; cursor:pointer; font-size:14px; transition:all 0.2s; display:flex; align-items:flex-start; gap:12px; text-align:left; color:var(--text); }
+  .option:hover:not(.disabled){border-color:var(--accent);background:rgba(56,189,248,0.07)}
+  .option.correct{border-color:var(--correct);background:rgba(52,211,153,0.08)}
+  .option.wrong{border-color:var(--wrong);background:rgba(248,113,113,0.08)}
+  .option.disabled{cursor:default}
+  .opt-letter{width:24px;height:24px;border-radius:6px;background:var(--border);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;font-family:'Space Mono',monospace}
+  .option.correct .opt-letter{background:var(--correct);color:#000}
+  .option.wrong   .opt-letter{background:var(--wrong);color:#fff}
+  .explanation{margin-top:16px;padding:16px;background:rgba(56,189,248,0.05);border:1px solid rgba(56,189,248,0.2);border-radius:var(--radius-sm);font-size:14px;color:var(--text-muted);display:none;line-height:1.7}
+  .explanation strong{color:var(--accent)}
+  .explanation.show{display:block}
+  .quiz-actions{display:flex;justify-content:flex-end;margin-top:20px}
+  .btn{padding:11px 28px;border-radius:var(--radius-sm);font-size:14px;font-weight:700;font-family:'Lato',sans-serif;cursor:pointer;border:none;transition:all 0.2s;letter-spacing:0.5px}
+  .btn-primary{background:var(--accent);color:#07080f}
+  .btn-primary:hover{background:#7dd3fc;transform:translateY(-1px)}
+  .btn-primary:disabled{opacity:0.4;cursor:not-allowed;transform:none}
+  .score-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:48px 32px;text-align:center;display:none}
+  .score-card.show{display:block;animation:fadeIn 0.4s ease}
+  .score-number{font-size:72px;font-weight:900;background:linear-gradient(135deg,var(--accent),var(--accent3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1;margin:16px 0}
+  .score-label{color:var(--text-muted);font-size:15px;margin-bottom:24px}
+  .score-msg{font-size:22px;font-weight:700;margin-bottom:8px}
+  .btn-restart{background:var(--surface2);color:var(--text);border:1px solid var(--border);margin-top:24px}
+  .btn-restart:hover{border-color:var(--accent);color:var(--accent)}
+
+  footer{background:var(--surface);border-top:1px solid var(--border);padding:32px 24px;text-align:center;color:var(--text-dim);font-size:13px}
+  footer span{color:var(--accent)}
+  @media(max-width:600px){.container{padding:40px 16px}.hero{padding:60px 16px 40px}.question-card{padding:20px}}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-badge">IBM Machine Learning Professional Certificate — Course 5 of 6</div>
+  <h1>Deep Learning &<br><span>Reinforcement Learning</span></h1>
+  <p class="tagline">Neural networks, backprop, CNNs, RNNs, LSTMs, autoencoders, GANs, and RL — explained from scratch with real analogies.</p>
+  <div class="newbie-note">🧠 Written for beginners — every concept explained with plain English analogies first</div>
+  <div class="hero-pills">
+    <span class="pill">🧠 Neural Networks</span>
+    <span class="pill">⬅️ Backpropagation</span>
+    <span class="pill">📸 CNNs</span>
+    <span class="pill">⏳ RNNs & LSTMs</span>
+    <span class="pill">🗜️ Autoencoders</span>
+    <span class="pill">🎨 GANs</span>
+    <span class="pill">🎮 Reinforcement Learning</span>
+    <span class="pill">✅ Quiz</span>
+  </div>
+</section>
+
+<!-- NAV -->
+<nav class="sticky-nav">
+  <ul>
+    <li><a href="#overview">Overview</a></li>
+    <li><a href="#neurons">Neurons</a></li>
+    <li><a href="#backprop">Backprop</a></li>
+    <li><a href="#activation">Activation Fns</a></li>
+    <li><a href="#regularization">Regularization</a></li>
+    <li><a href="#cnn">CNNs</a></li>
+    <li><a href="#rnn">RNNs & LSTMs</a></li>
+    <li><a href="#autoencoders">Autoencoders</a></li>
+    <li><a href="#gans">GANs</a></li>
+    <li><a href="#rl">Reinforcement RL</a></li>
+    <li><a href="#quiz">Quiz</a></li>
+  </ul>
+</nav>
+
+<!-- OVERVIEW -->
+<section id="overview">
+<div class="container">
+  <div class="section-label">Module 0</div>
+  <h2 class="section-title">Deep Learning in Plain English</h2>
+  <p class="section-sub">Deep Learning is just machine learning with many layers. Instead of you telling the model which features matter, the model figures it out on its own — by looking at thousands of examples and adjusting itself to get better.</p>
+
+  <div class="analogy">
+    <div class="analogy-icon">🧒</div>
+    <div class="analogy-body">
+      <strong>The Big Analogy</strong>
+      <p>Imagine you're teaching a child to recognise cats. You show them thousands of cat photos and say "cat" each time. You don't explain what fur is, or whiskers, or pointy ears — the child just absorbs the patterns automatically. That's deep learning. The "child" is the neural network, and the process of them getting better with each example is called <em>training</em>.</p>
+    </div>
+  </div>
+
+  <div class="grid-3">
+    <div class="card">
+      <h3><span class="icon" style="background:rgba(56,189,248,0.15)">🧠</span> Neural Networks</h3>
+      <p>Layers of simple math units (neurons) connected together. Shallow = few layers. Deep = many layers (hence "deep" learning).</p>
+    </div>
+    <div class="card">
+      <h3><span class="icon" style="background:rgba(244,114,182,0.15)">📸</span> CNNs</h3>
+      <p>Special networks for images. They scan for patterns like edges, shapes, and objects. Used in face recognition, self-driving cars, medical imaging.</p>
+    </div>
+    <div class="card">
+      <h3><span class="icon" style="background:rgba(251,191,36,0.15)">⏳</span> RNNs & LSTMs</h3>
+      <p>Networks with memory. They understand sequences — words in a sentence, steps in a time series. Used in translation, speech, forecasting.</p>
+    </div>
+    <div class="card">
+      <h3><span class="icon" style="background:rgba(52,211,153,0.15)">🗜️</span> Autoencoders</h3>
+      <p>Networks that compress data to a tiny representation then reconstruct it. Used for noise removal, anomaly detection, and image compression.</p>
+    </div>
+    <div class="card">
+      <h3><span class="icon" style="background:rgba(244,114,182,0.15)">🎨</span> GANs</h3>
+      <p>Two networks competing — one creates fake data, the other spots fakes. Together they produce astonishingly realistic images, voices, and video.</p>
+    </div>
+    <div class="card">
+      <h3><span class="icon" style="background:rgba(56,189,248,0.15)">🎮</span> Reinforcement Learning</h3>
+      <p>Training by rewards, not labels. An agent explores an environment, gets points for good actions, and learns to maximise its score. Like training a dog with treats.</p>
+    </div>
+  </div>
+</div>
+</section>
+
+<div class="divider"></div>
+
+<!-- NEURONS & FORWARD PASS -->
+<section id="neurons">
+<div class="container">
+  <div class="section-label">Module 1</div>
+  <h2 class="section-title">Neurons, Layers & the Forward Pass</h2>
+  <p class="section-sub">A neural network is just a chain of matrix multiplications dressed up with fancy names. Here's exactly what's happening inside.</p>
+
+  <div class="analogy">
+    <div class="analogy-icon">💡</div>
+    <div class="analogy-body">
+      <strong>What Is a Neuron?</strong>
+      <p>A single neuron is like a <em>voting machine</em>. It receives inputs (votes), assigns each one a weight (importance), adds them all up, and if the total passes a threshold — it fires. Simple. String thousands of these together in layers and they can recognise faces, translate French, and beat chess grandmasters.</p>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div>
+      <div class="cb">
+        <span class="tag tag-blue">The Math</span>
+        <h4>What Happens Inside One Neuron</h4>
+        <p>Each neuron computes a weighted sum of its inputs, adds a bias (a constant offset), then passes the result through an activation function to introduce non-linearity.</p>
+        <div class="formula">output = activation( w₁x₁ + w₂x₂ + ... + wₙxₙ + b )</div>
+        <p><strong>Weights (w):</strong> How much each input matters. Adjusted during training.<br>
+        <strong>Bias (b):</strong> Lets the neuron shift its output even when all inputs are zero.<br>
+        <strong>Activation:</strong> Squashes or gates the output (explained in Module 3).</p>
+      </div>
+      <div class="cb yellow">
+        <span class="tag tag-yellow">Layer Types</span>
+        <h4>What Each Layer Does</h4>
+        <p><strong>Input layer:</strong> Your raw data (pixels, numbers, text tokens). No computation — just receives data.<br><br>
+        <strong>Hidden layers:</strong> Where learning happens. Multiple hidden layers = "deep" network. Each layer learns increasingly abstract features (edges → shapes → objects).<br><br>
+        <strong>Output layer:</strong> Final prediction. For classification: one node per class with softmax. For regression: one node with linear activation.</p>
+      </div>
+    </div>
+    <div>
+      <div class="cb green">
+        <span class="tag tag-green">Forward Pass</span>
+        <h4>How a Prediction Is Made</h4>
+        <div class="steps">
+          <div class="step"><div class="step-num">1</div><div class="step-body"><h4>Input arrives</h4><p>Raw data enters the input layer — e.g., a 28×28 pixel image flattened to 784 numbers.</p></div></div>
+          <div class="step"><div class="step-num">2</div><div class="step-body"><h4>Multiply by weights</h4><p>Each neuron multiplies every input by its weight and sums them up. Expressed as a matrix multiplication: Z = W·X + b</p></div></div>
+          <div class="step"><div class="step-num">3</div><div class="step-body"><h4>Apply activation function</h4><p>Pass the sum through a function that adds non-linearity. Without this, all the layers would collapse into a single linear transformation.</p></div></div>
+          <div class="step"><div class="step-num">4</div><div class="step-body"><h4>Repeat through all layers</h4><p>Each layer feeds into the next. The final layer outputs the prediction — a probability distribution over classes, or a continuous value.</p></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><span class="code-title">neural_network_basics.py — Build Your First Neural Network</span></div>
+    <pre><code><span class="kw">import</span> tensorflow <span class="kw">as</span> tf
+<span class="kw">from</span> tensorflow <span class="kw">import</span> keras
+<span class="kw">from</span> tensorflow.keras <span class="kw">import</span> layers
+
+<span class="cm"># ── A simple feedforward neural network ────────────────────</span>
+<span class="cm"># Think of Sequential as a stack — data flows through layers in order</span>
+model = keras.<span class="fn">Sequential</span>([
+    layers.<span class="fn">Dense</span>(<span class="nm">128</span>, activation=<span class="st">'relu'</span>, input_shape=(<span class="nm">784</span>,)),  <span class="cm"># hidden layer 1</span>
+    layers.<span class="fn">Dense</span>(<span class="nm">64</span>,  activation=<span class="st">'relu'</span>),                      <span class="cm"># hidden layer 2</span>
+    layers.<span class="fn">Dense</span>(<span class="nm">10</span>,  activation=<span class="st">'softmax'</span>)                    <span class="cm"># output: 10 classes</span>
+])
+
+<span class="cm"># ── Compile: tell Keras HOW to train the network ──────────</span>
+model.<span class="fn">compile</span>(
+    optimizer=<span class="st">'adam'</span>,             <span class="cm"># algorithm for updating weights</span>
+    loss=<span class="st">'sparse_categorical_crossentropy'</span>,  <span class="cm"># how to measure error</span>
+    metrics=[<span class="st">'accuracy'</span>]
+)
+
+model.<span class="fn">summary</span>()  <span class="cm"># see layer shapes and total parameters</span>
+
+<span class="cm"># ── Train: show the model thousands of labelled examples ──</span>
+history = model.<span class="fn">fit</span>(
+    X_train, y_train,
+    epochs=<span class="nm">20</span>,            <span class="cm"># one epoch = one full pass through all training data</span>
+    batch_size=<span class="nm">32</span>,        <span class="cm"># process 32 examples at a time</span>
+    validation_split=<span class="nm">0.2</span> <span class="cm"># use 20% of training data to monitor overfitting</span>
+)
+
+<span class="cm"># ── Evaluate on unseen test data ──────────────────────────</span>
+test_loss, test_acc = model.<span class="fn">evaluate</span>(X_test, y_test)
+<span class="fn">print</span>(<span class="st">f"Test accuracy: </span><span class="va">{test_acc:.3f}</span><span class="st">"</span>)</code></pre>
+  </div>
+</div>
+</section>
+
+<div class="divider"></div>
+
+<!-- BACKPROPAGATION -->
+<section id="backprop">
+<div class="container">
+  <div class="section-label">Module 2</div>
+  <h2 class="section-title">Backpropagation & Gradient Descent</h2>
+  <p class="section-sub">This is how a neural network <em>learns</em>. It makes a prediction, measures how wrong it was, and then works backwards through every layer adjusting every weight to do better next time.</p>
+
+  <div class="analogy">
+    <div class="analogy-icon">🎯</div>
+    <div class="analogy-body">
+      <strong>The Dartboard Analogy</strong>
+      <p>Imagine you're blindfolded throwing darts. After each throw, someone tells you "you missed by 3 cm to the left." You adjust your arm slightly right. You throw again. After thousands of throws you hit the bullseye consistently. That adjustment process — measuring the error and tweaking based on it — is exactly what backpropagation does, except it's adjusting millions of weights simultaneously.</p>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div>
+      <div class="cb">
+        <span class="tag tag-blue">Loss Function</span>
+        <h4>Step 1 — Measure How Wrong the Prediction Is</h4>
+        <p>After a forward pass produces a prediction, we calculate the <strong>loss</strong> — a single number that represents how bad the prediction is. Lower loss = better model.</p>
+        <p style="margin-top:8px;"><strong>Binary Cross-Entropy:</strong> For yes/no problems<br>
+        <strong>Categorical Cross-Entropy:</strong> For multi-class (softmax output)<br>
+        <strong>MSE:</strong> For regression (predicting a number)</p>
+      </div>
+      <div class="cb yellow">
+        <span class="tag tag-yellow">Gradient Descent</span>
+        <h4>Step 2 — Find Which Direction to Adjust Weights</h4>
+        <p>The gradient is the slope of the loss curve with respect to each weight. It tells you: "if you increase this weight slightly, does the loss go up or down?"</p>
+        <div class="formula">new_weight = weight − learning_rate × gradient</div>
+        <p><strong>Learning rate:</strong> How big a step to take. Too large = overshooting. Too small = training takes forever. Typical: 0.001.</p>
+      </div>
+    </div>
+    <div>
+      <div class="cb pink">
+        <span class="tag tag-pink">Backpropagation</span>
+        <h4>Step 3 — Propagate Error Backwards Through Layers</h4>
+        <p>Using the chain rule from calculus, backprop computes <em>how much each weight contributed to the final error</em>. It starts at the output (where we know the error) and works backwards through every layer, computing the gradient for each weight along the way.</p>
+        <p style="margin-top:8px;">You don't need to implement this manually — Keras/TensorFlow does it automatically. But understanding the concept is crucial for debugging and design.</p>
+      </div>
+      <div class="cb red">
+        <span class="tag tag-red">Vanishing Gradients</span>
+        <h4>The Deep Network Problem</h4>
+        <p>In very deep networks, gradients can become so tiny by the time they reach the early layers that those layers barely learn at all. This is the <strong>vanishing gradient problem</strong>.</p>
+        <p style="margin-top:8px;"><strong>Cause:</strong> Sigmoid/tanh activations squash values into small ranges, and multiplying many small numbers gives near-zero.<br>
+        <strong>Solution:</strong> Use <strong>ReLU</strong> activations, <strong>batch normalisation</strong>, and <strong>residual connections</strong>.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><span class="code-title">gradient_descent_optimizers.py</span></div>
+    <pre><code><span class="kw">from</span> tensorflow.keras <span class="kw">import</span> optimizers
+
+<span class="cm"># ── SGD — the original gradient descent ───────────────────</span>
+<span class="cm"># Updates weights using gradient from a random mini-batch</span>
+sgd = <span class="fn">optimizers.SGD</span>(learning_rate=<span class="nm">0.01</span>, momentum=<span class="nm">0.9</span>)
+
+<span class="cm"># ── Adam — the 2025 go-to optimizer ──────────────────────</span>
+<span class="cm"># Adapts learning rate per parameter. Usually just works.</span>
+adam = <span class="fn">optimizers.Adam</span>(learning_rate=<span class="nm">0.001</span>)
+
+<span class="cm"># ── Learning rate scheduling ──────────────────────────────</span>
+<span class="cm"># Start with a higher LR, decay it over time for fine-tuning</span>
+lr_schedule = <span class="fn">optimizers.schedules.ExponentialDecay</span>(
+    initial_learning_rate=<span class="nm">0.001</span>,
+    decay_steps=<span class="nm">1000</span>,
+    decay_rate=<span class="nm">0.9</span>
+)
+adam_scheduled = <span class="fn">optimizers.Adam</span>(learning_rate=lr_schedule)
+
+<span class="cm"># ── Visualise training loss ───────────────────────────────</span>
+<span class="kw">import</span> matplotlib.pyplot <span class="kw">as</span> plt
+
+plt.<span class="fn">figure</span>(figsize=(<span class="nm">10</span>, <span class="nm">4</span>))
+plt.<span class="fn">subplot</span>(<span class="nm">1</span>, <span class="nm">2</span>, <span class="nm">1</span>)
+plt.<span class="fn">plot</span>(history.history[<span class="st">'loss'</span>],     label=<span class="st">'Train Loss'</span>)
+plt.<span class="fn">plot</span>(history.history[<span class="st">'val_loss'</span>], label=<span class="st">'Val Loss'</span>)
+plt.<span class="fn">xlabel</span>(<span class="st">'Epoch'</span>); plt.<span class="fn">ylabel</span>(<span class="st">'Loss'</span>); plt.<span class="fn">legend</span>()
+
+plt.<span class="fn">subplot</span>(<span class="nm">1</span>, <span class="nm">2</span>, <span class="nm">2</span>)
+plt.<span class="fn">plot</span>(history.history[<span class="st">'accuracy'</span>],     label=<span class="st">'Train Acc'</span>)
+plt.<span class="fn">plot</span>(history.history[<span class="st">'val_accuracy'</span>], label=<span class="st">'Val Acc'</span>)
+plt.<span class="fn">xlabel</span>(<span class="st">'Epoch'</span>); plt.<span class="fn">ylabel</span>(<span class="st">'Accuracy'</span>); plt.<span class="fn">legend</span>()
+plt.<span class="fn">tight_layout</span>(); plt.<span class="fn">show</span>()</code></pre>
+  </div>
+</div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ACTIVATION FUNCTIONS -->
+<section id="activation">
+<div class="container">
+  <div class="section-label">Module 3</div>
+  <h2 class="section-title">Activation Functions</h2>
+  <p class="section-sub">Without activation functions, a neural network — no matter how many layers — would just be one big linear equation. Activations introduce the non-linearity that lets networks learn complex patterns.</p>
+
+  <div class="analogy">
+    <div class="analogy-icon">🚦</div>
+    <div class="analogy-body">
+      <strong>Think of it as a gate</strong>
+      <p>Activation functions act like gates on each neuron. The gate decides: based on the incoming signal, how much (and in what form) should I let through to the next layer? Different gate shapes create different capabilities.</p>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Function</th><th>Formula</th><th>Output Range</th><th>Best Used In</th><th>Problem</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Sigmoid</strong></td><td>1 / (1 + e⁻ˣ)</td><td>(0, 1)</td><td>Output layer for binary classification</td><td>Vanishing gradients in deep networks</td></tr>
+        <tr><td><strong>Tanh</strong></td><td>(eˣ − e⁻ˣ)/(eˣ + e⁻ˣ)</td><td>(−1, 1)</td><td>Hidden layers (sometimes)</td><td>Still vanishing gradients</td></tr>
+        <tr><td><strong>ReLU</strong></td><td>max(0, x)</td><td>[0, ∞)</td><td>Hidden layers — most common default</td><td>"Dying ReLU" — neurons that output 0 permanently</td></tr>
+        <tr><td><strong>Leaky ReLU</strong></td><td>max(0.01x, x)</td><td>(−∞, ∞)</td><td>Hidden layers when dying ReLU is a concern</td><td>Slightly more complex</td></tr>
+        <tr><td><strong>Softmax</strong></td><td>eˣⁱ / Σeˣʲ</td><td>(0, 1), sum=1</td><td>Output layer for multi-class classification</td><td>Only makes sense at output layer</td></tr>
+        <tr><td><strong>Linear</strong></td><td>x</td><td>(−∞, ∞)</td><td>Output layer for regression problems</td><td>No non-linearity (never in hidden layers)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout warn">
+    <span class="callout-icon">💡</span>
+    <div class="callout-body"><strong>Quick Rule of Thumb:</strong> For hidden layers, start with <strong>ReLU</strong>. For binary classification output, use <strong>Sigmoid</strong>. For multi-class output, use <strong>Softmax</strong>. For regression output, use <strong>Linear (no activation)</strong>. If you're having training problems, try <strong>Leaky ReLU</strong> or <strong>ELU</strong> instead of plain ReLU.</div>
+  </div>
+</div>
+</section>
+
+<div class="divider"></div>
+
+<!-- REGULARIZATION -->
+<section id="regularization">
+<div class="container">
+  <div class="section-label">Module 4</div>
+  <h2 class="section-title">Regularization — Preventing Overfitting</h2>
+  <p class="section-sub">Neural networks have millions of parameters and can memorise training data perfectly — performing terribly on new data. These techniques force them to learn generalisable patterns instead.</p>
+
+  <div class="analogy">
+    <div class="analogy-icon">📚</div>
+    <div class="analogy-body">
+      <strong>The Exam Analogy</strong>
+      <p>A student who memorises every practice question word-for-word (overfitting) will fail on a real exam with slightly different phrasing. A student who truly understands the concepts (good generalisation) will handle any question. Regularisation is the "study smart, not just hard" coaching for neural networks.</p>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div>
+      <div class="cb">
+        <span class="tag tag-blue">Dropout</span>
+        <h4>Randomly Switch Off Neurons During Training</h4>
+        <p>During each training step, randomly "turn off" a fraction of neurons (set their output to zero). This forces the network to not rely on any single neuron — like making your team practice without their star player so the whole team gets better.</p>
+        <p style="margin-top:8px;">Typical rate: <code>0.2–0.5</code>. Applied during training only — at inference time, all neurons are active. Keras handles this automatically.</p>
+      </div>
+      <div class="cb yellow">
+        <span class="tag tag-yellow">Batch Normalisation</span>
+        <h4>Normalise Layer Inputs During Training</h4>
+        <p>After each layer, rescale the activations to have roughly zero mean and unit variance. This keeps values in a healthy range, preventing activations from exploding or vanishing. Also acts as a mild regulariser.</p>
+        <p style="margin-top:8px;">Allows much higher learning rates and makes training dramatically more stable. Add a <code>BatchNormalization()</code> layer after Dense or Conv layers.</p>
+      </div>
+    </div>
+    <div>
+      <div class="cb pink">
+        <span class="tag tag-pink">L1 / L2 Regularization</span>
+        <h4>Penalise Large Weights</h4>
+        <p><strong>L2 (Weight Decay):</strong> Adds a penalty proportional to the square of each weight. Discourages any single weight from becoming too dominant. Most common choice.<br><br>
+        <strong>L1:</strong> Adds penalty proportional to the absolute value. Drives some weights to exactly zero (sparse networks).<br><br>
+        Set via <code>kernel_regularizer=regularizers.l2(0.001)</code> in any layer.</p>
+      </div>
+      <div class="cb green">
+        <span class="tag tag-green">Early Stopping</span>
+        <h4>Stop Training When It Stops Improving</h4>
+        <p>Monitor the validation loss during training. If it doesn't improve for N epochs, stop training and restore the best weights. Prevents the network from continuing to memorise training data after it has already learned the useful patterns.</p>
+        <p style="margin-top:8px;">Use Keras <code>EarlyStopping(patience=5, restore_best_weights=True)</code> callback.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><span class="code-title">regularization.py</span></div>
+    <pre><code><span class="kw">from</span> tensorflow.keras <span class="kw">import</span> layers, regularizers, callbacks
+
+<span class="cm"># ── Network with all regularisation techniques ─────────────</span>
+model = keras.<span class="fn">Sequential</span>([
+    layers.<span class="fn">Dense</span>(<span class="nm">256</span>, activation=<span class="st">'relu'</span>,
+                 kernel_regularizer=regularizers.<span class="fn">l2</span>(<span class="nm">0.001</span>)),  <span class="cm"># L2</span>
+    layers.<span class="fn">BatchNormalization</span>(),   <span class="cm"># normalise activations</span>
+    layers.<span class="fn">Dropout</span>(<span class="nm">0.4</span>),           <span class="cm"># 40% of neurons randomly off</span>
+
+    layers.<span class="fn">Dense</span>(<span class="nm">128</span>, activation=<span class="st">'relu'</span>),
+    layers.<span class="fn">BatchNormalization</span>(),
+    layers.<span class="fn">Dropout</span>(<span class="nm">0.3</span>),
+
+    layers.<span class="fn">Dense</span>(<span class="nm">10</span>, activation=<span class="st">'softmax'</span>)
+])
+
+<span class="cm"># ── Early stopping callback ───────────────────────────────</span>
+early_stop = callbacks.<span class="fn">EarlyStopping</span>(
+    monitor=<span class="st">'val_loss'</span>,
+    patience=<span class="nm">5</span>,                 <span class="cm"># wait 5 epochs with no improvement</span>
+    restore_best_weights=<span class="nm">True</span>   <span class="cm"># go back to the best model</span>
+)
+
+model.<span class="fn">compile</span>(optimizer=<span class="st">'adam'</span>, loss=<span class="st">'categorical_crossentropy'</span>,
+            metrics=[<span class="st">'accuracy'</span>])
+model.<span class="fn">fit</span>(X_train, y_train, epochs=<span class="nm">100</span>, validation_split=<span class="nm">0.2</span>,
+        callbacks=[early_stop])  <span class="cm"># will stop well before 100 epochs</span></code></pre>
+  </div>
+</div>
+</section>
+
+<div class="divider"></div>
+
+<!-- CNNs -->
+<section id="cnn">
+<div class="container">
+  <div class="section-label">Module 5</div>
+  <h2 class="section-title">Convolutional Neural Networks (CNNs)</h2>
+  <p class="section-sub">CNNs are designed to work with images. Instead of looking at every pixel independently, they slide small filters across the image to detect local patterns — like a magnifying glass scanning a photo.</p>
+
+  <div class="analogy">
+    <div class="analogy-icon">🔍</div>
+    <div class="analogy-body">
+      <strong>The Stamp Analogy</strong>
+      <p>Imagine a tiny stamp (the filter/kernel) that you slide across the entire image, pressing down at every position. Each stamp is designed to detect something specific — maybe a vertical edge, maybe a curve. As you go deeper in the network, the stamps get more complex: first they find edges, then shapes, then whole objects. You start with pixel values, and by the final layer you have "cat probability".</p>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div>
+      <div class="cb">
+        <span class="tag tag-blue">Convolution Layer</span>
+        <h4>The Core Operation</h4>
+        <p>A filter (kernel) — typically 3×3 or 5×5 — slides across the image with a stride. At each position, it multiplies the filter values by the overlapping pixel values and sums them. The result is a <strong>feature map</strong> — a new representation showing where a particular pattern was found.</p>
+        <p style="margin-top:8px;"><strong>Many filters = many feature maps.</strong> With 32 filters, the layer learns 32 different patterns simultaneously.</p>
+      </div>
+      <div class="cb yellow">
+        <span class="tag tag-yellow">Pooling Layer</span>
+        <h4>Shrink the Feature Map</h4>
+        <p>After convolution, a pooling layer reduces the spatial dimensions. <strong>Max pooling</strong> takes the maximum value in each small region — keeping the strongest signal and throwing away the rest. This makes the network less sensitive to exactly <em>where</em> in the image a feature appeared (spatial invariance).</p>
+      </div>
+    </div>
+    <div>
+      <div class="cb pink">
+        <span class="tag tag-pink">Architecture</span>
+        <h4>A Typical CNN Structure</h4>
+        <div class="steps" style="margin-top:8px;">
+          <div class="step"><div class="step-num">1</div><div class="step-body"><h4>Conv2D + ReLU</h4><p>Detect low-level features: edges, colours, gradients.</p></div></div>
+          <div class="step"><div class="step-num">2</div><div class="step-body"><h4>MaxPooling2D</h4><p>Halve the spatial dimensions. Reduce computation, gain invariance.</p></div></div>
+          <div class="step"><div class="step-num">3</div><div class="step-body"><h4>More Conv + Pool blocks</h4><p>Each block learns higher-level patterns: curves → shapes → parts → objects.</p></div></div>
+          <div class="step"><div class="step-num">4</div><div class="step-body"><h4>Flatten → Dense → Softmax</h4><p>Convert spatial features into a classification decision.</p></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><span class="code-title">cnn_image_classifier.py</span></div>
+    <pre><code><span class="kw">from</span> tensorflow.keras <span class="kw">import</span> layers, Sequential
+
+<span class="cm"># ── CNN for image classification (e.g. CIFAR-10) ──────────</span>
+model = <span class="fn">Sequential</span>([
+    <span class="cm"># Block 1: find basic edges and colours</span>
+    layers.<span class="fn">Conv2D</span>(<span class="nm">32</span>, (<span class="nm">3</span>,<span class="nm">3</span>), activation=<span class="st">'relu'</span>, padding=<span class="st">'same'</span>,
+                  input_shape=(<span class="nm">32</span>, <span class="nm">32</span>, <span class="nm">3</span>)),  <span class="cm"># 32 filters, 3×3 kernel, RGB</span>
+    layers.<span class="fn">BatchNormalization</span>(),
+    layers.<span class="fn">MaxPooling2D</span>((<span class="nm">2</span>,<span class="nm">2</span>)),             <span class="cm"># 32×32 → 16×16</span>
+    layers.<span class="fn">Dropout</span>(<span class="nm">0.25</span>),
+
+    <span class="cm"># Block 2: find more complex shapes</span>
+    layers.<span class="fn">Conv2D</span>(<span class="nm">64</span>, (<span class="nm">3</span>,<span class="nm">3</span>), activation=<span class="st">'relu'</span>, padding=<span class="st">'same'</span>),
+    layers.<span class="fn">BatchNormalization</span>(),
+    layers.<span class="fn">MaxPooling2D</span>((<span class="nm">2</span>,<span class="nm">2</span>)),             <span class="cm"># 16×16 → 8×8</span>
+    layers.<span class="fn">Dropout</span>(<span class="nm">0.25</span>),
+
+    <span class="cm"># Classifier head</span>
+    layers.<span class="fn">Flatten</span>(),                        <span class="cm"># 8×8×64 → 4096 numbers</span>
+    layers.<span class="fn">Dense</span>(<span class="nm">128</span>, activation=<span class="st">'relu'</span>),
+    layers.<span class="fn">Dropout</span>(<span class="nm">0.5</span>),
+    layers.<span class="fn">Dense</span>(<span class="nm">10</span>,  activation=<span class="st">'softmax'</span>)  <span class="cm"># 10 classes</span>
+])
+
+model.<span class="fn">compile</span>(optimizer=<span class="st">'adam'</span>,
+             loss=<span class="st">'sparse_categorical_crossentropy'</span>,
+             metrics=[<span class="st">'accuracy'</span>])
+
+<span class="cm"># ── Transfer Learning: use a pretrained model ─────────────</span>
+<span class="cm"># VGG16 already knows edges, textures, objects from ImageNet</span>
+base = keras.applications.<span class="fn">VGG16</span>(
+    weights=<span class="st">'imagenet'</span>,   <span class="cm"># start with pretrained weights</span>
+    include_top=<span class="nm">False</span>,    <span class="cm"># remove the original classifier head</span>
+    input_shape=(<span class="nm">224</span>, <span class="nm">224</span>, <span class="nm">3</span>)
+)
+base.trainable = <span class="nm">False</span>  <span class="cm"># freeze: don't retrain those weights</span>
+
+transfer_model = keras.<span class="fn">Sequential</span>([
+    base,
+    layers.<span class="fn">GlobalAveragePooling2D</span>(),
+    layers.<span class="fn">Dense</span>(<span class="nm">256</span>, activation=<span class="st">'relu'</span>),
+    layers.<span class="fn">Dense</span>(<span class="nm">5</span>, activation=<span class="st">'softmax'</span>)  <span class="cm"># your 5 custom classes</span>
+])</code></pre>
+  </div>
+
+  <div class="callout green">
+    <span class="callout-icon">🚀</span>
+    <div class="callout-body"><strong>Transfer Learning = Don't Start From Scratch.</strong> Models like VGG16, ResNet50, and EfficientNet were trained on millions of images and already know how to detect thousands of visual features. You add your own classifier head on top and train only that — saving weeks of compute and needing far less data. This is what real professionals do 90% of the time.</div>
+  </div>
+</div>
+</section>
+
+<div class="divider"></div>
+
+<!-- RNN / LSTM -->
+<section id="rnn">
+<div class="container">
+  <div class="section-label">Module 6</div>
+  <h2 class="section-title">RNNs & LSTMs — Networks With Memory</h2>
+  <p class="section-sub">Standard neural networks treat every input independently. But language, audio, and time series have <em>order</em> — word 5 depends on words 1–4. RNNs solve this by maintaining a hidden state that carries information from one timestep to the next.</p>
+
+  <div class="analogy">
+    <div class="analogy-icon">📖</div>
+    <div class="analogy-body">
+      <strong>The Reading Analogy</strong>
+      <p>When you read a sentence, you don't forget the first word by the time you reach the last. Your brain maintains context — "She picked up the bat and..." — you remember whether we're talking about baseball or the animal. An RNN does the same thing: it carries a "memory" (hidden state) forward through the sequence, updating it at each word. A plain RNN forgets older context. An LSTM remembers what matters and forgets what doesn't.</p>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div>
+      <div class="cb">
+        <span class="tag tag-blue">RNN</span>
+        <h4>How a Recurrent Neural Network Works</h4>
+        <p>At each timestep t, the RNN receives the current input Xₜ AND the hidden state from the previous step hₜ₋₁. It combines them to produce a new hidden state hₜ and an output.</p>
+        <div class="formula">hₜ = tanh( Wₕ·hₜ₋₁ + Wₓ·xₜ + b )</div>
+        <p style="margin-top:8px;"><strong>Problem:</strong> Simple RNNs suffer badly from vanishing gradients. They forget things that happened many steps ago. "She went to the store yesterday and bought..." — by "bought" a plain RNN has mostly forgotten "She".</p>
+      </div>
+      <div class="cb red">
+        <span class="tag tag-red">Vanishing Gradients in RNNs</span>
+        <h4>Why Plain RNNs Forget Long Sequences</h4>
+        <p>In backpropagation through time (BPTT), gradients are multiplied together for every timestep. With 100 timesteps, you multiply 100 small numbers together — the gradient becomes essentially zero for the early timesteps, so the early part of the sequence has almost no influence on the weights.</p>
+      </div>
+    </div>
+    <div>
+      <div class="cb yellow">
+        <span class="tag tag-yellow">LSTM</span>
+        <h4>Long Short-Term Memory — The Solution</h4>
+        <p>LSTM adds a <strong>cell state</strong> — a dedicated memory highway that runs alongside the hidden state. Three gates control what enters, leaves, and is output from this memory:</p>
+        <ul>
+          <li><strong>Forget gate:</strong> "What should I delete from memory?" (e.g., once the subject changes, forget the old subject)</li>
+          <li><strong>Input gate:</strong> "What new information should I store?" (e.g., store the new subject)</li>
+          <li><strong>Output gate:</strong> "What should I share with the next layer right now?"</li>
+        </ul>
+        <p style="margin-top:8px;">This architecture lets LSTMs remember relevant information across hundreds of timesteps without vanishing gradients.</p>
+      </div>
+      <div class="cb green">
+        <span class="tag tag-green">GRU</span>
+        <h4>Gated Recurrent Unit — Simpler than LSTM</h4>
+        <p>GRU is a simplified version of LSTM with only 2 gates (reset and update). Fewer parameters = faster training, often similar performance. A good choice when training data is limited or speed matters. Try both and see which performs better on your problem.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><span class="code-title">rnn_lstm.py — Sequence Classification and Time Series Forecasting</span></div>
+    <pre><code><span class="kw">from</span> tensorflow.keras <span class="kw">import</span> layers, Sequential
+
+<span class="cm"># ── LSTM for sequence classification (e.g. sentiment) ─────</span>
+<span class="cm"># Input shape: (batch_size, timesteps, features)</span>
+model = <span class="fn">Sequential</span>([
+    layers.<span class="fn">LSTM</span>(<span class="nm">64</span>, return_sequences=<span class="nm">True</span>,  <span class="cm"># keep ALL timestep outputs</span>
+                input_shape=(<span class="nm">100</span>, <span class="nm">1</span>)),        <span class="cm"># 100 timesteps, 1 feature</span>
+    layers.<span class="fn">LSTM</span>(<span class="nm">32</span>, return_sequences=<span class="nm">False</span>),   <span class="cm"># only final timestep output</span>
+    layers.<span class="fn">Dense</span>(<span class="nm">1</span>, activation=<span class="st">'sigmoid'</span>)     <span class="cm"># binary output</span>
+])
+
+<span class="cm"># ── return_sequences explained: ───────────────────────────</span>
+<span class="cm"># return_sequences=True  → output at EVERY timestep (for stacking LSTMs)</span>
+<span class="cm"># return_sequences=False → output only at FINAL timestep (for classification)</span>
+
+<span class="cm"># ── Bidirectional LSTM (reads sequence forwards AND backwards) ─</span>
+bidir_model = <span class="fn">Sequential</span>([
+    layers.<span class="fn">Bidirectional</span>(
+        layers.<span class="fn">LSTM</span>(<span class="nm">64</span>),
+        input_shape=(<span class="nm">100</span>, <span class="nm">1</span>)
+    ),
+    layers.<span class="fn">Dense</span>(<span class="nm">1</span>, activation=<span class="st">'sigmoid'</span>)
+])
+
+<span class="cm"># ── GRU — lighter and often equally good as LSTM ──────────</span>
+gru_model = <span class="fn">Sequential</span>([
+    layers.<span class="fn">GRU</span>(<span class="nm">64</span>, return_sequences=<span class="nm">True</span>, input_shape=(<span class="nm">100</span>, <span class="nm">1</span>)),
+    layers.<span class="fn">GRU</span>(<span class="nm">32</span>),
+    layers.<span class="fn">Dense</span>(<span class="nm">1</span>)  <span class="cm"># regression: predict next value</span>
+])</code></pre>
+  </div>
+</div>
+</section>
+
+<div class="divider"></div>
+
+<!-- AUTOENCODERS -->
+<section id="autoencoders">
+<div class="container">
+  <div class="section-label">Module 7</div>
+  <h2 class="section-title">Autoencoders</h2>
+  <p class="section-sub">An autoencoder is a network that learns to compress data into a tiny representation, then reconstruct the original from that compression. It's trained entirely unsupervised — no labels needed.</p>
+
+  <div class="analogy">
+    <div class="analogy-icon">📷</div>
+    <div class="analogy-body">
+      <strong>The Polaroid Camera Analogy</strong>
+      <p>Imagine squeezing a full HD photo through a tiny tunnel only 10 pixels wide, then expanding it back to HD on the other side. To reconstruct it accurately, the 10-pixel "summary" must capture the most essential information. That summary is the <strong>latent space</strong> — a compressed code that represents the data's core essence. The squeezing half is the encoder. The expanding half is the decoder.</p>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div>
+      <div class="cb">
+        <span class="tag tag-blue">Architecture</span>
+        <h4>Encoder → Bottleneck → Decoder</h4>
+        <p><strong>Encoder:</strong> A series of layers that progressively compress the input into a smaller representation. e.g., 784 → 256 → 64 → 16 dimensions.<br><br>
+        <strong>Bottleneck (Latent Space):</strong> The smallest, most compressed representation. This is the "summary" of the input.<br><br>
+        <strong>Decoder:</strong> Mirrors the encoder, expanding the bottleneck back to the original dimensions. e.g., 16 → 64 → 256 → 784.</p>
+      </div>
+      <div class="cb yellow">
+        <span class="tag tag-yellow">Loss Function</span>
+        <h4>Reconstruction Loss</h4>
+        <p>The autoencoder is trained to minimise the difference between the input and the reconstructed output — this is called <strong>reconstruction loss</strong> (typically MSE for images, binary cross-entropy for binary data). There are no class labels — the "label" is the input itself.</p>
+        <div class="formula">Loss = ||X − X̂||²  (input vs reconstructed output)</div>
+      </div>
+    </div>
+    <div>
+      <div class="cb pink">
+        <span class="tag tag-pink">Applications</span>
+        <h4>What Autoencoders Are Actually Used For</h4>
+        <ul>
+          <li><strong>Anomaly detection:</strong> Normal data reconstructs well. Anomalies (fraud, defects) reconstruct poorly — high reconstruction error = anomaly.</li>
+          <li><strong>Denoising:</strong> Train on noisy→clean pairs. The network learns to ignore noise.</li>
+          <li><strong>Dimensionality reduction:</strong> Non-linear alternative to PCA.</li>
+          <li><strong>Image compression:</strong> Encode images to a compact code, decode on demand.</li>
+          <li><strong>Generative models:</strong> VAE (Variational Autoencoder) can generate new realistic data by sampling the latent space.</li>
+        </ul>
+      </div>
+      <div class="cb green">
+        <span class="tag tag-green">VAE</span>
+        <h4>Variational Autoencoder — Generating New Data</h4>
+        <p>A standard autoencoder maps each input to a single point in latent space. A VAE maps each input to a <em>distribution</em> (mean and variance). During training, it samples from this distribution, forcing the latent space to be smooth and continuous. You can then sample random points from the latent space to generate brand new, realistic data that was never in the training set.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><span class="code-title">autoencoder.py</span></div>
+    <pre><code><span class="kw">from</span> tensorflow.keras <span class="kw">import</span> layers, Model, Input
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+
+<span class="cm"># ── Build autoencoder using functional API ────────────────</span>
+input_img = <span class="fn">Input</span>(shape=(<span class="nm">784</span>,))  <span class="cm"># 28×28 flattened MNIST image</span>
+
+<span class="cm"># Encoder: compress 784 → 32</span>
+encoded = layers.<span class="fn">Dense</span>(<span class="nm">256</span>, activation=<span class="st">'relu'</span>)(input_img)
+encoded = layers.<span class="fn">Dense</span>(<span class="nm">64</span>,  activation=<span class="st">'relu'</span>)(encoded)
+encoded = layers.<span class="fn">Dense</span>(<span class="nm">32</span>,  activation=<span class="st">'relu'</span>)(encoded)  <span class="cm"># bottleneck</span>
+
+<span class="cm"># Decoder: expand 32 → 784</span>
+decoded = layers.<span class="fn">Dense</span>(<span class="nm">64</span>,  activation=<span class="st">'relu'</span>)(encoded)
+decoded = layers.<span class="fn">Dense</span>(<span class="nm">256</span>, activation=<span class="st">'relu'</span>)(decoded)
+decoded = layers.<span class="fn">Dense</span>(<span class="nm">784</span>, activation=<span class="st">'sigmoid'</span>)(decoded)  <span class="cm"># output: pixels 0–1</span>
+
+autoencoder = <span class="fn">Model</span>(input_img, decoded)
+autoencoder.<span class="fn">compile</span>(optimizer=<span class="st">'adam'</span>, loss=<span class="st">'mse'</span>)
+
+<span class="cm"># Note: we train with X_train as BOTH input AND target (no labels!)</span>
+autoencoder.<span class="fn">fit</span>(X_train, X_train, epochs=<span class="nm">50</span>, batch_size=<span class="nm">256</span>,
+               validation_data=(X_test, X_test))
+
+<span class="cm"># ── Anomaly detection using reconstruction error ──────────</span>
+reconstructions = autoencoder.<span class="fn">predict</span>(X_test)
+recon_error = np.<span class="fn">mean</span>(np.<span class="fn">square</span>(X_test - reconstructions), axis=<span class="nm">1</span>)
+threshold = np.<span class="fn">percentile</span>(recon_error, <span class="nm">95</span>)  <span class="cm"># top 5% = anomalies</span>
+anomalies  = X_test[recon_error > threshold]
+<span class="fn">print</span>(<span class="st">f"Anomalies detected: </span><span class="va">{len(anomalies)}</span><span class="st">"</span>)</code></pre>
+  </div>
+</div>
+</section>
+
+<div class="divider"></div>
+
+<!-- GANs -->
+<section id="gans">
+<div class="container">
+  <div class="section-label">Module 8</div>
+  <h2 class="section-title">Generative Adversarial Networks (GANs)</h2>
+  <p class="section-sub">GANs pit two neural networks against each other in a competition. One generates fake data, the other tries to spot the fakes. Through this adversarial battle, both get better — until the fakes become indistinguishable from reality.</p>
+
+  <div class="analogy">
+    <div class="analogy-icon">🖼️</div>
+    <div class="analogy-body">
+      <strong>The Art Forger vs Art Detective</strong>
+      <p>The <strong>Generator</strong> is an art forger trying to paint fake Picassos convincingly enough to fool the expert. The <strong>Discriminator</strong> is an art detective whose job is to tell real from fake. As the detective gets better at spotting fakes, the forger must improve. As the forger improves, the detective must get even sharper. After thousands of rounds, the forger produces near-perfect Picassos. That's a GAN.</p>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div>
+      <div class="cb">
+        <span class="tag tag-blue">The Generator</span>
+        <h4>Makes Fake Data From Random Noise</h4>
+        <p>The Generator takes a random noise vector (e.g., 100 random numbers) as input and outputs something that looks like real data (e.g., a 64×64 image of a face). It never sees real data directly — it only gets feedback from the Discriminator telling it "that wasn't convincing."</p>
+      </div>
+      <div class="cb pink">
+        <span class="tag tag-pink">The Discriminator</span>
+        <h4>Tells Real From Fake</h4>
+        <p>The Discriminator receives either a real data sample or a generated (fake) one. It outputs a probability: 1.0 = "definitely real", 0.0 = "definitely fake." It's trained with real labels — the real data is labelled 1, the generated data is labelled 0.</p>
+      </div>
+    </div>
+    <div>
+      <div class="cb yellow">
+        <span class="tag tag-yellow">Training Loop</span>
+        <h4>How GANs Are Trained</h4>
+        <div class="steps" style="margin-top:6px;">
+          <div class="step"><div class="step-num">1</div><div class="step-body"><h4>Train Discriminator</h4><p>Show it real samples (label=1) and generated fakes (label=0). Update its weights to get better at telling them apart.</p></div></div>
+          <div class="step"><div class="step-num">2</div><div class="step-body"><h4>Train Generator</h4><p>Generate fake samples. Freeze the Discriminator. Label the fakes as 1 (lie to the system). The Generator's loss is "how convincingly did I fool the Discriminator?" Update only Generator weights.</p></div></div>
+          <div class="step"><div class="step-num">3</div><div class="step-body"><h4>Repeat</h4><p>Keep alternating. When Discriminator is ~50% accurate (random guessing), the Generator is producing indistinguishable data.</p></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout warn">
+    <span class="callout-icon">⚠️</span>
+    <div class="callout-body"><strong>GANs are notoriously hard to train.</strong> Common problems: <strong>Mode collapse</strong> (Generator produces only one type of output), <strong>training instability</strong> (one network dominates the other), and <strong>vanishing gradients</strong>. Techniques like Wasserstein GANs (WGANs), spectral normalisation, and label smoothing help stabilise training. For beginners: use a well-known architecture like DCGAN as your starting point.</div>
+  </div>
+</div>
+</section>
+
+<div class="divider"></div>
+
+<!-- REINFORCEMENT LEARNING -->
+<section id="rl">
+<div class="container">
+  <div class="section-label">Module 9</div>
+  <h2 class="section-title">Reinforcement Learning</h2>
+  <p class="section-sub">Reinforcement Learning is completely different from supervised learning. There are no labeled examples. An <em>agent</em> learns by trying things in an environment and receiving rewards or penalties. It figures out, through trial and error, which actions lead to the most reward.</p>
+
+  <div class="analogy">
+    <div class="analogy-icon">🐕</div>
+    <div class="analogy-body">
+      <strong>Training a Dog</strong>
+      <p>When you train a dog to sit, you don't hand it a manual of joint angles. You say "sit," it tries something, and when it gets it right — treat! Over time it learns that a specific action (sitting) in a specific context (you saying "sit") leads to a reward. Reinforcement Learning works identically: agent takes action, environment responds, reward (or penalty) is given, agent updates its strategy.</p>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div>
+      <div class="cb">
+        <span class="tag tag-blue">Core Vocabulary</span>
+        <h4>The 5 Key RL Terms You Must Know</h4>
+        <ul>
+          <li><strong>Agent:</strong> The learner / decision maker (the AI)</li>
+          <li><strong>Environment:</strong> The world the agent operates in (game, robot, stock market)</li>
+          <li><strong>State (S):</strong> The current situation the agent observes</li>
+          <li><strong>Action (A):</strong> What the agent can do (move left, buy stock, turn wheel)</li>
+          <li><strong>Reward (R):</strong> A number (positive or negative) the environment gives after each action. The agent's goal is to maximise total reward over time.</li>
+          <li><strong>Policy (π):</strong> The agent's strategy — a mapping from states to actions</li>
+        </ul>
+      </div>
+      <div class="cb yellow">
+        <span class="tag tag-yellow">The RL Loop</span>
+        <h4>How an Agent Learns Over Time</h4>
+        <div class="steps" style="margin-top:6px;">
+          <div class="step"><div class="step-num">1</div><div class="step-body"><h4>Observe state</h4><p>Agent sees the current state of the environment (e.g., game screen pixels)</p></div></div>
+          <div class="step"><div class="step-num">2</div><div class="step-body"><h4>Choose action</h4><p>Based on policy (initially random, later learned)</p></div></div>
+          <div class="step"><div class="step-num">3</div><div class="step-body"><h4>Receive reward + new state</h4><p>Environment responds: gives reward and transitions to next state</p></div></div>
+          <div class="step"><div class="step-num">4</div><div class="step-body"><h4>Update policy</h4><p>Agent updates its internal model to favour actions that led to higher reward</p></div></div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="cb pink">
+        <span class="tag tag-pink">Q-Learning</span>
+        <h4>Learning the Value of State-Action Pairs</h4>
+        <p>Q-Learning learns a Q-table: a lookup of "if I'm in state S and take action A, what total future reward can I expect?" The Q-value accounts for both immediate and future rewards via the <strong>discount factor γ</strong>.</p>
+        <div class="formula">Q(s,a) ← Q(s,a) + α[r + γ·max Q(s',a') − Q(s,a)]</div>
+        <p style="margin-top:8px;"><strong>α:</strong> Learning rate (how fast to update)<br>
+        <strong>γ (gamma):</strong> Discount factor — how much to value future rewards vs immediate ones (0=greedy, 1=far-sighted)<br>
+        <strong>Exploration vs exploitation:</strong> ε-greedy strategy — sometimes try random actions (explore), sometimes use best known action (exploit)</p>
+      </div>
+      <div class="cb green">
+        <span class="tag tag-green">Deep Q-Network (DQN)</span>
+        <h4>Q-Learning at Scale with Neural Networks</h4>
+        <p>Q-tables are too large for complex environments (you can't enumerate all possible Atari game states). DQN replaces the table with a neural network that takes the state as input and outputs Q-values for each action. DeepMind used DQN to beat human experts at 49 Atari games using only raw pixel inputs.</p>
+        <p style="margin-top:8px;"><strong>Experience replay:</strong> Store past transitions and sample them randomly — breaks correlation and stabilises training.<br>
+        <strong>Target network:</strong> A separate, slowly-updated copy of the Q-network to provide stable targets.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div><span class="code-title">q_learning_and_dqn.py</span></div>
+    <pre><code><span class="kw">import</span> numpy <span class="kw">as</span> np
+
+<span class="cm"># ── Simple Q-Learning on a Grid World ────────────────────</span>
+n_states  = <span class="nm">16</span>     <span class="cm"># 4×4 grid</span>
+n_actions = <span class="nm">4</span>      <span class="cm"># up, down, left, right</span>
+Q = np.<span class="fn">zeros</span>((n_states, n_actions))  <span class="cm"># start with all Q-values = 0</span>
+
+alpha   = <span class="nm">0.1</span>   <span class="cm"># learning rate</span>
+gamma   = <span class="nm">0.9</span>   <span class="cm"># discount factor (0.9 = value future rewards highly)</span>
+epsilon = <span class="nm">0.1</span>   <span class="cm"># exploration rate (10% random actions)</span>
+
+<span class="kw">for</span> episode <span class="kw">in</span> <span class="fn">range</span>(<span class="nm">1000</span>):
+    state = env.<span class="fn">reset</span>()
+    done  = <span class="nm">False</span>
+
+    <span class="kw">while not</span> done:
+        <span class="cm"># ε-greedy: explore or exploit?</span>
+        <span class="kw">if</span> np.random.<span class="fn">random</span>() < epsilon:
+            action = env.action_space.<span class="fn">sample</span>()      <span class="cm"># explore: random</span>
+        <span class="kw">else</span>:
+            action = np.<span class="fn">argmax</span>(Q[state])            <span class="cm"># exploit: best known</span>
+
+        next_state, reward, done, _ = env.<span class="fn">step</span>(action)
+
+        <span class="cm"># Q-learning update rule</span>
+        Q[state, action] += alpha * (
+            reward + gamma * np.<span class="fn">max</span>(Q[next_state]) - Q[state, action]
+        )
+        state = next_state
+
+<span class="cm"># ── DQN with Keras ────────────────────────────────────────</span>
+<span class="kw">from</span> tensorflow.keras <span class="kw">import</span> layers, Sequential
+
+<span class="cm"># Neural network to approximate Q(state, action) for all actions</span>
+dqn = <span class="fn">Sequential</span>([
+    layers.<span class="fn">Dense</span>(<span class="nm">64</span>, activation=<span class="st">'relu'</span>, input_shape=(state_size,)),
+    layers.<span class="fn">Dense</span>(<span class="nm">64</span>, activation=<span class="st">'relu'</span>),
+    layers.<span class="fn">Dense</span>(n_actions, activation=<span class="st">'linear'</span>)  <span class="cm"># one Q-value per action</span>
+])
+dqn.<span class="fn">compile</span>(optimizer=<span class="st">'adam'</span>, loss=<span class="st">'mse'</span>)</code></pre>
+  </div>
+</div>
+</section>
+
+<div class="divider"></div>
+
+<!-- QUIZ -->
+<section id="quiz">
+<div class="container">
+  <div class="section-label">Test Your Knowledge</div>
+  <h2 class="section-title">Course 5 Quiz</h2>
+  <p class="section-sub">20 questions across every topic. The explanations are written to teach — read every one even when you get it right.</p>
+
+  <div class="quiz-progress">
+    <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    <span class="quiz-counter" id="quizCounter">0 / 20</span>
+  </div>
+
+  <div id="quizContainer">
+
+    <div class="question-card active" data-q="0">
+      <div class="q-meta"><span class="q-num">Q01</span><span class="q-topic">Neural Networks</span></div>
+      <div class="q-text">Why can't a neural network learn complex patterns using only linear transformations — even with 100 layers?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>Because 100 layers requires too much memory for gradient calculations</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>Because stacking linear layers is mathematically identical to a single linear layer — activation functions are what introduce the non-linearity needed to learn complex patterns</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>Because linear layers can only process images, not structured data</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>Because linear functions require too many parameters per layer</button>
+      </div>
+      <div class="explanation">✅ <strong>Multiple linear layers collapse into one.</strong> Mathematically, W₃·(W₂·(W₁·x)) = (W₃W₂W₁)·x — it's still just one big matrix multiplication. No amount of stacking linear layers adds expressive power. Activation functions (ReLU, sigmoid, tanh) introduce non-linearity at every layer, which is what allows neural networks to approximate any function. Without activations, even a 1000-layer network is equivalent to logistic regression.</div>
+    </div>
+
+    <div class="question-card" data-q="1">
+      <div class="q-meta"><span class="q-num">Q02</span><span class="q-topic">Backpropagation</span></div>
+      <div class="q-text">In plain English, what does backpropagation actually calculate and what does it update?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>It calculates the accuracy of each layer and updates the biases to match the target</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>It calculates how much each weight contributed to the prediction error, then updates every weight to reduce that error — starting from the output and working backwards through the network</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>It calculates the forward pass error and removes weights below a threshold</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>It propagates new training examples backwards through the layers to verify correctness</button>
+      </div>
+      <div class="explanation">✅ <strong>Backprop = blame assignment + weight adjustment.</strong> After a forward pass produces a wrong prediction, backpropagation uses the chain rule to calculate the gradient of the loss with respect to every single weight in the network — essentially "who is most responsible for this error?" Then gradient descent uses those gradients to nudge every weight in the direction that reduces the error. This happens thousands of times until the loss converges.</div>
+    </div>
+
+    <div class="question-card" data-q="2">
+      <div class="q-meta"><span class="q-num">Q03</span><span class="q-topic">Activation Functions</span></div>
+      <div class="q-text">You're building a network to classify emails into 5 categories. What activation function should you use in the output layer?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>ReLU — it works for all layer types</button>
+        <button class="option" data-correct="false"><span class="opt-letter">B</span>Sigmoid — it outputs a probability for each class</button>
+        <button class="option" data-correct="true"><span class="opt-letter">C</span>Softmax — it outputs 5 probabilities that sum to exactly 1, representing the probability of each class</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>Linear — no activation needed for classification tasks</button>
+      </div>
+      <div class="explanation">✅ <strong>Softmax for multi-class output.</strong> Softmax exponentiates each output and divides by the sum — so all 5 outputs sum to exactly 1.0. They can be interpreted as "probability this email is Category 1, 2, 3, 4, or 5". Sigmoid would give independent probabilities for each class (not summing to 1) — that's for multi-label classification where an email could be in multiple categories simultaneously. ReLU is for hidden layers. Linear is for regression.</div>
+    </div>
+
+    <div class="question-card" data-q="3">
+      <div class="q-meta"><span class="q-num">Q04</span><span class="q-topic">Regularization</span></div>
+      <div class="q-text">Your training accuracy is 99% but validation accuracy is 62%. What is happening and which technique would you add first?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>Underfitting — add more layers and train longer</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>Overfitting — add Dropout and/or Early Stopping to prevent the model from memorising training data</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>Data leakage — the training and validation sets overlap</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>Vanishing gradients — early layers aren't learning properly</button>
+      </div>
+      <div class="explanation">✅ <strong>Classic overfitting signature: huge train/validation gap.</strong> The model has memorised the training data instead of learning generalisable patterns. Add Dropout (randomly deactivates neurons so the model can't memorise specific patterns), EarlyStopping (stop before it overfits further), and possibly L2 regularisation. You might also collect more training data, use data augmentation, or reduce model complexity.</div>
+    </div>
+
+    <div class="question-card" data-q="4">
+      <div class="q-meta"><span class="q-num">Q05</span><span class="q-topic">CNNs</span></div>
+      <div class="q-text">In a CNN, what is a "filter" (also called a kernel), and what does it produce when applied to an image?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>A filter removes noisy pixels from the image before the network sees them</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>A small matrix of learned weights that slides across the image, producing a feature map showing where a specific pattern (like an edge or texture) was detected</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>A layer that connects every pixel to every neuron, similar to a Dense layer</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>A preprocessing step that resizes the image to a standard dimension</button>
+      </div>
+      <div class="explanation">✅ <strong>A filter = a pattern detector.</strong> A 3×3 filter has 9 learnable weights. As it slides across the image (at each of the image's positions), it multiplies its values by the underlying pixels and sums the result. The output — called a feature map — is high wherever that pattern was found and low where it wasn't. With 32 filters, a CNN layer learns 32 different patterns simultaneously. Early filters find simple edges; deeper filters find complex shapes and object parts.</div>
+    </div>
+
+    <div class="question-card" data-q="5">
+      <div class="q-meta"><span class="q-num">Q06</span><span class="q-topic">CNNs</span></div>
+      <div class="q-text">What is Transfer Learning and why is it almost always better than training a CNN from scratch?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>Transfer Learning copies weights from one layer to another within the same model</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>Transfer Learning reuses a model pre-trained on a large dataset (like ImageNet), replacing only the final classifier. It requires far less data and training time since the base already knows how to detect visual features</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>Transfer Learning converts a CNN trained on images into one that works on text</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>Transfer Learning transfers data between training and test sets for better generalisation</button>
+      </div>
+      <div class="explanation">✅ <strong>Reuse millions of dollars of pre-trained knowledge.</strong> VGG16, ResNet50, and EfficientNet were trained on ImageNet (1.2 million images, 1000 classes) by teams with enormous compute budgets. They already know how to detect edges, textures, shapes, and objects. You freeze those weights, add your own small classifier head (Dense + Softmax), and train only the head on your much smaller dataset. Works brilliantly with as few as a few hundred images per class.</div>
+    </div>
+
+    <div class="question-card" data-q="6">
+      <div class="q-meta"><span class="q-num">Q07</span><span class="q-topic">RNNs</span></div>
+      <div class="q-text">Why do plain RNNs struggle with long sentences, and what does LSTM add to solve this?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>Plain RNNs can't process variable-length inputs; LSTM adds padding to make them equal length</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>Plain RNNs suffer from vanishing gradients so early words are effectively forgotten; LSTM adds a cell state with gates that explicitly decide what to remember, update, and forget</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>Plain RNNs process words in parallel; LSTM processes them sequentially which handles long sentences better</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>Plain RNNs only work on numerical data; LSTM handles text through word embeddings</button>
+      </div>
+      <div class="explanation">✅ <strong>LSTM solves vanishing gradients with gated memory.</strong> In a plain RNN, gradients from early timesteps become vanishingly small by the time backprop reaches them — so the word at position 1 barely influences the loss, meaning the model can't learn long-range dependencies. LSTM's three gates (forget, input, output) control a separate cell state that can carry information unchanged across many timesteps, effectively maintaining a "phone wire" of memory that bypasses the vanishing gradient issue.</div>
+    </div>
+
+    <div class="question-card" data-q="7">
+      <div class="q-meta"><span class="q-num">Q08</span><span class="q-topic">LSTMs</span></div>
+      <div class="q-text">In a Keras LSTM layer, what does setting return_sequences=True vs return_sequences=False mean?</div>
+      <div class="options">
+        <button class="option" data-correct="true"><span class="opt-letter">A</span>True returns the LSTM output at every timestep (needed when stacking LSTMs); False returns only the output at the final timestep (used for classification)</button>
+        <button class="option" data-correct="false"><span class="opt-letter">B</span>True makes the network bidirectional; False makes it unidirectional</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>True returns training sequences; False returns prediction sequences</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>True passes the sequence to the next LSTM layer; False stops the network after one LSTM layer</button>
+      </div>
+      <div class="explanation">✅ <strong>return_sequences controls what shape you get out.</strong> With True, you get an output at every single timestep — shape (batch, timesteps, units). This is required when you're stacking LSTM layers, because the next LSTM needs a full sequence to process. With False (the default), you only get the output at the very last timestep — shape (batch, units). Use this when the LSTM feeds directly into a Dense classification layer and you just need one final "summary" of the sequence.</div>
+    </div>
+
+    <div class="question-card" data-q="8">
+      <div class="q-meta"><span class="q-num">Q09</span><span class="q-topic">Autoencoders</span></div>
+      <div class="q-text">How are autoencoders trained, and why don't they need labelled data?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>They are trained with class labels like normal classifiers, but the labels are generated automatically by a teacher model</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>The input IS the label — the network is trained to reconstruct its own input, so no external labels are needed. Loss = difference between input and reconstructed output</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>They are trained using reinforcement learning rewards based on reconstruction quality</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>They require labels during training but can make label-free predictions at inference time</button>
+      </div>
+      <div class="explanation">✅ <strong>Self-supervised: input = target.</strong> You feed in an image and the autoencoder tries to output the same image. The loss is the reconstruction error (e.g., MSE between input pixels and output pixels). No human labelling needed — the data provides its own supervision. This is why autoencoders are great for domains with lots of unlabelled data. The useful representation is the bottleneck — the compressed code the network is forced to create in order to reconstruct accurately.</div>
+    </div>
+
+    <div class="question-card" data-q="9">
+      <div class="q-meta"><span class="q-num">Q10</span><span class="q-topic">Autoencoders</span></div>
+      <div class="q-text">You train an autoencoder on normal server log data. At inference time, a malicious intrusion is present. How do you detect it?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>The autoencoder will classify the intrusion as a known attack type based on its training</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>The autoencoder will have a high reconstruction error on the intrusion, since it only learned to reconstruct normal patterns — high error = anomaly</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>You set a threshold on the bottleneck activation values to flag unusual compressions</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>The decoder will refuse to reconstruct inputs too different from its training data</button>
+      </div>
+      <div class="explanation">✅ <strong>Anomaly detection via reconstruction error.</strong> The autoencoder learned to compress and reconstruct normal server activity. When it sees malicious activity (a pattern it never encountered during training), it can't reconstruct it well — the reconstruction error is unusually high. Set a threshold (e.g., 95th percentile of normal reconstruction errors) and flag anything above it as an anomaly. This is used in fraud detection, network security, predictive maintenance, and quality control.</div>
+    </div>
+
+    <div class="question-card" data-q="10">
+      <div class="q-meta"><span class="q-num">Q11</span><span class="q-topic">GANs</span></div>
+      <div class="q-text">What are the two networks in a GAN and what does each one do?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>Encoder and Decoder — they compress and reconstruct real data</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>Generator (creates fake data from random noise) and Discriminator (tries to tell real data from fake data) — they compete, driving each other to improve</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>Predictor and Corrector — predictor makes a guess, corrector refines it</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>Teacher and Student — teacher creates labelled examples for the student to learn from</button>
+      </div>
+      <div class="explanation">✅ <strong>Generator vs Discriminator — adversarial competition.</strong> The Generator takes random noise → outputs realistic-looking fake data (images, audio, text). The Discriminator takes an input (real OR fake) → outputs 0 (fake) or 1 (real). The Generator is trained to maximise the Discriminator's error (fool it). The Discriminator is trained to minimise its error (catch fakes). This competition drives both networks to improve until the Generator produces indistinguishable fakes.</div>
+    </div>
+
+    <div class="question-card" data-q="11">
+      <div class="q-meta"><span class="q-num">Q12</span><span class="q-topic">GANs</span></div>
+      <div class="q-text">What is "mode collapse" in a GAN and why is it a problem?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>The Discriminator always predicts "real" so it stops discriminating</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>The Generator learns to produce only one type of output (e.g., always the same face) — it finds one "trick" that fools the Discriminator and stops exploring other possibilities</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>Both networks collapse to random weights and stop learning</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>The GAN's loss function collapses to zero, halting all updates</button>
+      </div>
+      <div class="explanation">✅ <strong>Mode collapse = lack of diversity in outputs.</strong> The Generator discovers one output that consistently fools the Discriminator and gets "stuck" — producing only that one type of output forever, ignoring the full diversity of the training data. Imagine asking it to generate faces and it only produces blonde women in their 30s. This happens because the Discriminator can't penalise the Generator for lack of diversity, only for looking fake. Solutions: Wasserstein loss, mini-batch discrimination, progressive growing.</div>
+    </div>
+
+    <div class="question-card" data-q="12">
+      <div class="q-meta"><span class="q-num">Q13</span><span class="q-topic">Reinforcement Learning</span></div>
+      <div class="q-text">What are the 5 core components of a Reinforcement Learning problem?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>Input, weights, activation, loss, output</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>Agent, Environment, State, Action, and Reward</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>Encoder, Decoder, Bottleneck, Loss, Reconstruction</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>Features, Labels, Model, Prediction, Gradient</button>
+      </div>
+      <div class="explanation">✅ <strong>The RL vocabulary: Agent-Environment-State-Action-Reward.</strong> Agent = the learner (your AI). Environment = the world it operates in. State = the current situation the agent observes. Action = what the agent can do. Reward = feedback from the environment (positive or negative number). The agent's goal is to choose actions that maximise the total accumulated reward over time. The Policy (π) is what maps states to actions — learning the best policy is the whole point of RL.</div>
+    </div>
+
+    <div class="question-card" data-q="13">
+      <div class="q-meta"><span class="q-num">Q14</span><span class="q-topic">Reinforcement Learning</span></div>
+      <div class="q-text">In Q-Learning, what does the discount factor γ (gamma) control?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>How fast the agent explores new states (exploration rate)</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>How much the agent values future rewards vs immediate rewards. γ=1 means long-term reward matters equally to immediate reward. γ=0 means the agent is completely short-sighted</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>The learning rate — how quickly Q-values are updated after each action</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>The penalty applied when the agent takes an incorrect action</button>
+      </div>
+      <div class="explanation">✅ <strong>γ = how patient the agent is.</strong> Q-learning calculates Q(s,a) = immediate reward + γ × max future reward. With γ = 0.99, a reward 10 steps away is still worth 0.99¹⁰ ≈ 0.9 of its face value — the agent plans ahead. With γ = 0, the agent only cares about the next immediate reward and ignores all future consequences (greedy/shortsighted). Most real RL problems use γ = 0.9 to 0.99 — enough future-awareness to make good long-term plans.</div>
+    </div>
+
+    <div class="question-card" data-q="14">
+      <div class="q-meta"><span class="q-num">Q15</span><span class="q-topic">Backprop</span></div>
+      <div class="q-text">What causes the vanishing gradient problem in deep networks and what is the most common fix?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>Large learning rates cause gradients to overshoot zero; fix by reducing the learning rate</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>Sigmoid and tanh activations squash outputs to small ranges, so multiplying many small gradients together during backprop results in near-zero updates for early layers; fix by using ReLU activations and Batch Normalisation</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>Too many neurons cause gradients to average out to zero; fix by using Dropout</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>The chain rule produces negative gradients in deeper layers; fix by using absolute value of gradients</button>
+      </div>
+      <div class="explanation">✅ <strong>Sigmoid/tanh crush the gradients; ReLU stops the crushing.</strong> Sigmoid squashes any input into (0, 1) — the gradient is always less than 0.25. Multiply 50 of those together: 0.25⁵⁰ ≈ 10⁻³⁰. Completely vanished. Early layers receive almost no learning signal. ReLU (max(0,x)) has a gradient of exactly 1 for positive inputs, so gradients can flow unchanged through many layers. Batch Normalisation also helps by keeping activations in a healthy range throughout training.</div>
+    </div>
+
+    <div class="question-card" data-q="15">
+      <div class="q-meta"><span class="q-num">Q16</span><span class="q-topic">Regularization</span></div>
+      <div class="q-text">What does Dropout do during training, and what happens to dropout at test/inference time?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>Dropout removes the worst-performing neurons permanently to make the network smaller</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>Dropout randomly sets a fraction of neurons to zero during each training step. At inference time, Dropout is turned off and all neurons are active — Keras handles this automatically</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>Dropout works at both train and test time to reduce prediction variance</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>Dropout replaces removed neurons with their average value to maintain the total signal</button>
+      </div>
+      <div class="explanation">✅ <strong>Training: random zeroing. Inference: all neurons active.</strong> During training, dropout randomly deactivates neurons (e.g., 30%) in each batch. This prevents any neuron from becoming over-relied upon and forces redundant representations — like making a sports team train with random players missing so everyone develops. At test time, all neurons are active, but their outputs are scaled by (1 − dropout_rate) to compensate for the extra active neurons. Keras/TensorFlow handle this scaling automatically.</div>
+    </div>
+
+    <div class="question-card" data-q="16">
+      <div class="q-meta"><span class="q-num">Q17</span><span class="q-topic">CNNs</span></div>
+      <div class="q-text">What does a MaxPooling2D(2,2) layer actually do to a 16×16 feature map?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>It adds 2×2 padding around the feature map, making it 18×18</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>It divides the 16×16 map into 2×2 regions and keeps only the maximum value from each, producing an 8×8 output — half the spatial size</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>It applies a 2×2 learnable filter to the feature map</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>It normalises the feature map values to be between 0 and 1</button>
+      </div>
+      <div class="explanation">✅ <strong>MaxPool halves the spatial dimensions.</strong> A 2×2 max pool takes every non-overlapping 2×2 window and keeps only the largest value. 16×16 → 8×8, discarding 75% of the values. This: (1) reduces computation in subsequent layers, (2) provides translation invariance (a feature detected slightly to the left or right still gives the same max), and (3) focuses on the strongest activation of each detected pattern. Most CNNs halve dimensions after every conv block.</div>
+    </div>
+
+    <div class="question-card" data-q="17">
+      <div class="q-meta"><span class="q-num">Q18</span><span class="q-topic">Reinforcement Learning</span></div>
+      <div class="q-text">What is the ε-greedy strategy in RL, and why is the balance between exploration and exploitation important?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>ε-greedy means always taking the action with the highest Q-value to maximise reward</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>With probability ε the agent takes a random action (explore), otherwise it takes the best-known action (exploit). Without exploration, the agent may never discover better actions it hasn't tried yet</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>ε controls the learning rate decay — lower ε means faster convergence</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>ε-greedy makes the agent take the greediest possible action at every step, maximising short-term reward</button>
+      </div>
+      <div class="explanation">✅ <strong>Explore to avoid getting stuck, exploit what you know.</strong> If the agent only exploits (always picks the best-known action), it may settle on a locally good but globally suboptimal strategy — like only ever ordering the same dish at a restaurant because it's "safe." Exploration forces it to try new things. A common approach: start with high ε (mostly random → lots of exploration), then decay ε over time as the agent builds knowledge (mostly greedy → exploitation of learned policy).</div>
+    </div>
+
+    <div class="question-card" data-q="18">
+      <div class="q-meta"><span class="q-num">Q19</span><span class="q-topic">All Topics</span></div>
+      <div class="q-text">You want to build a model that generates realistic new images of flowers. Which architecture is most appropriate?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>A CNN classifier — train it to classify flower types, then use the output probabilities to generate images</button>
+        <button class="option" data-correct="false"><span class="opt-letter">B</span>An LSTM — it remembers patterns from past flower images to generate new ones sequentially</button>
+        <button class="option" data-correct="true"><span class="opt-letter">C</span>A GAN (or VAE) — the Generator learns to produce realistic flower images through adversarial training with the Discriminator</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>A standard autoencoder — train it to reconstruct flowers, then use the decoder to generate new ones</button>
+      </div>
+      <div class="explanation">✅ <strong>GANs and VAEs are the go-to generative architectures.</strong> A plain autoencoder's latent space isn't smooth or continuous — sampling random points from it produces poor results. A VAE explicitly models the latent space as a probability distribution, enabling high-quality generation. A GAN's adversarial training drives the Generator to produce the most realistic images possible. In 2025, diffusion models (like those behind DALL-E and Stable Diffusion) have become even more powerful — but GANs and VAEs remain the core curriculum.</div>
+    </div>
+
+    <div class="question-card" data-q="19">
+      <div class="q-meta"><span class="q-num">Q20</span><span class="q-topic">All Topics</span></div>
+      <div class="q-text">Which of the following statements about deep learning is FALSE?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>Batch Normalisation helps stabilise training and can allow higher learning rates</button>
+        <button class="option" data-correct="false"><span class="opt-letter">B</span>LSTMs were designed to solve the vanishing gradient problem that plagues plain RNNs</button>
+        <button class="option" data-correct="true"><span class="opt-letter">C</span>Dropout should remain active at inference time to improve prediction consistency</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>Transfer Learning uses weights pre-trained on large datasets to speed up training on smaller custom datasets</button>
+      </div>
+      <div class="explanation">✅ <strong>C is FALSE — Dropout is training-only.</strong> Dropout must be turned OFF at inference time. During training it randomly deactivates neurons to prevent overfitting. At inference, you want deterministic, full-capacity predictions — all neurons active. Keras automatically disables Dropout at prediction time (when you call model.predict or model.evaluate). If Dropout stayed on at inference, you'd get different predictions each time you ran the same input through the model, which is useless in production.</div>
+    </div>
+
+  </div>
+
+  <div class="score-card" id="scoreCard">
+    <div class="section-label">Results</div>
+    <div class="score-msg" id="scoreMsg">—</div>
+    <div class="score-number" id="scoreNumber">0/20</div>
+    <div class="score-label" id="scoreLabel">Review the explanations above.</div>
+    <button class="btn btn-restart" onclick="restartQuiz()">↺ Restart Quiz</button>
+  </div>
+
+  <div class="quiz-actions">
+    <button class="btn btn-primary" id="nextBtn" onclick="nextQuestion()" disabled>Next Question →</button>
+  </div>
+</div>
+</section>
+
+<footer>
+  Built for <span>IBM ML Course 5</span> · Deep Learning & Reinforcement Learning · Neural Networks · Backprop · CNNs · RNNs · LSTMs · Autoencoders · GANs · RL
+</footer>
+
+<script>
+  const questions = document.querySelectorAll('.question-card');
+  const progressFill = document.getElementById('progressFill');
+  const quizCounter  = document.getElementById('quizCounter');
+  const nextBtn      = document.getElementById('nextBtn');
+  const scoreCard    = document.getElementById('scoreCard');
+  let current = 0, score = 0, answered = false;
+
+  function updateProgress() {
+    progressFill.style.width = (current / questions.length * 100) + '%';
+    quizCounter.textContent  = current + ' / ' + questions.length;
+  }
+
+  document.querySelectorAll('.option').forEach(btn => {
+    btn.addEventListener('click', function () {
+      if (answered) return;
+      answered = true;
+      const card = this.closest('.question-card');
+      card.querySelectorAll('.option').forEach(o => {
+        o.classList.add('disabled');
+        if (o.dataset.correct === 'true') o.classList.add('correct');
+      });
+      if (this.dataset.correct !== 'true') this.classList.add('wrong');
+      else score++;
+      card.querySelector('.explanation').classList.add('show');
+      nextBtn.disabled = false;
+    });
+  });
+
+  function nextQuestion() {
+    if (current >= questions.length - 1) { showScore(); return; }
+    questions[current].classList.remove('active');
+    current++;
+    questions[current].classList.add('active');
+    answered = false;
+    nextBtn.disabled = true;
+    updateProgress();
+    if (current === questions.length - 1) nextBtn.textContent = 'See Results →';
+  }
+
+  function showScore() {
+    document.getElementById('quizContainer').style.display = 'none';
+    nextBtn.style.display = 'none';
+    scoreCard.classList.add('show');
+    const pct = Math.round(score / questions.length * 100);
+    document.getElementById('scoreNumber').textContent = score + '/' + questions.length;
+    const rows = [
+      [90, '🔥 Deep Learning Expert',    'You know this deeply. Course 6 is yours.'],
+      [75, '💪 Strong Performance',       'Solid foundation — a couple of concepts to revisit.'],
+      [60, '📘 Getting There',            'Review the modules and retry — the explanations help a lot.'],
+      [0,  '🔄 Keep At It',              'Revisit the analogies in each module, then come back.']
+    ];
+    const r = rows.find(r => pct >= r[0]);
+    document.getElementById('scoreMsg').textContent   = r[1];
+    document.getElementById('scoreLabel').textContent = r[2];
+    progressFill.style.width = '100%';
+    quizCounter.textContent  = questions.length + ' / ' + questions.length;
+  }
+
+  function restartQuiz() {
+    current = 0; score = 0; answered = false;
+    scoreCard.classList.remove('show');
+    document.getElementById('quizContainer').style.display = 'block';
+    nextBtn.style.display   = 'flex';
+    nextBtn.disabled        = true;
+    nextBtn.textContent     = 'Next Question →';
+    questions.forEach((q, i) => {
+      q.classList.toggle('active', i === 0);
+      q.querySelectorAll('.option').forEach(o => o.classList.remove('correct','wrong','disabled'));
+      q.querySelector('.explanation').classList.remove('show');
+    });
+    updateProgress();
+  }
+
+  updateProgress();
+</script>
+</body>
+</html>
