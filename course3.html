@@ -1,0 +1,1430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IBM ML Course 3 — Supervised Machine Learning: Classification</title>
+<link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0f0a;
+    --surface: #111811;
+    --surface2: #182018;
+    --border: #243024;
+    --accent: #4ecb71;
+    --accent2: #2d8a50;
+    --accent3: #7ec8e3;
+    --accent4: #f5a623;
+    --accent5: #e25c5c;
+    --text: #e8f0e8;
+    --text-muted: #7a9a7a;
+    --text-dim: #3a5a3a;
+    --code-bg: #080d08;
+    --correct: #4ecb71;
+    --wrong: #e25c5c;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'Lato', sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; font-size: 16px; }
+
+  /* ── HERO ── */
+  .hero {
+    background: linear-gradient(135deg, #0a0f0a 0%, #0d1a10 45%, #0a1518 100%);
+    padding: 80px 24px 60px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 70% 50% at 50% 0%, rgba(78,203,113,0.10) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-badge {
+    display: inline-block;
+    background: rgba(78,203,113,0.12);
+    border: 1px solid rgba(78,203,113,0.3);
+    color: var(--accent);
+    font-size: 11px; font-weight: 700; letter-spacing: 2.5px;
+    text-transform: uppercase; padding: 6px 16px; border-radius: 20px; margin-bottom: 24px;
+  }
+  .hero h1 { font-size: clamp(28px,5vw,52px); font-weight: 900; line-height: 1.1; margin-bottom: 16px; letter-spacing: -1px; }
+  .hero h1 span { color: var(--accent); }
+  .hero p { font-size: 18px; color: var(--text-muted); max-width: 640px; margin: 0 auto 36px; font-weight: 300; }
+  .hero-pills { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+  .pill { background: var(--surface2); border: 1px solid var(--border); color: var(--text-muted); font-size: 13px; font-weight: 700; padding: 7px 16px; border-radius: 20px; }
+
+  /* ── NAV ── */
+  .sticky-nav {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(10,15,10,0.95); backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px; overflow-x: auto; white-space: nowrap;
+  }
+  .sticky-nav ul { display: flex; gap: 0; list-style: none; max-width: 1200px; margin: 0 auto; }
+  .sticky-nav a { display: block; padding: 15px 16px; color: var(--text-muted); text-decoration: none; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; transition: color 0.2s; border-bottom: 2px solid transparent; }
+  .sticky-nav a:hover { color: var(--accent); border-bottom-color: var(--accent); }
+
+  /* ── LAYOUT ── */
+  .container { max-width: 1160px; margin: 0 auto; padding: 60px 24px; }
+  .section-label { font-size: 11px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: var(--accent); margin-bottom: 10px; }
+  .section-title { font-size: clamp(22px,3vw,34px); font-weight: 900; margin-bottom: 8px; letter-spacing: -0.5px; }
+  .section-sub { color: var(--text-muted); font-size: 15px; margin-bottom: 40px; font-weight: 300; }
+
+  /* ── CARDS ── */
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 28px; margin-bottom: 20px; transition: border-color 0.2s, box-shadow 0.2s; }
+  .card:hover { border-color: rgba(78,203,113,0.35); box-shadow: 0 4px 24px rgba(78,203,113,0.07); }
+  .card h3 { font-size: 17px; font-weight: 700; margin-bottom: 10px; display: flex; align-items: center; gap: 10px; }
+  .card .icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
+  .card p, .card ul { color: var(--text-muted); font-size: 14px; }
+  .card ul { padding-left: 20px; }
+  .card ul li { margin-bottom: 5px; }
+  .grid-2 { display: grid; grid-template-columns: repeat(auto-fit,minmax(300px,1fr)); gap: 20px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(auto-fit,minmax(240px,1fr)); gap: 20px; }
+
+  /* ── TAGS ── */
+  .tag { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; padding: 3px 10px; border-radius: 4px; margin-bottom: 12px; }
+  .tag-green  { background: rgba(78,203,113,0.14); color: var(--accent); }
+  .tag-blue   { background: rgba(126,200,227,0.14); color: var(--accent3); }
+  .tag-orange { background: rgba(245,166,35,0.14);  color: var(--accent4); }
+  .tag-red    { background: rgba(226,92,92,0.14);   color: var(--accent5); }
+  .tag-purple { background: rgba(180,130,255,0.14); color: #c09aff; }
+
+  /* ── CONCEPT BLOCKS ── */
+  .concept-block { background: var(--surface); border-left: 3px solid var(--accent); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; padding: 20px 24px; margin-bottom: 16px; }
+  .concept-block.blue   { border-left-color: var(--accent3); }
+  .concept-block.orange { border-left-color: var(--accent4); }
+  .concept-block.red    { border-left-color: var(--accent5); }
+  .concept-block.purple { border-left-color: #c09aff; }
+  .concept-block h4 { font-size: 15px; font-weight: 700; margin-bottom: 8px; }
+  .concept-block p  { color: var(--text-muted); font-size: 14px; line-height: 1.6; }
+  .concept-block ul { color: var(--text-muted); font-size: 14px; padding-left: 18px; }
+  .concept-block ul li { margin-bottom: 4px; }
+
+  /* ── FORMULA ── */
+  .formula { background: var(--code-bg); border: 1px solid #1a2a1a; border-radius: var(--radius-sm); padding: 12px 18px; font-family: 'Space Mono', monospace; font-size: 13px; color: #8de8a8; margin: 12px 0; text-align: center; }
+
+  /* ── CALLOUT ── */
+  .callout { display: flex; gap: 16px; background: rgba(78,203,113,0.05); border: 1px solid rgba(78,203,113,0.2); border-radius: var(--radius-sm); padding: 16px 20px; margin: 20px 0; }
+  .callout.warn  { background: rgba(245,166,35,0.05); border-color: rgba(245,166,35,0.2); }
+  .callout.red   { background: rgba(226,92,92,0.05);  border-color: rgba(226,92,92,0.2); }
+  .callout.blue  { background: rgba(126,200,227,0.05); border-color: rgba(126,200,227,0.2); }
+  .callout-icon  { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+  .callout-body  { font-size: 14px; color: var(--text-muted); line-height: 1.6; }
+  .callout-body strong { color: var(--text); }
+
+  /* ── CODE ── */
+  .code-block { background: var(--code-bg); border: 1px solid #1a2a1a; border-radius: var(--radius); overflow: hidden; margin: 20px 0; }
+  .code-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 18px; background: #0e160e; border-bottom: 1px solid #1a2a1a; }
+  .code-title  { font-family: 'Space Mono',monospace; font-size: 12px; color: var(--accent); }
+  .code-dots   { display: flex; gap: 6px; }
+  .code-dot    { width: 10px; height: 10px; border-radius: 50%; }
+  .code-dot:nth-child(1) { background: #ff5f57; }
+  .code-dot:nth-child(2) { background: #febc2e; }
+  .code-dot:nth-child(3) { background: #28c840; }
+  .code-block pre { padding: 20px 18px; overflow-x: auto; font-family: 'Space Mono',monospace; font-size: 13px; line-height: 1.7; }
+  .code-block code { color: #d4e8d4; }
+  .kw { color: #e0806a; }  .fn { color: #9cd4b0; }  .st { color: #90c8a0; }
+  .cm { color: #4a6a4a; font-style: italic; }  .nm { color: #7ec8e3; }
+  .va { color: #f5a623; }
+
+  /* ── TABLE ── */
+  .table-wrap { overflow-x: auto; margin: 20px 0; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th { background: var(--surface2); color: var(--accent); font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--border); }
+  td { padding: 12px 16px; border-bottom: 1px solid rgba(36,48,36,0.5); color: var(--text-muted); vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(78,203,113,0.03); }
+  td strong { color: var(--text); }
+
+  /* ── ACCORDION ── */
+  details { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 10px; overflow: hidden; }
+  summary { padding: 16px 20px; font-weight: 700; font-size: 15px; cursor: pointer; list-style: none; display: flex; align-items: center; justify-content: space-between; transition: background 0.2s; }
+  summary:hover { background: var(--surface2); }
+  summary::after { content: '+'; font-size: 20px; color: var(--accent); font-weight: 300; }
+  details[open] summary::after { content: '−'; }
+  details[open] summary { border-bottom: 1px solid var(--border); }
+  .details-body { padding: 20px; color: var(--text-muted); font-size: 14px; line-height: 1.7; }
+
+  /* ── BEST PRACTICE ── */
+  .bp-card { display: flex; gap: 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 18px 20px; margin-bottom: 12px; align-items: flex-start; }
+  .bp-num { width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), var(--accent2)); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 900; flex-shrink: 0; color: #000; }
+  .bp-content h4 { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+  .bp-content p  { font-size: 13px; color: var(--text-muted); }
+
+  /* ── DIVIDER ── */
+  .divider { height: 1px; background: linear-gradient(90deg, transparent, var(--border), transparent); margin: 0; }
+
+  /* ── ALGO COMPARE GRID ── */
+  .algo-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(260px,1fr)); gap: 16px; margin: 20px 0; }
+  .algo-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px; }
+  .algo-card h4 { font-size: 15px; font-weight: 700; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
+  .algo-card .algo-badge { font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; padding: 2px 8px; border-radius: 3px; }
+  .algo-card p { font-size: 13px; color: var(--text-muted); line-height: 1.55; margin-bottom: 8px; }
+  .algo-card ul { font-size: 12px; color: var(--text-muted); padding-left: 16px; }
+  .algo-card ul li { margin-bottom: 3px; }
+
+  /* ── QUIZ ── */
+  #quiz { background: linear-gradient(180deg, var(--bg) 0%, #080f0a 100%); }
+  .quiz-progress { display: flex; align-items: center; gap: 16px; margin-bottom: 32px; }
+  .progress-bar { flex: 1; height: 4px; background: var(--surface2); border-radius: 2px; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent3)); border-radius: 2px; transition: width 0.4s ease; }
+  .quiz-counter { font-size: 13px; color: var(--text-muted); font-weight: 700; white-space: nowrap; }
+
+  .question-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 32px; margin-bottom: 24px; display: none; animation: fadeIn 0.3s ease; }
+  .question-card.active { display: block; }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+
+  .q-meta { display: flex; gap: 10px; align-items: center; margin-bottom: 20px; }
+  .q-num  { font-family: 'Space Mono',monospace; font-size: 11px; color: var(--accent); background: rgba(78,203,113,0.1); padding: 3px 10px; border-radius: 4px; }
+  .q-topic { font-size: 11px; color: var(--text-dim); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+  .q-text  { font-size: 16px; font-weight: 700; margin-bottom: 24px; line-height: 1.5; }
+
+  .options { display: flex; flex-direction: column; gap: 10px; }
+  .option { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px 18px; cursor: pointer; font-size: 14px; transition: all 0.2s; display: flex; align-items: flex-start; gap: 12px; text-align: left; color: var(--text); }
+  .option:hover:not(.disabled) { border-color: var(--accent); background: rgba(78,203,113,0.07); }
+  .option.correct { border-color: var(--correct); background: rgba(78,203,113,0.09); }
+  .option.wrong   { border-color: var(--wrong);   background: rgba(226,92,92,0.09); }
+  .option.disabled { cursor: default; }
+  .opt-letter { width: 24px; height: 24px; border-radius: 6px; background: var(--border); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; font-family: 'Space Mono',monospace; }
+  .option.correct .opt-letter { background: var(--correct); color: #000; }
+  .option.wrong   .opt-letter { background: var(--wrong);   color: #fff; }
+
+  .explanation { margin-top: 16px; padding: 16px; background: rgba(78,203,113,0.05); border: 1px solid rgba(78,203,113,0.2); border-radius: var(--radius-sm); font-size: 14px; color: var(--text-muted); display: none; line-height: 1.6; }
+  .explanation strong { color: var(--accent); }
+  .explanation.show { display: block; }
+
+  .quiz-actions { display: flex; justify-content: flex-end; margin-top: 20px; }
+  .btn { padding: 11px 28px; border-radius: var(--radius-sm); font-size: 14px; font-weight: 700; font-family: 'Lato',sans-serif; cursor: pointer; border: none; transition: all 0.2s; letter-spacing: 0.5px; }
+  .btn-primary { background: var(--accent); color: #000; }
+  .btn-primary:hover { background: #6ddf8f; transform: translateY(-1px); }
+  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+  .score-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 48px 32px; text-align: center; display: none; }
+  .score-card.show { display: block; animation: fadeIn 0.4s ease; }
+  .score-number { font-size: 72px; font-weight: 900; background: linear-gradient(135deg, var(--accent), var(--accent3)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; line-height: 1; margin: 16px 0; }
+  .score-label { color: var(--text-muted); font-size: 15px; margin-bottom: 24px; }
+  .score-msg { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+  .btn-restart { background: var(--surface2); color: var(--text); border: 1px solid var(--border); margin-top: 24px; }
+  .btn-restart:hover { border-color: var(--accent); color: var(--accent); }
+
+  footer { background: var(--surface); border-top: 1px solid var(--border); padding: 32px 24px; text-align: center; color: var(--text-dim); font-size: 13px; }
+  footer span { color: var(--accent); }
+
+  @media (max-width: 600px) { .container { padding: 40px 16px; } .hero { padding: 60px 16px 40px; } .question-card { padding: 20px; } }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-badge">IBM Machine Learning Professional Certificate — Course 3 of 6</div>
+  <h1>Supervised ML:<br><span>Classification</span></h1>
+  <p>Complete reference covering every algorithm, metric, ensemble method, and class imbalance technique — with full Python code for each.</p>
+  <div class="hero-pills">
+    <span class="pill">🔢 Logistic Regression</span>
+    <span class="pill">📍 KNN</span>
+    <span class="pill">🌳 Decision Trees</span>
+    <span class="pill">🌲 Random Forest</span>
+    <span class="pill">⚡ Boosting</span>
+    <span class="pill">🎯 SVM</span>
+    <span class="pill">📊 Evaluation Metrics</span>
+    <span class="pill">⚖️ Class Imbalance</span>
+    <span class="pill">✅ Quiz</span>
+  </div>
+</section>
+
+<!-- NAV -->
+<nav class="sticky-nav">
+  <ul>
+    <li><a href="#overview">Overview</a></li>
+    <li><a href="#logistic">Logistic Regression</a></li>
+    <li><a href="#knn">KNN</a></li>
+    <li><a href="#svm">SVM</a></li>
+    <li><a href="#trees">Decision Trees</a></li>
+    <li><a href="#ensembles">Ensembles</a></li>
+    <li><a href="#metrics">Metrics</a></li>
+    <li><a href="#imbalance">Class Imbalance</a></li>
+    <li><a href="#best-practices">Best Practices</a></li>
+    <li><a href="#quiz">Quiz</a></li>
+  </ul>
+</nav>
+
+<!-- OVERVIEW -->
+<section id="overview">
+<div class="container">
+  <div class="section-label">Module 0</div>
+  <h2 class="section-title">Classification: The Big Picture</h2>
+  <p class="section-sub">Classification predicts which discrete category a data point belongs to. Unlike regression (continuous outputs), classification outputs class labels.</p>
+
+  <div class="grid-3">
+    <div class="card">
+      <h3><span class="icon" style="background:rgba(78,203,113,0.15)">🔢</span> Logistic Regression</h3>
+      <p>Probabilistic model. Extends linear regression with a sigmoid function. Highly interpretable — the baseline classifier.</p>
+    </div>
+    <div class="card">
+      <h3><span class="icon" style="background:rgba(126,200,227,0.15)">📍</span> K-Nearest Neighbors</h3>
+      <p>Instance-based learning. No training phase — classifies by majority vote of k nearest points. Simple but powerful.</p>
+    </div>
+    <div class="card">
+      <h3><span class="icon" style="background:rgba(245,166,35,0.15)">🎯</span> Support Vector Machine</h3>
+      <p>Finds the maximum-margin hyperplane separating classes. Extremely powerful in high-dimensional spaces with kernel trick.</p>
+    </div>
+    <div class="card">
+      <h3><span class="icon" style="background:rgba(180,130,255,0.15)">🌳</span> Decision Trees</h3>
+      <p>Rule-based splits using Gini or Entropy. Highly interpretable. Tends to overfit — tamed by pruning or ensembling.</p>
+    </div>
+    <div class="card">
+      <h3><span class="icon" style="background:rgba(78,203,113,0.15)">🌲</span> Random Forest</h3>
+      <p>Bagging ensemble of decorrelated decision trees. Robust, high accuracy, built-in feature importance. The workhorse.</p>
+    </div>
+    <div class="card">
+      <h3><span class="icon" style="background:rgba(226,92,92,0.15)">⚡</span> Gradient Boosting</h3>
+      <p>Sequential ensemble that corrects previous errors. XGBoost, LightGBM and CatBoost dominate Kaggle competitions.</p>
+    </div>
+  </div>
+
+  <div class="callout blue" style="margin-top:24px;">
+    <span class="callout-icon">📐</span>
+    <div class="callout-body">
+      <strong>Classification vs Regression:</strong> If the target is a continuous number (price, temperature) → regression. If the target is a category (spam/not-spam, disease/no-disease, A/B/C) → classification. Logistic regression, despite its name, is a <em>classification</em> algorithm.
+    </div>
+  </div>
+</div>
+</section>
+
+<div class="divider"></div>
+
+<!-- LOGISTIC REGRESSION -->
+<section id="logistic">
+<div class="container">
+  <div class="section-label">Module 1</div>
+  <h2 class="section-title">Logistic Regression</h2>
+  <p class="section-sub">The most interpretable classifier. Gold standard in regulated industries (finance, healthcare). Always your baseline.</p>
+
+  <div class="grid-2">
+    <div>
+      <div class="concept-block">
+        <span class="tag tag-green">Core Idea</span>
+        <h4>Sigmoid Function</h4>
+        <p>Applies the sigmoid (logistic) function to a linear combination of features to output a probability between 0 and 1. Decision boundary is at probability = 0.5 by default.</p>
+        <div class="formula">σ(z) = 1 / (1 + e⁻ᶻ) &nbsp;where z = β₀ + β₁x₁ + ... + βₙxₙ</div>
+      </div>
+      <div class="concept-block blue">
+        <span class="tag tag-blue">Log Loss</span>
+        <h4>Cost Function: Binary Cross-Entropy</h4>
+        <p>Unlike MSE used in linear regression, logistic uses log loss (binary cross-entropy). Penalizes confident wrong predictions heavily. Optimized via gradient descent.</p>
+        <div class="formula">Loss = −[y log(ŷ) + (1−y) log(1−ŷ)]</div>
+      </div>
+    </div>
+    <div>
+      <div class="concept-block orange">
+        <span class="tag tag-orange">Multi-class</span>
+        <h4>Extending to Multi-Class</h4>
+        <p><strong>OvR (One-vs-Rest):</strong> Train one binary classifier per class (class A vs not-A). Choose class with highest probability. Fast, simple.<br><br>
+        <strong>Softmax / Multinomial:</strong> Directly models probabilities across all classes. Probabilities sum to 1. Use <code>multi_class='multinomial'</code>.</p>
+      </div>
+      <div class="concept-block">
+        <span class="tag tag-green">Regularization</span>
+        <h4>L1 vs L2 Penalty</h4>
+        <p><code>penalty='l2'</code> (Ridge) — default. Shrinks coefficients, keeps all features.<br>
+        <code>penalty='l1'</code> (Lasso) — drives some coefficients to zero, performs feature selection.<br>
+        <code>C</code> = inverse of regularization strength. Smaller C = more regularization.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+      <span class="code-title">logistic_regression.py</span>
+    </div>
+    <pre><code><span class="kw">from</span> sklearn.linear_model <span class="kw">import</span> LogisticRegression
+<span class="kw">from</span> sklearn.model_selection <span class="kw">import</span> train_test_split, cross_val_score
+<span class="kw">from</span> sklearn.preprocessing <span class="kw">import</span> StandardScaler
+<span class="kw">from</span> sklearn.pipeline <span class="kw">import</span> Pipeline
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+
+<span class="cm"># ── Binary Classification ──────────────────────────────────</span>
+pipe = <span class="fn">Pipeline</span>([
+    (<span class="st">'scaler'</span>, <span class="fn">StandardScaler</span>()),
+    (<span class="st">'model'</span>, <span class="fn">LogisticRegression</span>(
+        C=<span class="nm">1.0</span>,           <span class="cm"># inverse regularization — smaller = more regularized</span>
+        penalty=<span class="st">'l2'</span>,    <span class="cm"># 'l1' for feature selection, 'l2' default</span>
+        solver=<span class="st">'lbfgs'</span>,  <span class="cm"># lbfgs for L2; saga for L1 on large datasets</span>
+        max_iter=<span class="nm">1000</span>
+    ))
+])
+
+X_train, X_test, y_train, y_test = <span class="fn">train_test_split</span>(X, y, test_size=<span class="nm">0.2</span>, random_state=<span class="nm">42</span>)
+pipe.<span class="fn">fit</span>(X_train, y_train)
+
+<span class="cm"># Predict class labels and probabilities</span>
+y_pred  = pipe.<span class="fn">predict</span>(X_test)
+y_proba = pipe.<span class="fn">predict_proba</span>(X_test)[:, <span class="nm">1</span>]  <span class="cm"># probability of positive class</span>
+
+<span class="cm"># ── Multi-Class Classification ────────────────────────────</span>
+lr_multi = <span class="fn">LogisticRegression</span>(
+    multi_class=<span class="st">'ovr'</span>,        <span class="cm"># or 'multinomial' for softmax</span>
+    solver=<span class="st">'lbfgs'</span>,
+    C=<span class="nm">0.5</span>, max_iter=<span class="nm">2000</span>
+)
+
+<span class="cm"># ── Hyperparameter tuning with GridSearchCV ────────────────</span>
+<span class="kw">from</span> sklearn.model_selection <span class="kw">import</span> GridSearchCV
+param_grid = {<span class="st">'model__C'</span>: [<span class="nm">0.001</span>, <span class="nm">0.01</span>, <span class="nm">0.1</span>, <span class="nm">1</span>, <span class="nm">10</span>, <span class="nm">100</span>]}
+grid = <span class="fn">GridSearchCV</span>(pipe, param_grid, cv=<span class="nm">5</span>, scoring=<span class="st">'roc_auc'</span>)
+grid.<span class="fn">fit</span>(X_train, y_train)
+<span class="fn">print</span>(<span class="st">f"Best C: </span><span class="va">{grid.best_params_}</span><span class="st">"</span>)
+
+<span class="cm"># ── Inspect coefficients ──────────────────────────────────</span>
+model = pipe.<span class="fn">named_steps</span>[<span class="st">'model'</span>]
+coef_df = pd.<span class="fn">Series</span>(model.coef_[<span class="nm">0</span>], index=feature_names).<span class="fn">sort_values</span>()
+<span class="fn">print</span>(coef_df)  <span class="cm"># positive = pushes toward positive class</span></code></pre>
+  </div>
+</div>
+</section>
+
+<div class="divider"></div>
+
+<!-- KNN -->
+<section id="knn">
+<div class="container">
+  <div class="section-label">Module 2</div>
+  <h2 class="section-title">K-Nearest Neighbors (KNN)</h2>
+  <p class="section-sub">The laziest learner — stores all training data and classifies by similarity. Deceptively powerful for many problems.</p>
+
+  <div class="grid-2">
+    <div class="concept-block">
+      <span class="tag tag-green">Algorithm</span>
+      <h4>How KNN Works</h4>
+      <ol style="color:var(--text-muted);font-size:14px;padding-left:18px;">
+        <li style="margin-bottom:5px;">Store all training examples</li>
+        <li style="margin-bottom:5px;">For a new point, compute distance to all training points</li>
+        <li style="margin-bottom:5px;">Find k nearest neighbors</li>
+        <li style="margin-bottom:5px;">Majority vote → predicted class</li>
+        <li>For regression: average of k neighbors</li>
+      </ol>
+    </div>
+    <div class="concept-block blue">
+      <span class="tag tag-blue">Distance Metrics</span>
+      <h4>Which Distance to Use</h4>
+      <p><strong>Euclidean:</strong> Default. L2 norm. Good for continuous, scaled features.<br><br>
+      <strong>Manhattan:</strong> L1 norm. Better for high-dimensional data.<br><br>
+      <strong>Minkowski:</strong> Generalizes both (p=2 → Euclidean, p=1 → Manhattan).<br><br>
+      <strong>⚠️ Always scale features before KNN</strong> — otherwise high-range features dominate distance calculations.</p>
+    </div>
+    <div class="concept-block orange">
+      <span class="tag tag-orange">Hyperparameter k</span>
+      <h4>Choosing k</h4>
+      <p><strong>Small k (k=1):</strong> Very complex boundary, high variance, overfits.<br><br>
+      <strong>Large k:</strong> Smoother boundary, high bias, underfits.<br><br>
+      <strong>Best practice:</strong> Use cross-validation to find optimal k. Try odd values to avoid ties. Common starting point: k = √n where n = number of training samples.</p>
+    </div>
+    <div class="concept-block red">
+      <span class="tag tag-red">Limitations</span>
+      <h4>When NOT to Use KNN</h4>
+      <ul>
+        <li>Very large datasets — O(n) prediction cost</li>
+        <li>High-dimensional data — curse of dimensionality</li>
+        <li>Imbalanced classes — majority class dominates votes</li>
+        <li>When features are on different scales (fix: scale first)</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+      <span class="code-title">knn_classifier.py</span>
+    </div>
+    <pre><code><span class="kw">from</span> sklearn.neighbors <span class="kw">import</span> KNeighborsClassifier
+<span class="kw">from</span> sklearn.pipeline <span class="kw">import</span> Pipeline
+<span class="kw">from</span> sklearn.preprocessing <span class="kw">import</span> StandardScaler
+<span class="kw">from</span> sklearn.model_selection <span class="kw">import</span> cross_val_score
+<span class="kw">import</span> matplotlib.pyplot <span class="kw">as</span> plt
+
+<span class="cm"># ── KNN Pipeline (scaling is mandatory!) ──────────────────</span>
+knn_pipe = <span class="fn">Pipeline</span>([
+    (<span class="st">'scaler'</span>, <span class="fn">StandardScaler</span>()),
+    (<span class="st">'knn'</span>, <span class="fn">KNeighborsClassifier</span>(
+        n_neighbors=<span class="nm">5</span>,
+        weights=<span class="st">'uniform'</span>,    <span class="cm"># 'distance' weights closer points more</span>
+        metric=<span class="st">'euclidean'</span>    <span class="cm"># 'manhattan', 'minkowski'</span>
+    ))
+])
+knn_pipe.<span class="fn">fit</span>(X_train, y_train)
+
+<span class="cm"># ── Find optimal k using cross-validation ─────────────────</span>
+k_range = <span class="fn">range</span>(<span class="nm">1</span>, <span class="nm">31</span>)
+cv_scores = []
+<span class="kw">for</span> k <span class="kw">in</span> k_range:
+    pipe = <span class="fn">Pipeline</span>([
+        (<span class="st">'scaler'</span>, <span class="fn">StandardScaler</span>()),
+        (<span class="st">'knn'</span>, <span class="fn">KNeighborsClassifier</span>(n_neighbors=k))
+    ])
+    scores = <span class="fn">cross_val_score</span>(pipe, X_train, y_train, cv=<span class="nm">5</span>, scoring=<span class="st">'accuracy'</span>)
+    cv_scores.<span class="fn">append</span>(scores.<span class="fn">mean</span>())
+
+optimal_k = k_range[cv_scores.<span class="fn">index</span>(<span class="fn">max</span>(cv_scores))]
+<span class="fn">print</span>(<span class="st">f"Optimal k = </span><span class="va">{optimal_k}</span><span class="st">, CV Score = </span><span class="va">{max(cv_scores):.3f}</span><span class="st">"</span>)
+
+plt.<span class="fn">plot</span>(k_range, cv_scores)
+plt.<span class="fn">xlabel</span>(<span class="st">'k'</span>); plt.<span class="fn">ylabel</span>(<span class="st">'CV Accuracy'</span>); plt.<span class="fn">show</span>()</code></pre>
+  </div>
+</div>
+</section>
+
+<div class="divider"></div>
+
+<!-- SVM -->
+<section id="svm">
+<div class="container">
+  <div class="section-label">Module 3</div>
+  <h2 class="section-title">Support Vector Machines (SVM)</h2>
+  <p class="section-sub">Find the optimal hyperplane that maximally separates classes. The kernel trick makes it devastatingly effective in high-dimensional spaces.</p>
+
+  <div class="grid-2">
+    <div>
+      <div class="concept-block">
+        <span class="tag tag-green">Core Concept</span>
+        <h4>Maximum Margin Hyperplane</h4>
+        <p>SVM finds the decision boundary (hyperplane) that maximizes the margin — the distance to the nearest training points from either class (called <strong>support vectors</strong>). Only support vectors determine the hyperplane. Wider margin = better generalization.</p>
+        <div class="formula">Decision: sign(w·x + b) &nbsp;|&nbsp; Margin = 2 / ||w||</div>
+      </div>
+      <div class="concept-block orange">
+        <span class="tag tag-orange">Soft Margin</span>
+        <h4>The C Hyperparameter</h4>
+        <p><strong>Small C:</strong> Wide margin, allows some misclassification, high bias (underfits).<br>
+        <strong>Large C:</strong> Narrow margin, fewer violations tolerated, high variance (overfits).<br>
+        C controls the trade-off between margin width and training errors.</p>
+      </div>
+    </div>
+    <div>
+      <div class="concept-block blue">
+        <span class="tag tag-blue">Kernel Trick</span>
+        <h4>Non-Linear Classification</h4>
+        <p>When data isn't linearly separable, kernels transform features to a higher-dimensional space where a hyperplane can separate them — without computing the transformation explicitly.</p>
+        <ul>
+          <li><strong>Linear:</strong> Fast, good for high-D text data</li>
+          <li><strong>RBF (Gaussian):</strong> Most common, works well for most problems. Controlled by <code>gamma</code></li>
+          <li><strong>Polynomial:</strong> Good for polynomial relationships</li>
+          <li><strong>Sigmoid:</strong> Similar to neural networks</li>
+        </ul>
+      </div>
+      <div class="concept-block red">
+        <span class="tag tag-red">Hinge Loss</span>
+        <h4>SVM Cost Function</h4>
+        <p>SVM uses <strong>Hinge Loss</strong> instead of log loss. Penalizes misclassified points and points within the margin. Zero loss for correctly classified points outside the margin. More focused on the boundary than logistic regression's cost which never reaches zero.</p>
+        <div class="formula">L = max(0, 1 − y·(w·x + b))</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+      <span class="code-title">svm_classifier.py</span>
+    </div>
+    <pre><code><span class="kw">from</span> sklearn.svm <span class="kw">import</span> SVC, LinearSVC
+<span class="kw">from</span> sklearn.pipeline <span class="kw">import</span> Pipeline
+<span class="kw">from</span> sklearn.preprocessing <span class="kw">import</span> StandardScaler
+<span class="kw">from</span> sklearn.model_selection <span class="kw">import</span> GridSearchCV
+
+<span class="cm"># ── Standard SVM with RBF Kernel ──────────────────────────</span>
+svm_pipe = <span class="fn">Pipeline</span>([
+    (<span class="st">'scaler'</span>, <span class="fn">StandardScaler</span>()),   <span class="cm"># SVM is scale-sensitive!</span>
+    (<span class="st">'svm'</span>, <span class="fn">SVC</span>(
+        kernel=<span class="st">'rbf'</span>,     <span class="cm"># 'linear', 'poly', 'sigmoid'</span>
+        C=<span class="nm">1.0</span>,             <span class="cm"># margin-vs-error tradeoff</span>
+        gamma=<span class="st">'scale'</span>,    <span class="cm"># 'scale'=1/(n_features*X.var()), 'auto'=1/n_features</span>
+        probability=<span class="nm">True</span>   <span class="cm"># enable predict_proba (slower training)</span>
+    ))
+])
+svm_pipe.<span class="fn">fit</span>(X_train, y_train)
+
+<span class="cm"># ── Grid Search for C and gamma ───────────────────────────</span>
+param_grid = {
+    <span class="st">'svm__C'</span>:     [<span class="nm">0.1</span>, <span class="nm">1</span>, <span class="nm">10</span>, <span class="nm">100</span>],
+    <span class="st">'svm__gamma'</span>: [<span class="nm">0.001</span>, <span class="nm">0.01</span>, <span class="nm">0.1</span>, <span class="st">'scale'</span>]
+}
+grid = <span class="fn">GridSearchCV</span>(svm_pipe, param_grid, cv=<span class="nm">5</span>, scoring=<span class="st">'roc_auc'</span>, n_jobs=-<span class="nm">1</span>)
+grid.<span class="fn">fit</span>(X_train, y_train)
+<span class="fn">print</span>(<span class="st">f"Best params: </span><span class="va">{grid.best_params_}</span><span class="st">"</span>)
+
+<span class="cm"># ── LinearSVC — much faster for large datasets ────────────</span>
+linear_svm = <span class="fn">Pipeline</span>([
+    (<span class="st">'scaler'</span>, <span class="fn">StandardScaler</span>()),
+    (<span class="st">'svm'</span>, <span class="fn">LinearSVC</span>(C=<span class="nm">1.0</span>, max_iter=<span class="nm">5000</span>))
+])
+linear_svm.<span class="fn">fit</span>(X_train, y_train)</code></pre>
+  </div>
+</div>
+</section>
+
+<div class="divider"></div>
+
+<!-- DECISION TREES -->
+<section id="trees">
+<div class="container">
+  <div class="section-label">Module 4</div>
+  <h2 class="section-title">Decision Trees</h2>
+  <p class="section-sub">Interpretable rule-based classifiers. The building block for all ensemble methods. Powerful alone, legendary in groups.</p>
+
+  <div class="grid-2">
+    <div>
+      <div class="concept-block">
+        <span class="tag tag-green">Splitting Criterion</span>
+        <h4>Gini Impurity vs Entropy</h4>
+        <p><strong>Gini:</strong> Default in sklearn. Probability of misclassifying a randomly chosen element. Computationally cheaper. Range [0, 0.5].</p>
+        <div class="formula">Gini = 1 − Σ pᵢ²</div>
+        <p style="margin-top:10px;"><strong>Entropy:</strong> Information theory basis. Slightly better splits in some cases. Computationally heavier. Range [0, 1].</p>
+        <div class="formula">Entropy = −Σ pᵢ log₂(pᵢ)</div>
+        <p style="margin-top:8px;">Both produce very similar results in practice. Use Gini unless you have a specific reason for Entropy.</p>
+      </div>
+      <div class="concept-block blue">
+        <span class="tag tag-blue">Stopping Criteria</span>
+        <h4>Controlling Tree Depth</h4>
+        <p><strong>max_depth:</strong> Maximum depth. Most important hyperparameter for preventing overfitting.<br>
+        <strong>min_samples_split:</strong> Min samples needed to split an internal node.<br>
+        <strong>min_samples_leaf:</strong> Min samples at a leaf node.<br>
+        <strong>max_features:</strong> Fraction of features considered at each split.</p>
+      </div>
+    </div>
+    <div>
+      <div class="concept-block orange">
+        <span class="tag tag-orange">Overfitting</span>
+        <h4>Why Trees Overfit</h4>
+        <p>A fully grown decision tree memorizes the training data (zero impurity at every leaf). It is a <strong>greedy algorithm</strong> — it makes locally optimal splits without considering global optimality. This creates high variance models that generalize poorly. Solutions: limit depth, prune, or use ensembles.</p>
+      </div>
+      <div class="concept-block">
+        <span class="tag tag-green">Feature Importance</span>
+        <h4>Impurity-Based Importance</h4>
+        <p>Feature importance = total impurity reduction weighted by the number of samples a feature splits. Features that split early (near root) on many samples get highest importance. Available via <code>model.feature_importances_</code>. Biased towards high-cardinality features — use permutation importance for a fair comparison.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+      <span class="code-title">decision_tree.py</span>
+    </div>
+    <pre><code><span class="kw">from</span> sklearn.tree <span class="kw">import</span> DecisionTreeClassifier, plot_tree, export_text
+<span class="kw">from</span> sklearn.model_selection <span class="kw">import</span> GridSearchCV
+<span class="kw">import</span> matplotlib.pyplot <span class="kw">as</span> plt
+<span class="kw">import</span> pandas <span class="kw">as</span> pd
+
+<span class="cm"># ── Train Decision Tree ────────────────────────────────────</span>
+dt = <span class="fn">DecisionTreeClassifier</span>(
+    criterion=<span class="st">'gini'</span>,          <span class="cm"># 'entropy' for information gain</span>
+    max_depth=<span class="nm">5</span>,               <span class="cm"># key regularization parameter</span>
+    min_samples_split=<span class="nm">20</span>,      <span class="cm"># min samples to split a node</span>
+    min_samples_leaf=<span class="nm">10</span>,       <span class="cm"># min samples at leaf</span>
+    random_state=<span class="nm">42</span>
+)
+dt.<span class="fn">fit</span>(X_train, y_train)
+
+<span class="cm"># ── Visualize the tree ────────────────────────────────────</span>
+plt.<span class="fn">figure</span>(figsize=(<span class="nm">20</span>, <span class="nm">8</span>))
+<span class="fn">plot_tree</span>(dt, feature_names=feature_names, class_names=[<span class="st">'0'</span>, <span class="st">'1'</span>],
+          filled=<span class="nm">True</span>, rounded=<span class="nm">True</span>, max_depth=<span class="nm">3</span>)
+plt.<span class="fn">show</span>()
+
+<span class="cm"># ── Text representation ───────────────────────────────────</span>
+<span class="fn">print</span>(<span class="fn">export_text</span>(dt, feature_names=feature_names))
+
+<span class="cm"># ── Feature Importance ────────────────────────────────────</span>
+importance_df = pd.<span class="fn">Series</span>(
+    dt.feature_importances_, index=feature_names
+).<span class="fn">sort_values</span>(ascending=<span class="nm">False</span>)
+<span class="fn">print</span>(importance_df.<span class="fn">head</span>(<span class="nm">10</span>))
+
+<span class="cm"># ── Tune max_depth with GridSearch ────────────────────────</span>
+param_grid = {<span class="st">'max_depth'</span>: [<span class="nm">2</span>, <span class="nm">3</span>, <span class="nm">4</span>, <span class="nm">5</span>, <span class="nm">8</span>, <span class="nm">10</span>, <span class="nm">None</span>]}
+grid = <span class="fn">GridSearchCV</span>(
+    <span class="fn">DecisionTreeClassifier</span>(random_state=<span class="nm">42</span>),
+    param_grid, cv=<span class="nm">5</span>, scoring=<span class="st">'accuracy'</span>
+)
+grid.<span class="fn">fit</span>(X_train, y_train)
+<span class="fn">print</span>(<span class="st">f"Best depth: </span><span class="va">{grid.best_params_}</span><span class="st">"</span>)</code></pre>
+  </div>
+</div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ENSEMBLES -->
+<section id="ensembles">
+<div class="container">
+  <div class="section-label">Module 5</div>
+  <h2 class="section-title">Ensemble Methods</h2>
+  <p class="section-sub">Combine multiple models to beat any single model. The secret weapon of competitive ML.</p>
+
+  <div class="grid-2">
+    <div class="concept-block">
+      <span class="tag tag-green">Bagging</span>
+      <h4>Bootstrap Aggregating</h4>
+      <p>Train multiple models on different <strong>random subsets</strong> of the training data (with replacement). Average predictions. Key effect: reduces <strong>variance</strong>, keeps bias stable. Models are trained in <strong>parallel</strong>.</p>
+      <p style="margin-top:8px;"><strong>Random Forest</strong> is bagging + random feature subsets per split → decorrelated trees → more effective variance reduction.</p>
+    </div>
+    <div class="concept-block blue">
+      <span class="tag tag-blue">Boosting</span>
+      <h4>Sequential Error Correction</h4>
+      <p>Train models <strong>sequentially</strong>. Each new model focuses on the mistakes of the previous one. Reduces <strong>bias</strong>. Risk: overfitting if too many estimators.</p>
+      <p style="margin-top:8px;"><strong>AdaBoost:</strong> Reweights misclassified samples. <strong>Gradient Boosting:</strong> Fits on residuals. <strong>XGBoost/LightGBM:</strong> Optimized gradient boosting with regularization.</p>
+    </div>
+  </div>
+
+  <div class="algo-grid" style="margin-top:24px;">
+    <div class="algo-card">
+      <h4><span class="algo-badge tag-green">BAGGING</span><br>Random Forest</h4>
+      <p>N decision trees on bootstrapped data + random feature subsets per split. Majority vote for classification.</p>
+      <ul>
+        <li>Key param: <code>n_estimators</code> (more = better)</li>
+        <li><code>max_features='sqrt'</code> for classification</li>
+        <li>Built-in OOB (out-of-bag) validation</li>
+        <li>Parallel training → fast</li>
+      </ul>
+    </div>
+    <div class="algo-card">
+      <h4><span class="algo-badge tag-orange">BOOSTING</span><br>AdaBoost</h4>
+      <p>Sequential weak learners. Misclassified samples get higher weight. Final prediction is weighted vote.</p>
+      <ul>
+        <li>Default base: <code>DecisionTreeClassifier(max_depth=1)</code> (stump)</li>
+        <li><code>n_estimators</code>: number of stumps</li>
+        <li><code>learning_rate</code>: shrinks each tree's contribution</li>
+        <li>Prone to noisy data (outliers can dominate)</li>
+      </ul>
+    </div>
+    <div class="algo-card">
+      <h4><span class="algo-badge tag-blue">BOOSTING</span><br>Gradient Boosting</h4>
+      <p>Fits each new tree on <strong>pseudo-residuals</strong> of the previous model. Minimizes any differentiable loss function.</p>
+      <ul>
+        <li><code>learning_rate</code> + <code>n_estimators</code>: inverse tradeoff</li>
+        <li><code>max_depth=3–5</code> typical for base trees</li>
+        <li><code>subsample &lt;1.0</code>: stochastic GBM</li>
+        <li>XGBoost adds L1+L2 regularization</li>
+      </ul>
+    </div>
+    <div class="algo-card">
+      <h4><span class="algo-badge tag-purple">STACKING</span><br>Stacking / Blending</h4>
+      <p>Train multiple diverse base models; use their predictions as input to a meta-model (blender) that makes the final call.</p>
+      <ul>
+        <li>Base: diverse models (LR, SVM, RF, GBM)</li>
+        <li>Meta: simple model (logistic regression)</li>
+        <li>Use <code>StackingClassifier</code> in sklearn</li>
+        <li>Most powerful but computationally expensive</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+      <span class="code-title">ensemble_methods.py</span>
+    </div>
+    <pre><code><span class="kw">from</span> sklearn.ensemble <span class="kw">import</span> (
+    RandomForestClassifier, AdaBoostClassifier,
+    GradientBoostingClassifier, StackingClassifier
+)
+<span class="kw">from</span> xgboost <span class="kw">import</span> XGBClassifier
+<span class="kw">from</span> sklearn.linear_model <span class="kw">import</span> LogisticRegression
+
+<span class="cm"># ── Random Forest ─────────────────────────────────────────</span>
+rf = <span class="fn">RandomForestClassifier</span>(
+    n_estimators=<span class="nm">200</span>,        <span class="cm"># more trees = better (diminishing returns)</span>
+    max_features=<span class="st">'sqrt'</span>,    <span class="cm"># features per split: 'sqrt' for clf, 'log2' option</span>
+    max_depth=<span class="nm">None</span>,          <span class="cm"># let trees grow fully (bagging handles overfitting)</span>
+    min_samples_leaf=<span class="nm">1</span>,
+    oob_score=<span class="nm">True</span>,          <span class="cm"># free validation on out-of-bag samples</span>
+    n_jobs=-<span class="nm">1</span>,               <span class="cm"># use all CPU cores</span>
+    random_state=<span class="nm">42</span>
+)
+rf.<span class="fn">fit</span>(X_train, y_train)
+<span class="fn">print</span>(<span class="st">f"OOB Score: </span><span class="va">{rf.oob_score_:.3f}</span><span class="st">"</span>)
+
+<span class="cm"># ── AdaBoost ──────────────────────────────────────────────</span>
+ada = <span class="fn">AdaBoostClassifier</span>(
+    n_estimators=<span class="nm">100</span>,
+    learning_rate=<span class="nm">0.5</span>,
+    random_state=<span class="nm">42</span>
+)
+
+<span class="cm"># ── Gradient Boosting ─────────────────────────────────────</span>
+gb = <span class="fn">GradientBoostingClassifier</span>(
+    n_estimators=<span class="nm">200</span>,
+    learning_rate=<span class="nm">0.05</span>,   <span class="cm"># lower rate + more trees is typical</span>
+    max_depth=<span class="nm">3</span>,
+    subsample=<span class="nm">0.8</span>,        <span class="cm"># stochastic GBM — reduces overfitting</span>
+    random_state=<span class="nm">42</span>
+)
+
+<span class="cm"># ── XGBoost (2025 best practice) ──────────────────────────</span>
+xgb = <span class="fn">XGBClassifier</span>(
+    n_estimators=<span class="nm">300</span>,
+    learning_rate=<span class="nm">0.05</span>,
+    max_depth=<span class="nm">4</span>,
+    subsample=<span class="nm">0.8</span>,
+    colsample_bytree=<span class="nm">0.8</span>, <span class="cm"># random feature subset per tree</span>
+    reg_alpha=<span class="nm">0.1</span>,        <span class="cm"># L1 regularization</span>
+    reg_lambda=<span class="nm">1.0</span>,       <span class="cm"># L2 regularization</span>
+    use_label_encoder=<span class="nm">False</span>,
+    eval_metric=<span class="st">'logloss'</span>,
+    early_stopping_rounds=<span class="nm">20</span>,
+    random_state=<span class="nm">42</span>
+)
+xgb.<span class="fn">fit</span>(X_train, y_train,
+        eval_set=[(X_test, y_test)], verbose=<span class="nm">False</span>)
+
+<span class="cm"># ── Stacking ──────────────────────────────────────────────</span>
+from sklearn.svm <span class="kw">import</span> SVC
+estimators = [
+    (<span class="st">'rf'</span>,  <span class="fn">RandomForestClassifier</span>(n_estimators=<span class="nm">100</span>)),
+    (<span class="st">'xgb'</span>, <span class="fn">XGBClassifier</span>(n_estimators=<span class="nm">100</span>)),
+    (<span class="st">'svm'</span>, <span class="fn">SVC</span>(probability=<span class="nm">True</span>))
+]
+stacker = <span class="fn">StackingClassifier</span>(
+    estimators=estimators,
+    final_estimator=<span class="fn">LogisticRegression</span>(),
+    cv=<span class="nm">5</span>
+)
+stacker.<span class="fn">fit</span>(X_train, y_train)</code></pre>
+  </div>
+</div>
+</section>
+
+<div class="divider"></div>
+
+<!-- METRICS -->
+<section id="metrics">
+<div class="container">
+  <div class="section-label">Module 6</div>
+  <h2 class="section-title">Classification Evaluation Metrics</h2>
+  <p class="section-sub">Accuracy is a lie for imbalanced data. Know exactly when to use each metric and why.</p>
+
+  <div class="callout warn">
+    <span class="callout-icon">⚠️</span>
+    <div class="callout-body"><strong>Accuracy is not enough.</strong> A model that always predicts "not fraud" achieves 99% accuracy on a dataset that is 1% fraud. Learn to choose the right metric for the business problem — precision, recall, F1, and AUC-ROC tell the full story.</div>
+  </div>
+
+  <h3 style="font-size:16px;font-weight:700;margin:28px 0 16px;">The Confusion Matrix</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Metric</th><th>Formula</th><th>What It Measures</th><th>Use When</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Accuracy</strong></td><td>(TP+TN) / Total</td><td>Overall correct predictions</td><td>Balanced classes only</td></tr>
+        <tr><td><strong>Precision</strong></td><td>TP / (TP+FP)</td><td>Of predicted positives, how many are actually positive?</td><td>False positives are costly (spam filter)</td></tr>
+        <tr><td><strong>Recall (Sensitivity)</strong></td><td>TP / (TP+FN)</td><td>Of actual positives, how many did we catch?</td><td>False negatives are costly (cancer screening)</td></tr>
+        <tr><td><strong>F1 Score</strong></td><td>2 × (P×R)/(P+R)</td><td>Harmonic mean of precision and recall</td><td>Imbalanced classes, need balance of P and R</td></tr>
+        <tr><td><strong>AUC-ROC</strong></td><td>Area under ROC curve</td><td>Model's ability to rank positives above negatives</td><td>Comparing classifiers, imbalanced data</td></tr>
+        <tr><td><strong>AUC-PR</strong></td><td>Area under P-R curve</td><td>Precision-recall tradeoff</td><td>Highly imbalanced data (rare positives)</td></tr>
+        <tr><td><strong>Specificity</strong></td><td>TN / (TN+FP)</td><td>True negative rate</td><td>Medical: how well we identify healthy patients</td></tr>
+        <tr><td><strong>MCC</strong></td><td>Balanced metric for all 4 confusion matrix values</td><td>Single score for imbalanced data</td><td>Highly imbalanced, multi-class</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="grid-2" style="margin-top:20px;">
+    <div class="concept-block">
+      <span class="tag tag-green">Precision-Recall Tradeoff</span>
+      <h4>Adjusting the Decision Threshold</h4>
+      <p>Default threshold = 0.5. Lowering it raises recall but lowers precision (catch more positives, more false alarms). Raising it raises precision but lowers recall. Use the <strong>PR curve</strong> to visualize the full tradeoff and choose threshold based on business cost.</p>
+    </div>
+    <div class="concept-block blue">
+      <span class="tag tag-blue">ROC Curve</span>
+      <h4>Receiver Operating Characteristic</h4>
+      <p>Plots TPR (recall) vs FPR at every threshold. AUC = 1.0 = perfect model. AUC = 0.5 = random classifier. <strong>AUC-ROC is threshold-independent</strong> — it evaluates ranking quality. Misleading for severely imbalanced data — use AUC-PR instead.</p>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+      <span class="code-title">evaluation_metrics.py</span>
+    </div>
+    <pre><code><span class="kw">from</span> sklearn.metrics <span class="kw">import</span> (
+    confusion_matrix, classification_report, accuracy_score,
+    precision_score, recall_score, f1_score,
+    roc_auc_score, roc_curve, precision_recall_curve,
+    ConfusionMatrixDisplay
+)
+<span class="kw">import</span> matplotlib.pyplot <span class="kw">as</span> plt
+
+<span class="cm"># ── Full evaluation report ────────────────────────────────</span>
+<span class="fn">print</span>(<span class="fn">classification_report</span>(y_test, y_pred,
+      target_names=[<span class="st">'Negative'</span>, <span class="st">'Positive'</span>]))
+
+<span class="cm"># ── Confusion matrix ──────────────────────────────────────</span>
+cm = <span class="fn">confusion_matrix</span>(y_test, y_pred)
+disp = <span class="fn">ConfusionMatrixDisplay</span>(cm, display_labels=[<span class="st">'0'</span>, <span class="st">'1'</span>])
+disp.<span class="fn">plot</span>(cmap=<span class="st">'Greens'</span>); plt.<span class="fn">show</span>()
+
+<span class="cm"># ── Individual metrics ────────────────────────────────────</span>
+<span class="fn">print</span>(<span class="st">f"Accuracy:  </span><span class="va">{accuracy_score(y_test, y_pred):.3f}</span><span class="st">"</span>)
+<span class="fn">print</span>(<span class="st">f"Precision: </span><span class="va">{precision_score(y_test, y_pred):.3f}</span><span class="st">"</span>)
+<span class="fn">print</span>(<span class="st">f"Recall:    </span><span class="va">{recall_score(y_test, y_pred):.3f}</span><span class="st">"</span>)
+<span class="fn">print</span>(<span class="st">f"F1 Score:  </span><span class="va">{f1_score(y_test, y_pred):.3f}</span><span class="st">"</span>)
+<span class="fn">print</span>(<span class="st">f"AUC-ROC:   </span><span class="va">{roc_auc_score(y_test, y_proba):.3f}</span><span class="st">"</span>)
+
+<span class="cm"># ── ROC Curve ─────────────────────────────────────────────</span>
+fpr, tpr, thresholds = <span class="fn">roc_curve</span>(y_test, y_proba)
+plt.<span class="fn">plot</span>(fpr, tpr, label=<span class="st">f'AUC = {roc_auc_score(y_test, y_proba):.3f}'</span>)
+plt.<span class="fn">plot</span>([<span class="nm">0</span>,<span class="nm">1</span>], [<span class="nm">0</span>,<span class="nm">1</span>], <span class="st">'k--'</span>, label=<span class="st">'Random'</span>)
+plt.<span class="fn">xlabel</span>(<span class="st">'False Positive Rate'</span>); plt.<span class="fn">ylabel</span>(<span class="st">'True Positive Rate'</span>)
+plt.<span class="fn">legend</span>(); plt.<span class="fn">show</span>()
+
+<span class="cm"># ── Adjust threshold for business need ────────────────────</span>
+<span class="cm"># e.g. fraud detection: maximize recall (catch frauds)</span>
+best_threshold = thresholds[<span class="fn">np</span>.<span class="fn">argmax</span>(tpr - fpr)]  <span class="cm"># Youden's J</span>
+y_pred_custom = (y_proba >= best_threshold).<span class="fn">astype</span>(<span class="fn">int</span>)</code></pre>
+  </div>
+</div>
+</section>
+
+<div class="divider"></div>
+
+<!-- CLASS IMBALANCE -->
+<section id="imbalance">
+<div class="container">
+  <div class="section-label">Module 7</div>
+  <h2 class="section-title">Handling Class Imbalance</h2>
+  <p class="section-sub">Real-world datasets are rarely balanced. Fraud, disease, churn — the positive class is always rare. Here's how to handle it correctly.</p>
+
+  <div class="grid-2">
+    <div class="concept-block">
+      <span class="tag tag-green">Oversampling</span>
+      <h4>SMOTE — Synthetic Minority Oversampling</h4>
+      <p>Creates <strong>synthetic</strong> minority class examples by interpolating between existing minority samples. Avoids simple duplication which doesn't add information. Use <code>imbalanced-learn</code> library.<br><br>
+      <strong>SMOTE-NC:</strong> Handles mixed numerical and categorical features. <strong>ADASYN:</strong> Focuses synthesis near decision boundary.</p>
+    </div>
+    <div class="concept-block blue">
+      <span class="tag tag-blue">Undersampling</span>
+      <h4>Random Undersampling & Tomek Links</h4>
+      <p><strong>Random undersampling:</strong> Remove majority class samples randomly. Fast but discards real data.<br><br>
+      <strong>Tomek Links:</strong> Remove borderline majority class samples that are closest to minority class. Cleans the decision boundary without losing bulk data.<br><br>
+      <strong>Combined:</strong> SMOTE + Tomek Links = oversample minority + clean boundary.</p>
+    </div>
+    <div class="concept-block orange">
+      <span class="tag tag-orange">Class Weights</span>
+      <h4>class_weight='balanced'</h4>
+      <p>Most sklearn classifiers accept <code>class_weight='balanced'</code>. Automatically adjusts weights inversely proportional to class frequencies. Misclassifications of the minority class are penalized more heavily during training. Simplest approach — try this first before resampling.</p>
+      <div class="formula">weight_i = n_samples / (n_classes × n_samples_i)</div>
+    </div>
+    <div class="concept-block red">
+      <span class="tag tag-red">What NOT to Do</span>
+      <h4>Common Mistakes</h4>
+      <ul>
+        <li>Using accuracy as your metric on imbalanced data</li>
+        <li>Applying SMOTE before train/test split (leakage!)</li>
+        <li>Oversampling the test set</li>
+        <li>Undersampling so aggressively you discard useful majority examples</li>
+        <li>Using a single imbalance strategy without comparing</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="callout warn">
+    <span class="callout-icon">🚨</span>
+    <div class="callout-body">
+      <strong>SMOTE must only be applied to training data.</strong> Apply SMOTE inside cross-validation folds (not before splitting) using <code>imbalanced-learn</code>'s Pipeline. Applying SMOTE on the full dataset before splitting leaks synthetic test set information.
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+      <span class="code-title">class_imbalance.py</span>
+    </div>
+    <pre><code><span class="kw">from</span> imblearn.over_sampling <span class="kw">import</span> SMOTE
+<span class="kw">from</span> imblearn.under_sampling <span class="kw">import</span> RandomUnderSampler, TomekLinks
+<span class="kw">from</span> imblearn.combine <span class="kw">import</span> SMOTETomek
+<span class="kw">from</span> imblearn.pipeline <span class="kw">import</span> Pipeline <span class="kw">as</span> ImbPipeline
+<span class="kw">from</span> sklearn.ensemble <span class="kw">import</span> RandomForestClassifier
+
+<span class="cm"># ── Check class distribution ──────────────────────────────</span>
+<span class="kw">import</span> pandas <span class="kw">as</span> pd
+<span class="fn">print</span>(pd.<span class="fn">Series</span>(y_train).<span class="fn">value_counts</span>())
+
+<span class="cm"># ── Option 1: class_weight (simplest, always try first) ───</span>
+rf = <span class="fn">RandomForestClassifier</span>(class_weight=<span class="st">'balanced'</span>, n_estimators=<span class="nm">200</span>)
+rf.<span class="fn">fit</span>(X_train, y_train)
+
+<span class="cm"># ── Option 2: SMOTE (inside imblearn Pipeline = no leakage)</span>
+smote_pipe = <span class="fn">ImbPipeline</span>([
+    (<span class="st">'smote'</span>, <span class="fn">SMOTE</span>(k_neighbors=<span class="nm">5</span>, random_state=<span class="nm">42</span>)),
+    (<span class="st">'model'</span>, <span class="fn">RandomForestClassifier</span>(n_estimators=<span class="nm">200</span>, random_state=<span class="nm">42</span>))
+])
+smote_pipe.<span class="fn">fit</span>(X_train, y_train)
+
+<span class="cm"># ── Option 3: SMOTETomek (over + clean boundary) ──────────</span>
+combined = <span class="fn">SMOTETomek</span>(random_state=<span class="nm">42</span>)
+X_resampled, y_resampled = combined.<span class="fn">fit_resample</span>(X_train, y_train)
+<span class="fn">print</span>(<span class="st">f"After resampling: </span><span class="va">{pd.Series(y_resampled).value_counts().to_dict()}</span><span class="st">"</span>)
+
+<span class="cm"># ── Option 4: Threshold tuning instead of resampling ──────</span>
+<span class="cm"># Train on imbalanced data, adjust threshold for recall target</span>
+rf_base = <span class="fn">RandomForestClassifier</span>(n_estimators=<span class="nm">200</span>)
+rf_base.<span class="fn">fit</span>(X_train, y_train)
+y_proba = rf_base.<span class="fn">predict_proba</span>(X_test)[:, <span class="nm">1</span>]
+
+<span class="cm"># Find threshold that achieves recall >= 0.90</span>
+<span class="kw">from</span> sklearn.metrics <span class="kw">import</span> precision_recall_curve
+precision, recall, thresholds = <span class="fn">precision_recall_curve</span>(y_test, y_proba)
+target_recall = <span class="nm">0.90</span>
+idx = (recall >= target_recall).<span class="fn">argmax</span>()  <span class="cm"># first threshold meeting target</span>
+threshold = thresholds[idx] <span class="kw">if</span> idx < <span class="fn">len</span>(thresholds) <span class="kw">else</span> <span class="nm">0.5</span>
+y_pred_adjusted = (y_proba >= threshold).<span class="fn">astype</span>(<span class="fn">int</span>)</code></pre>
+  </div>
+</div>
+</section>
+
+<div class="divider"></div>
+
+<!-- BEST PRACTICES -->
+<section id="best-practices">
+<div class="container">
+  <div class="section-label">State-of-the-Art 2025</div>
+  <h2 class="section-title">Best Practices & Algorithm Selection</h2>
+  <p class="section-sub">How to choose the right classifier and what professional ML engineers do before hitting 'fit'.</p>
+
+  <h3 style="font-size:16px;font-weight:700;margin-bottom:16px;">Algorithm Selection Guide</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Algorithm</th><th>Pros</th><th>Cons</th><th>Best For</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Logistic Regression</strong></td><td>Interpretable, probabilistic, fast, handles regularization</td><td>Assumes linear boundary</td><td>Baseline, regulated industries, high-dim text</td></tr>
+        <tr><td><strong>KNN</strong></td><td>Simple, no training, naturally multi-class</td><td>Slow prediction, sensitive to scale, curse of dimensionality</td><td>Small datasets, recommendation baseline</td></tr>
+        <tr><td><strong>SVM</strong></td><td>Effective in high-D, kernel trick, strong theory</td><td>Slow on large data, poor probabilistic output</td><td>Text classification, small-medium datasets</td></tr>
+        <tr><td><strong>Decision Tree</strong></td><td>Interpretable, no scaling needed, handles mixed types</td><td>Overfits badly without tuning</td><td>Explainable models, feature importance baseline</td></tr>
+        <tr><td><strong>Random Forest</strong></td><td>High accuracy, robust, built-in feature importance, handles missing</td><td>Black box, memory heavy</td><td>General purpose tabular data workhorse</td></tr>
+        <tr><td><strong>XGBoost/LightGBM</strong></td><td>State-of-the-art accuracy on tabular data, fast, regularization</td><td>Many hyperparameters, black box</td><td>Competitions, production tabular ML</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3 style="font-size:16px;font-weight:700;margin:32px 0 16px;">Professional Checklist</h3>
+  <div class="bp-card">
+    <div class="bp-num">1</div>
+    <div class="bp-content">
+      <h4>Start with Logistic Regression as Your Baseline</h4>
+      <p>Always establish a baseline before complex models. A complex model that barely beats logistic regression is often not worth the interpretability cost.</p>
+    </div>
+  </div>
+  <div class="bp-card">
+    <div class="bp-num">2</div>
+    <div class="bp-content">
+      <h4>Use Stratified K-Fold Cross-Validation</h4>
+      <p>For classification (especially imbalanced), always use <code>StratifiedKFold</code> to ensure each fold preserves the original class ratio. Plain KFold can create folds with no minority class examples.</p>
+    </div>
+  </div>
+  <div class="bp-card">
+    <div class="bp-num">3</div>
+    <div class="bp-content">
+      <h4>Choose Your Metric Before You Train</h4>
+      <p>Define what "good" means before fitting anything. Is this a fraud detection system (optimize recall)? A spam filter (optimize precision)? Choose and justify your metric first, then train toward it.</p>
+    </div>
+  </div>
+  <div class="bp-card">
+    <div class="bp-num">4</div>
+    <div class="bp-content">
+      <h4>Use Calibrated Probabilities When Probabilities Matter</h4>
+      <p>SVM and Random Forest outputs are often poorly calibrated probabilities. If you need reliable probability estimates (e.g., risk scoring), wrap your model in <code>CalibratedClassifierCV</code>.</p>
+    </div>
+  </div>
+  <div class="bp-card">
+    <div class="bp-num">5</div>
+    <div class="bp-content">
+      <h4>SHAP Values for Explainability</h4>
+      <p>Beyond feature_importances_, use SHAP (SHapley Additive exPlanations) for per-prediction, directional feature importance. Works with any model. Critical for regulated industries (GDPR "right to explanation").</p>
+    </div>
+  </div>
+  <div class="bp-card">
+    <div class="bp-num">6</div>
+    <div class="bp-content">
+      <h4>Early Stopping + Learning Curves for Boosting</h4>
+      <p>For XGBoost/LightGBM, always use <code>early_stopping_rounds</code> with a validation set. Monitor training vs validation learning curves to diagnose overfitting vs underfitting before deploying.</p>
+    </div>
+  </div>
+
+  <h3 style="font-size:16px;font-weight:700;margin:32px 0 16px;">FAQ — Common Pitfalls</h3>
+  <details>
+    <summary>Why does my model have high accuracy but terrible performance on the minority class?</summary>
+    <div class="details-body">Because accuracy weights all classes equally. If 95% of your data is class 0, a model that always predicts 0 achieves 95% accuracy. Look at per-class precision, recall, and F1 in the classification report. If recall for the minority class is near zero, your model has learned to ignore it. Use <code>class_weight='balanced'</code> or SMOTE and switch to F1/AUC-ROC as your evaluation metric.</div>
+  </details>
+  <details>
+    <summary>When should I use Random Forest vs XGBoost?</summary>
+    <div class="details-body">Random Forest is generally easier to tune (fewer hyperparameters) and more resistant to overfitting without tuning. XGBoost/LightGBM typically achieves higher accuracy with proper tuning and benefits from early stopping. Start with Random Forest for quick strong baselines. Move to XGBoost when you need peak performance and are willing to tune. LightGBM is faster than XGBoost on large datasets.</div>
+  </details>
+  <details>
+    <summary>What's the real difference between Gini and Entropy in decision trees?</summary>
+    <div class="details-body">In practice, almost none. Gini is computationally cheaper (no log computation). Entropy sometimes creates slightly deeper trees. In head-to-head comparisons, the difference is rarely statistically significant. Use Gini (the default) unless you have empirical evidence Entropy works better for your dataset.</div>
+  </details>
+  <details>
+    <summary>Should I use AUC-ROC or AUC-PR for my imbalanced dataset?</summary>
+    <div class="details-body">AUC-PR (Precision-Recall area) is more informative for severe class imbalance. AUC-ROC can look artificially high because TN (true negatives — the dominant class) inflate the FPR denominator. With 1% positive class, a mediocre model can still achieve 0.90 AUC-ROC. AUC-PR focuses purely on the minority class performance and is harder to inflate artificially.</div>
+  </details>
+  <details>
+    <summary>How do I know if my classification model is well-calibrated?</summary>
+    <div class="details-body">A calibrated model means predicted probability 0.7 should correspond to ~70% true positives in practice. Use a calibration curve (<code>sklearn.calibration.calibration_curve</code>). Logistic regression is naturally well-calibrated. Random Forest and SVM often aren't. Wrap poorly calibrated models in <code>CalibratedClassifierCV(method='isotonic')</code> to fix this when probabilities matter downstream.</div>
+  </details>
+</div>
+</section>
+
+<div class="divider"></div>
+
+<!-- QUIZ -->
+<section id="quiz">
+<div class="container">
+  <div class="section-label">Test Your Knowledge</div>
+  <h2 class="section-title">Course 3 Quiz</h2>
+  <p class="section-sub">20 questions covering every algorithm, metric, and technique from this course. No peeking at the code above.</p>
+
+  <div class="quiz-progress">
+    <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    <span class="quiz-counter" id="quizCounter">0 / 20</span>
+  </div>
+
+  <div id="quizContainer">
+
+    <div class="question-card active" data-q="0">
+      <div class="q-meta"><span class="q-num">Q01</span><span class="q-topic">Logistic Regression</span></div>
+      <div class="q-text">What does the sigmoid function output, and what is the default decision boundary threshold?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>A continuous value from −∞ to +∞; threshold at 0</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>A probability from 0 to 1; threshold at 0.5</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>A value from −1 to 1; threshold at 0</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>A class label 0 or 1 directly; no threshold needed</button>
+      </div>
+      <div class="explanation">✅ <strong>Sigmoid outputs a probability between 0 and 1.</strong> Default threshold = 0.5. If σ(z) ≥ 0.5 → predict class 1; if &lt; 0.5 → predict class 0. Crucially, this threshold can and should be adjusted based on the business problem (e.g., lower to 0.3 if you need higher recall in fraud detection).</div>
+    </div>
+
+    <div class="question-card" data-q="1">
+      <div class="q-meta"><span class="q-num">Q02</span><span class="q-topic">KNN</span></div>
+      <div class="q-text">Why is feature scaling mandatory before applying KNN?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>KNN cannot process non-integer inputs without scaling</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>Distance calculations are dominated by high-range features if not scaled</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>Scaling speeds up training by reducing dimensionality</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>KNN uses gradient descent which requires normalized features</button>
+      </div>
+      <div class="explanation">✅ <strong>Distance domination.</strong> If salary ranges from $20k–$500k and age from 18–80, the salary feature contributes ~500x more to Euclidean distance than age. Without scaling, "nearest neighbors" are determined almost entirely by salary, ignoring age. Always scale (StandardScaler or MinMaxScaler) before KNN. KNN has no training phase — it's purely distance-based at prediction time.</div>
+    </div>
+
+    <div class="question-card" data-q="2">
+      <div class="q-meta"><span class="q-num">Q03</span><span class="q-topic">SVM</span></div>
+      <div class="q-text">In an SVM, what are "support vectors" and what role do they play?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>All training data points — SVM uses them all to define the boundary</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>The training points closest to the decision boundary — they alone define the hyperplane</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>Misclassified training points that get extra weight in optimization</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>Feature vectors used to transform data into higher dimensions</button>
+      </div>
+      <div class="explanation">✅ <strong>Support vectors are the closest training points to the decision boundary</strong>, one from each class. They "support" the hyperplane — removing any other training point doesn't change the model. The optimal hyperplane maximizes the margin (distance) between the hyperplane and the nearest support vectors. This makes SVM memory-efficient and robust to most of the training data.</div>
+    </div>
+
+    <div class="question-card" data-q="3">
+      <div class="q-meta"><span class="q-num">Q04</span><span class="q-topic">Decision Trees</span></div>
+      <div class="q-text">A fully grown decision tree achieves 100% accuracy on training data but 60% on the test set. What is happening and what is the primary fix?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>Underfitting — increase max_depth to allow the tree to learn more</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>Overfitting — limit max_depth or increase min_samples_leaf</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>Data leakage — the tree saw the test data during training</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>Class imbalance — add class_weight='balanced'</button>
+      </div>
+      <div class="explanation">✅ <strong>Overfitting.</strong> A fully grown tree memorizes training data by creating leaf nodes for every training example. The 40% gap between train (100%) and test (60%) accuracy is a textbook overfit signature. Primary fixes: limit <code>max_depth</code>, increase <code>min_samples_leaf</code>, use pruning. Better yet — use a Random Forest which controls overfitting through bagging.</div>
+    </div>
+
+    <div class="question-card" data-q="4">
+      <div class="q-meta"><span class="q-num">Q05</span><span class="q-topic">Metrics</span></div>
+      <div class="q-text">You're building a cancer screening model. A patient with cancer who tests negative (missed diagnosis) is far more dangerous than a healthy patient who tests positive (false alarm). Which metric should you optimize?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>Precision — minimize false positives</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>Recall — minimize false negatives (missed cancers)</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>Accuracy — overall correctness is most important</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>Specificity — maximize correctly identified healthy patients</button>
+      </div>
+      <div class="explanation">✅ <strong>Recall (Sensitivity).</strong> Recall = TP/(TP+FN). A false negative here = a missed cancer = potentially fatal. You want to catch as many true cancers as possible, even at the cost of more false positives (unnecessary follow-up tests). This is the classic "false negatives are costly" scenario. Precision optimizes the opposite — used when false alarms are costly (spam filter).</div>
+    </div>
+
+    <div class="question-card" data-q="5">
+      <div class="q-meta"><span class="q-num">Q06</span><span class="q-topic">Ensembles</span></div>
+      <div class="q-text">What is the key difference between Bagging (Random Forest) and Boosting (AdaBoost/XGBoost) in terms of training order and the error they reduce?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>Bagging is sequential and reduces bias; Boosting is parallel and reduces variance</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>Bagging is parallel and reduces variance; Boosting is sequential and reduces bias</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>Both are parallel and both reduce variance, but Boosting also adds regularization</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>Bagging uses different algorithms; Boosting uses only decision trees</button>
+      </div>
+      <div class="explanation">✅ <strong>Bagging = parallel + reduces variance. Boosting = sequential + reduces bias.</strong> Random Forest grows trees independently on bootstrapped data — the ensemble average reduces variance (the main problem with individual trees). Boosting trains each new tree to correct the residual errors of the previous ensemble — this sequentially reduces bias. Both can overfit if the number of estimators is too high.</div>
+    </div>
+
+    <div class="question-card" data-q="6">
+      <div class="q-meta"><span class="q-num">Q07</span><span class="q-topic">Metrics</span></div>
+      <div class="q-text">Your fraud detection model has precision = 0.92 and recall = 0.45. What does this tell you and what should you do?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>The model is excellent — precision above 0.9 means it's working well</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>The model misses 55% of actual fraud cases — lower the decision threshold to boost recall at the cost of precision</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>The model has too many false alarms — raise the threshold to improve precision further</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>The F1 score is fine so no action is needed</button>
+      </div>
+      <div class="explanation">✅ <strong>Recall = 0.45 means 55% of actual fraud cases are missed.</strong> In fraud detection, missing fraud is catastrophic. Despite high precision (when it flags fraud it's usually right), it's far too conservative. Solution: lower the decision threshold from 0.5 to ~0.2–0.3 to catch more fraud, accepting more false positives (which are just more investigations, not missed fraud). Also try SMOTE or class_weight='balanced'.</div>
+    </div>
+
+    <div class="question-card" data-q="7">
+      <div class="q-meta"><span class="q-num">Q08</span><span class="q-topic">SVM</span></div>
+      <div class="q-text">What does a small value of C in an SVM do to the decision boundary?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>Creates a narrow margin and penalizes all misclassifications heavily</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>Creates a wider margin and allows more misclassifications — reduces overfitting</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>Applies stronger L2 regularization to the kernel function</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>Reduces the number of support vectors to speed up training</button>
+      </div>
+      <div class="explanation">✅ <strong>Small C = wide margin, more tolerant of violations.</strong> C is the penalty for margin violations. Small C = soft margin (high bias, underfits). Large C = hard margin, zero tolerance (high variance, overfits). Think of C as "how much do I care about misclassification?" Tune via GridSearchCV. SVM is sensitive to C — test several orders of magnitude (0.01, 0.1, 1, 10, 100).</div>
+    </div>
+
+    <div class="question-card" data-q="8">
+      <div class="q-meta"><span class="q-num">Q09</span><span class="q-topic">Class Imbalance</span></div>
+      <div class="q-text">You apply SMOTE to your full dataset and then split into train/test. What problem did you introduce?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>Underfitting — synthetic samples reduce diversity of training data</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>Data leakage — synthetic test samples were created using test set information</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>Overfitting — too many minority class samples</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>Nothing — SMOTE can be applied at any point in the pipeline</button>
+      </div>
+      <div class="explanation">✅ <strong>Data leakage.</strong> SMOTE interpolates between existing minority class samples. If applied before the split, some synthetic training samples are created using real test set minority examples as reference points. This leaks test set information into training. Always: split first, then apply SMOTE only to training data. Use <code>imbalanced-learn</code>'s Pipeline to enforce this automatically during cross-validation.</div>
+    </div>
+
+    <div class="question-card" data-q="9">
+      <div class="q-meta"><span class="q-num">Q10</span><span class="q-topic">Decision Trees</span></div>
+      <div class="q-text">What splitting criterion does a decision tree use, and what is Gini impurity measuring?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>Mean Squared Error — the average squared distance between predictions and true values</button>
+        <button class="option" data-correct="false"><span class="opt-letter">B</span>Log Loss — probability of misclassification using a sigmoid function</button>
+        <button class="option" data-correct="true"><span class="opt-letter">C</span>Gini or Entropy — probability of misclassifying a randomly chosen element in the node</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>Euclidean distance — how far apart class centroids are at each split</button>
+      </div>
+      <div class="explanation">✅ <strong>Gini impurity</strong> = 1 − Σpᵢ² where pᵢ is the proportion of class i at the node. Gini = 0 means perfectly pure (all one class). Gini = 0.5 is maximally impure (50/50 split). The tree greedily chooses the split that most reduces impurity. Entropy (information gain) does the same but uses −Σpᵢlog₂(pᵢ). In practice both produce nearly identical trees.</div>
+    </div>
+
+    <div class="question-card" data-q="10">
+      <div class="q-meta"><span class="q-num">Q11</span><span class="q-topic">Ensembles</span></div>
+      <div class="q-text">Why does Random Forest use random feature subsets at each split, not just bootstrap sampling?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>To reduce computation time by limiting features per tree</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>To decorrelate trees — if all trees split on the same dominant feature, averaging correlated trees doesn't reduce variance</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>To perform automatic feature selection, removing unimportant features</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>To prevent any single tree from using more than half the features</button>
+      </div>
+      <div class="explanation">✅ <strong>Decorrelation.</strong> Bootstrap sampling alone doesn't prevent all trees from splitting on the same dominant feature first. Correlated trees produce similar predictions, and averaging correlated estimates doesn't reduce variance much. Random feature subsets (typically √n_features for classification) force trees to find different structures, maximizing decorrelation and making the ensemble average far more effective.</div>
+    </div>
+
+    <div class="question-card" data-q="11">
+      <div class="q-meta"><span class="q-num">Q12</span><span class="q-topic">Logistic Regression</span></div>
+      <div class="q-text">When should you use L1 (Lasso) regularization in Logistic Regression instead of L2 (Ridge)?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>When your dataset is large and gradient descent is slow</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>When you want automatic feature selection — L1 drives some coefficients to exactly zero</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>When your features are highly correlated — L1 handles multicollinearity better</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>Always — L1 is strictly better than L2 for all classification tasks</button>
+      </div>
+      <div class="explanation">✅ <strong>L1 for feature selection.</strong> L1 (Lasso) penalty drives some coefficients to exactly zero, effectively removing those features. Use L1 when you have many features and suspect only a subset are relevant. L2 (Ridge) shrinks all coefficients toward zero but never exactly zeros them — it's better when all features contribute and you just want to prevent any one from dominating. Use <code>solver='saga'</code> with L1 on large datasets.</div>
+    </div>
+
+    <div class="question-card" data-q="12">
+      <div class="q-meta"><span class="q-num">Q13</span><span class="q-topic">Metrics</span></div>
+      <div class="q-text">An AUC-ROC of 0.5 means what about your model?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>50% accuracy — the model is mediocre</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>The model has no discriminatory power — it's equivalent to random guessing</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>Equal precision and recall</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>The model classifies 50% of positive cases correctly</button>
+      </div>
+      <div class="explanation">✅ <strong>AUC = 0.5 = random classifier.</strong> AUC-ROC measures ranking quality — the probability that a randomly chosen positive example is ranked higher than a randomly chosen negative example. AUC = 1.0 → perfect. AUC = 0.5 → as good as flipping a coin (ROC curve is the diagonal line). AUC &lt; 0.5 → systematically worse than random (your model has inverted its predictions).</div>
+    </div>
+
+    <div class="question-card" data-q="13">
+      <div class="q-meta"><span class="q-num">Q14</span><span class="q-topic">KNN</span></div>
+      <div class="q-text">With k=1 in KNN, what is the training accuracy and what problem does this indicate?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>Training accuracy is 50% because k=1 only uses one neighbor per point</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>Training accuracy is 100% because each point's nearest neighbor is itself — indicating severe overfitting</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>Training accuracy equals test accuracy because KNN has no training phase</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>Training accuracy is undefined because KNN has no training step</button>
+      </div>
+      <div class="explanation">✅ <strong>k=1 → 100% training accuracy, but severe overfitting.</strong> When k=1, every training point's nearest neighbor is itself, so it's always correctly classified. The decision boundary is jagged and wraps tightly around every training point. On new data, performance collapses. This is maximum variance. Increasing k smooths the boundary. Use cross-validation to find the k that generalizes best.</div>
+    </div>
+
+    <div class="question-card" data-q="14">
+      <div class="q-meta"><span class="q-num">Q15</span><span class="q-topic">Class Imbalance</span></div>
+      <div class="q-text">What is the key advantage of SMOTE over simple random oversampling?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>SMOTE is faster and requires less memory</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>SMOTE creates synthetic interpolated samples rather than duplicating existing ones, adding new information</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>SMOTE works on both majority and minority classes simultaneously</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>SMOTE automatically adjusts the decision threshold</button>
+      </div>
+      <div class="explanation">✅ <strong>Synthetic interpolation adds information.</strong> Simple oversampling just duplicates minority class examples — the model sees the same points more often but doesn't learn new patterns. SMOTE interpolates between existing minority samples along the feature space, creating novel synthetic points. This enriches the minority class representation. However, SMOTE can introduce noise near class borders — SMOTE-Tomek removes borderline noise afterward.</div>
+    </div>
+
+    <div class="question-card" data-q="15">
+      <div class="q-meta"><span class="q-num">Q16</span><span class="q-topic">SVM</span></div>
+      <div class="q-text">What does the RBF (Radial Basis Function) kernel do in an SVM?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>Creates polynomial combinations of features up to a specified degree</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>Maps data to an infinite-dimensional feature space, allowing non-linear decision boundaries without computing the transformation explicitly</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>Radially normalizes feature values to unit length vectors</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>Applies random feature projections to reduce dimensionality</button>
+      </div>
+      <div class="explanation">✅ <strong>The kernel trick.</strong> RBF (Gaussian) kernel computes similarity between points as a function of their distance, implicitly mapping data to an infinite-dimensional space where a linear hyperplane can separate non-linearly separable classes — without ever computing that transformation. Controlled by <code>gamma</code>: small gamma = broad influence (underfits), large gamma = narrow influence (overfits).</div>
+    </div>
+
+    <div class="question-card" data-q="16">
+      <div class="q-meta"><span class="q-num">Q17</span><span class="q-topic">Ensembles</span></div>
+      <div class="q-text">In XGBoost, what do the hyperparameters learning_rate and n_estimators control, and how do they interact?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>learning_rate controls the step size of gradient descent; n_estimators is the number of features</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>learning_rate shrinks each tree's contribution; lower learning_rate needs more n_estimators (inverse tradeoff)</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>They're independent — learning_rate only affects convergence speed, not final accuracy</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>Higher n_estimators always improves accuracy; learning_rate prevents overfitting independently</button>
+      </div>
+      <div class="explanation">✅ <strong>Inverse tradeoff.</strong> Lower learning_rate = each tree contributes less = need more trees (higher n_estimators) to achieve the same fit. The combination <code>learning_rate=0.05, n_estimators=500</code> typically outperforms <code>learning_rate=0.3, n_estimators=100</code>. Use <code>early_stopping_rounds</code> to automatically find the optimal n_estimators for a given learning_rate without overfitting.</div>
+    </div>
+
+    <div class="question-card" data-q="17">
+      <div class="q-meta"><span class="q-num">Q18</span><span class="q-topic">Metrics</span></div>
+      <div class="q-text">What is the F1 score, and why is it called the "harmonic mean" rather than the arithmetic mean of precision and recall?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>F1 = (Precision + Recall) / 2; harmonic because it uses logarithms</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>F1 = 2×P×R/(P+R); harmonic mean penalizes extreme imbalance between P and R more than arithmetic mean would</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>F1 = P×R; harmonic because it multiplies rather than averages</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>F1 = (P+R)/2; the name "harmonic" refers to the harmonic relationship to AUC-ROC</button>
+      </div>
+      <div class="explanation">✅ <strong>F1 = 2×P×R/(P+R).</strong> The harmonic mean is always ≤ the arithmetic mean, and it's dragged down strongly by whichever value (precision or recall) is lower. So a model with P=0.99 and R=0.01 gets arithmetic mean ≈ 0.50 but F1 ≈ 0.02 — correctly penalizing the massive imbalance. This makes F1 a much more honest metric when you care about both precision and recall.</div>
+    </div>
+
+    <div class="question-card" data-q="18">
+      <div class="q-meta"><span class="q-num">Q19</span><span class="q-topic">Best Practices</span></div>
+      <div class="q-text">Why should you use StratifiedKFold instead of regular KFold for cross-validation on a classification problem?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>StratifiedKFold is faster because it creates fewer folds</button>
+        <button class="option" data-correct="true"><span class="opt-letter">B</span>StratifiedKFold preserves the class distribution in each fold, preventing folds with no minority class examples</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>Regular KFold doesn't work with categorical target variables</button>
+        <button class="option" data-correct="false"><span class="opt-letter">D</span>StratifiedKFold applies SMOTE to each fold automatically</button>
+      </div>
+      <div class="explanation">✅ <strong>Class distribution preservation.</strong> With imbalanced data and random KFold, some folds may have very few or zero minority class examples in the validation set. This makes metric estimates noisy and unreliable. StratifiedKFold ensures each fold contains approximately the same class ratio as the full dataset, producing more stable and reliable cross-validation scores. Always use it for classification tasks.</div>
+    </div>
+
+    <div class="question-card" data-q="19">
+      <div class="q-meta"><span class="q-num">Q20</span><span class="q-topic">All Topics</span></div>
+      <div class="q-text">Which of the following statements about classification algorithms is TRUE?</div>
+      <div class="options">
+        <button class="option" data-correct="false"><span class="opt-letter">A</span>Decision trees are robust to overfitting and need no depth constraints</button>
+        <button class="option" data-correct="false"><span class="opt-letter">B</span>KNN requires no scaling because it uses majority voting, not distances</button>
+        <button class="option" data-correct="false"><span class="opt-letter">C</span>AUC-ROC of 1.0 can be achieved by setting a threshold of 0.5 on any model</button>
+        <button class="option" data-correct="true"><span class="opt-letter">D</span>Logistic Regression is a classification algorithm despite its name, and outputs probabilities via the sigmoid function</button>
+      </div>
+      <div class="explanation">✅ <strong>D is the only true statement.</strong> Despite "regression" in the name, Logistic Regression IS a classification algorithm — it predicts probabilities via sigmoid, then applies a threshold. A is false: trees heavily overfit without constraints. B is false: KNN is entirely distance-based and requires scaling. C is false: AUC-ROC = 1.0 requires perfect ranking across all thresholds — it can't be achieved just by changing the threshold of a poor model.</div>
+    </div>
+
+  </div>
+
+  <div class="score-card" id="scoreCard">
+    <div class="section-label">Results</div>
+    <div class="score-msg" id="scoreMsg">Loading...</div>
+    <div class="score-number" id="scoreNumber">0/20</div>
+    <div class="score-label" id="scoreLabel">Review the explanations above.</div>
+    <button class="btn btn-restart" onclick="restartQuiz()">↺ Restart Quiz</button>
+  </div>
+
+  <div class="quiz-actions">
+    <button class="btn btn-primary" id="nextBtn" onclick="nextQuestion()" disabled>Next Question →</button>
+  </div>
+
+</div>
+</section>
+
+<footer>
+  Built for <span>IBM ML Course 3</span> · Supervised Machine Learning: Classification · Logistic Regression · KNN · SVM · Trees · Ensembles · Metrics · Imbalance
+</footer>
+
+<script>
+  const questions = document.querySelectorAll('.question-card');
+  const progressFill = document.getElementById('progressFill');
+  const quizCounter = document.getElementById('quizCounter');
+  const nextBtn = document.getElementById('nextBtn');
+  const scoreCard = document.getElementById('scoreCard');
+  let current = 0, score = 0, answered = false;
+
+  function updateProgress() {
+    progressFill.style.width = (current / questions.length * 100) + '%';
+    quizCounter.textContent = current + ' / ' + questions.length;
+  }
+
+  document.querySelectorAll('.option').forEach(btn => {
+    btn.addEventListener('click', function() {
+      if (answered) return;
+      answered = true;
+      const card = this.closest('.question-card');
+      card.querySelectorAll('.option').forEach(o => {
+        o.classList.add('disabled');
+        if (o.dataset.correct === 'true') o.classList.add('correct');
+      });
+      if (this.dataset.correct !== 'true') this.classList.add('wrong');
+      else score++;
+      card.querySelector('.explanation').classList.add('show');
+      nextBtn.disabled = false;
+    });
+  });
+
+  function nextQuestion() {
+    if (current >= questions.length - 1) { showScore(); return; }
+    questions[current].classList.remove('active');
+    current++;
+    questions[current].classList.add('active');
+    answered = false;
+    nextBtn.disabled = true;
+    updateProgress();
+    if (current === questions.length - 1) nextBtn.textContent = 'See Results →';
+  }
+
+  function showScore() {
+    document.getElementById('quizContainer').style.display = 'none';
+    nextBtn.style.display = 'none';
+    scoreCard.classList.add('show');
+    const pct = Math.round(score / questions.length * 100);
+    document.getElementById('scoreNumber').textContent = score + '/' + questions.length;
+    const msgs = [[90,'🔥 Classification Expert','You have mastered this. Course 4 awaits.'],
+                  [75,'💪 Strong Performance','Solid grasp with a few gaps to close.'],
+                  [60,'📘 Good Progress','Review the explanations and retry.'],
+                  [0,'🔄 Keep Studying','Revisit the course material and try again.']];
+    const m = msgs.find(m => pct >= m[0]);
+    document.getElementById('scoreMsg').textContent = m[1];
+    document.getElementById('scoreLabel').textContent = m[2];
+    progressFill.style.width = '100%';
+    quizCounter.textContent = questions.length + ' / ' + questions.length;
+  }
+
+  function restartQuiz() {
+    current = 0; score = 0; answered = false;
+    scoreCard.classList.remove('show');
+    document.getElementById('quizContainer').style.display = 'block';
+    nextBtn.style.display = 'flex';
+    nextBtn.disabled = true;
+    nextBtn.textContent = 'Next Question →';
+    questions.forEach((q, i) => {
+      q.classList.toggle('active', i === 0);
+      q.querySelectorAll('.option').forEach(o => o.classList.remove('correct','wrong','disabled'));
+      q.querySelector('.explanation').classList.remove('show');
+    });
+    updateProgress();
+  }
+
+  updateProgress();
+</script>
+</body>
+</html>
